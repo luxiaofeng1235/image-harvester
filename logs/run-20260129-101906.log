@@ -1,4 +1,0 @@
-2026-01-29 10:19:06 [INFO] Starting run: keywords=['风景'], out=/mnt/d/python_work/image-harvester/data, count=10
-2026-01-29 10:19:10 [INFO] keyword=风景 urls=3
-2026-01-29 10:19:10 [INFO] Run complete. saved=3 filtered=0 duplicates=0 errors=0
-2026-01-29 10:19:10 [INFO] Summary written: /mnt/d/python_work/image-harvester/data/20260129/summary.json
