@@ -103,7 +103,7 @@ PY
 python -m scripts.stamp --left-text "胡" --right-text "苏州九界\\n九界AI"
 ```
 
-默认从 `./data` 读取，输出到 `./out`。
+默认从 `./data` 读取，输出到 `./out`，并使用 `./images/logo.png` 作为左上角 Logo。
 
 ## 注意事项
 - 百度源包含**预检**：Range 0–2047 + 文件头校验 + 反爬过滤，可能导致获取量不足。

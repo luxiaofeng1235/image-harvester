@@ -35,7 +35,7 @@ python -m scripts.run --keywords "猫,狗" --count 50
 python -m scripts.stamp --left-text "胡" --right-text "苏州九界\\n九界AI"
 ```
 
-默认从 `./data` 读取，输出到 `./out`。
+默认从 `./data` 读取，输出到 `./out`，并使用 `./images/logo.png` 作为左上角 Logo。
 
 ## 分辨率规则示例
 - 精确匹配：`1300x250`

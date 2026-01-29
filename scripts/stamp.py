@@ -176,6 +176,12 @@ def _merge_cli(cfg: dict, args: argparse.Namespace) -> dict:
         cli["stamp_right_text"] = args.right_text
     if args.font:
         cli["stamp_font"] = args.font
+    if args.logo:
+        cli["stamp_logo"] = args.logo
+    if args.logo_scale is not None:
+        cli["stamp_logo_scale"] = args.logo_scale
+    if args.logo_max_h is not None:
+        cli["stamp_logo_max_h"] = args.logo_max_h
     if args.scale is not None:
         cli["stamp_scale"] = args.scale
     if args.opacity is not None:
@@ -203,6 +209,9 @@ def main(argv: List[str]) -> int:
     parser.add_argument("--left-text", help="Left-top text")
     parser.add_argument("--right-text", help="Right-bottom text")
     parser.add_argument("--font", help="TTF/TTC font path")
+    parser.add_argument("--logo", help="Logo image path")
+    parser.add_argument("--logo-scale", type=float, help="Logo width ratio (default: 0.12)")
+    parser.add_argument("--logo-max-h", type=float, help="Logo max height ratio (default: 0.2)")
     parser.add_argument("--scale", type=float, help="Font size scale of width (default: 0.04)")
     parser.add_argument("--min-px", type=int, help="Min font size")
     parser.add_argument("--max-px", type=int, help="Max font size")
@@ -225,6 +234,12 @@ def main(argv: List[str]) -> int:
         raise ValueError("left_text and right_text are both empty; provide at least one")
 
     font_path = _find_font(cfg.get("stamp_font"))
+    logo_path = cfg.get("stamp_logo")
+    logo_path = Path(logo_path).expanduser().resolve() if logo_path else None
+    if logo_path and not logo_path.exists():
+        raise FileNotFoundError(f"Logo not found: {logo_path}")
+    logo_scale = float(cfg.get("stamp_logo_scale", 0.12))
+    logo_max_h_ratio = float(cfg.get("stamp_logo_max_h", 0.2))
     scale = float(cfg.get("stamp_scale", 0.04))
     opacity = float(cfg.get("stamp_opacity", 0.6))
     padding = int(cfg.get("stamp_padding", 24))
@@ -251,6 +266,9 @@ def main(argv: List[str]) -> int:
                 left_text,
                 right_text,
                 font_path,
+                logo_path,
+                logo_scale,
+                logo_max_h_ratio,
                 scale,
                 min_px,
                 max_px,
@@ -267,6 +285,7 @@ def main(argv: List[str]) -> int:
         "left_text": left_text,
         "right_text": right_text,
         "font": str(font_path),
+        "logo": str(logo_path) if logo_path else None,
         "total": total,
     }
     print(json.dumps(summary, ensure_ascii=False, indent=2))

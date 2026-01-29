@@ -29,3 +29,9 @@ blocked_domains:
 timeout: 10
 log_dir: ./logs
 log_level: INFO
+
+stamp_input: ./data
+stamp_output: ./out
+stamp_logo: ./images/logo.png
+stamp_logo_scale: 0.12
+stamp_logo_max_h: 0.2
