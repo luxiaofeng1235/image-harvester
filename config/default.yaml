@@ -26,7 +26,7 @@ dedupe:
 blocked_domains:
   - pic.quanjing.com
 
-timeout: 10
+timeout: 20
 log_dir: ./logs
 log_level: INFO
 
@@ -35,3 +35,5 @@ stamp_output: ./out
 stamp_logo: ./images/logo.png
 stamp_logo_scale: 0.12
 stamp_logo_max_h: 0.2
+stamp_padding: 10
+stamp_opacity: 0.85

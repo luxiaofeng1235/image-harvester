@@ -45,6 +45,24 @@ def _font_size(width: int, scale: float, min_px: int, max_px: int) -> int:
     return max(min_px, min(size, max_px))
 
 
+def _fit_font_size(
+    text: str,
+    font_path: Path,
+    start_size: int,
+    min_px: int,
+    max_w: int,
+    max_h: int,
+) -> ImageFont.FreeTypeFont:
+    size = start_size
+    while size > min_px:
+        font = ImageFont.truetype(str(font_path), size)
+        w, h = _measure_text(text, font)
+        if w <= max_w and h <= max_h:
+            return font
+        size -= 2
+    return ImageFont.truetype(str(font_path), min_px)
+
+
 def _draw_text(
     base: Image.Image,
     text: str,
@@ -95,9 +113,9 @@ def _apply_stamp(
         base = im.convert("RGBA")
 
     w, h = base.size
+    max_pad = min(padding, 150)
+    pad = max(8, max_pad)
     font_size = _font_size(w, scale, min_px, max_px)
-    font = ImageFont.truetype(str(font_path), font_size)
-
     left_text = left_text.replace("\\n", "\n") if left_text else ""
     right_text = right_text.replace("\\n", "\n") if right_text else ""
 
@@ -105,7 +123,7 @@ def _apply_stamp(
 
     alpha = max(0, min(255, int(255 * opacity)))
     fill = (255, 255, 255, alpha)
-    stroke_fill = (0, 0, 0, int(alpha * 0.8))
+    stroke_fill = (0, 0, 0, int(alpha * 0.4))
 
     logo_h = 0
     if logo_path:
@@ -119,37 +137,61 @@ def _apply_stamp(
         if target_h > max_h:
             target_h = max_h
             target_w = int(target_h / ratio) if ratio else target_w
-        logo = logo.resize((target_w, target_h), Image.LANCZOS)
-        overlay.alpha_composite(logo, (padding, padding))
-        logo_h = target_h
+        max_logo_w = max(0, w - 2 * pad)
+        max_logo_h = max(0, h - 2 * pad)
+        if max_logo_w <= 0 or max_logo_h <= 0:
+            target_w = 0
+            target_h = 0
+        if target_w > max_logo_w:
+            target_w = max_logo_w
+            target_h = int(target_w * ratio)
+        if target_h > max_logo_h:
+            target_h = max_logo_h
+            target_w = int(target_h / ratio) if ratio else target_w
+        if target_w > 0 and target_h > 0:
+            logo = logo.resize((target_w, target_h), Image.LANCZOS)
+            overlay.alpha_composite(logo, (pad, pad))
+            logo_h = target_h
 
     if left_text:
-        left_y = padding + (logo_h + padding // 2 if logo_h else 0)
-        _draw_text(
-            overlay,
-            left_text,
-            (padding, left_y),
-            font,
-            align="left",
-            fill=fill,
-            stroke_fill=stroke_fill,
-            stroke_width=stroke_width,
-        )
+        left_y = pad + (logo_h + pad // 2 if logo_h else 0)
+        max_left_w = max(0, w - 2 * pad)
+        max_left_h = max(0, h - left_y - pad)
+        if max_left_w <= 0 or max_left_h <= 0:
+            left_text = ""
+        left_font = _fit_font_size(left_text, font_path, font_size, min_px, max_left_w, max_left_h)
+        if left_text:
+            _draw_text(
+                overlay,
+                left_text,
+                (pad, left_y),
+                left_font,
+                align="left",
+                fill=fill,
+                stroke_fill=stroke_fill,
+                stroke_width=stroke_width,
+            )
 
     if right_text:
-        text_w, text_h = _measure_text(right_text, font)
-        x = max(padding, w - text_w - padding)
-        y = max(padding, h - text_h - padding)
-        _draw_text(
-            overlay,
-            right_text,
-            (x, y),
-            font,
-            align="right",
-            fill=fill,
-            stroke_fill=stroke_fill,
-            stroke_width=stroke_width,
-        )
+        max_right_w = max(0, w - 2 * pad)
+        max_right_h = max(0, h - 2 * pad)
+        if max_right_w <= 0 or max_right_h <= 0:
+            right_text = ""
+        right_font = _fit_font_size(right_text, font_path, font_size, min_px, max_right_w, max_right_h)
+        if right_text:
+            text_w, text_h = _measure_text(right_text, right_font)
+            x = max(pad, w - text_w - pad)
+            y = max(pad, h - text_h - pad)
+            _draw_text(
+                overlay,
+                right_text,
+                (x, y),
+                right_font,
+                align="right",
+                fill=fill,
+                stroke_fill=stroke_fill,
+                stroke_width=stroke_width,
+            )
 
     stamped = Image.alpha_composite(base, overlay)
 

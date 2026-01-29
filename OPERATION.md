@@ -100,10 +100,12 @@ PY
 
 ## 水印剪辑（输出到 out）
 ```bash
-python -m scripts.stamp --left-text "胡" --right-text "苏州九界\\n九界AI"
+python -m scripts.stamp --right-text "九界AI"
 ```
 
 默认从 `./data` 读取，输出到 `./out`，并使用 `./images/logo.png` 作为左上角 Logo。
+默认水印距离边缘为 10 像素（可用 `--padding` 覆盖）。
+默认文字透明度为 0.85（可用 `--opacity` 调整）。
 
 ## 注意事项
 - 百度源包含**预检**：Range 0–2047 + 文件头校验 + 反爬过滤，可能导致获取量不足。
