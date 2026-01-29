@@ -37,4 +37,4 @@ stamp_logo: ./images/logo.png
 stamp_logo_scale: 0.12
 stamp_logo_max_h: 0.2
 stamp_padding: 10
-stamp_opacity: 0.85
+stamp_opacity: 0.95
