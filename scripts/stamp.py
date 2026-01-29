@@ -72,8 +72,22 @@ def _draw_text(
     fill: Tuple[int, int, int, int],
     stroke_fill: Tuple[int, int, int, int],
     stroke_width: int,
+    bold_radius: int,
 ):
     draw = ImageDraw.Draw(base)
+    if bold_radius > 0:
+        for dx in range(-bold_radius, bold_radius + 1):
+            for dy in range(-bold_radius, bold_radius + 1):
+                if dx == 0 and dy == 0:
+                    continue
+                draw.multiline_text(
+                    (position[0] + dx, position[1] + dy),
+                    text,
+                    font=font,
+                    fill=fill,
+                    align=align,
+                    spacing=int(font.size * 0.2),
+                )
     draw.multiline_text(
         position,
         text,
@@ -108,6 +122,7 @@ def _apply_stamp(
     padding: int,
     opacity: float,
     stroke_width: int,
+    bold_radius: int,
 ):
     with Image.open(img_path) as im:
         base = im.convert("RGBA")
@@ -165,12 +180,13 @@ def _apply_stamp(
                 overlay,
                 left_text,
                 (pad, left_y),
-                left_font,
-                align="left",
-                fill=fill,
-                stroke_fill=stroke_fill,
-                stroke_width=stroke_width,
-            )
+            left_font,
+            align="left",
+            fill=fill,
+            stroke_fill=stroke_fill,
+            stroke_width=stroke_width,
+            bold_radius=bold_radius,
+        )
 
     if right_text:
         max_right_w = max(0, w - 2 * pad)
@@ -186,12 +202,13 @@ def _apply_stamp(
                 overlay,
                 right_text,
                 (x, y),
-                right_font,
-                align="right",
-                fill=fill,
-                stroke_fill=stroke_fill,
-                stroke_width=stroke_width,
-            )
+            right_font,
+            align="right",
+            fill=fill,
+            stroke_fill=stroke_fill,
+            stroke_width=stroke_width,
+            bold_radius=bold_radius,
+        )
 
     stamped = Image.alpha_composite(base, overlay)
 
@@ -232,6 +249,8 @@ def _merge_cli(cfg: dict, args: argparse.Namespace) -> dict:
         cli["stamp_padding"] = args.padding
     if args.stroke_width is not None:
         cli["stamp_stroke_width"] = args.stroke_width
+    if args.bold_radius is not None:
+        cli["stamp_bold_radius"] = args.bold_radius
     if args.min_px is not None:
         cli["stamp_min_px"] = args.min_px
     if args.max_px is not None:
@@ -260,6 +279,7 @@ def main(argv: List[str]) -> int:
     parser.add_argument("--opacity", type=float, help="Text opacity 0..1 (default: 0.6)")
     parser.add_argument("--padding", type=int, help="Padding in px (default: 24)")
     parser.add_argument("--stroke-width", type=int, help="Stroke width (default: 2)")
+    parser.add_argument("--bold-radius", type=int, help="Simulated bold radius (default: 1)")
 
     args = parser.parse_args(argv)
 
@@ -286,6 +306,7 @@ def main(argv: List[str]) -> int:
     opacity = float(cfg.get("stamp_opacity", 0.6))
     padding = int(cfg.get("stamp_padding", 24))
     stroke_width = int(cfg.get("stamp_stroke_width", 2))
+    bold_radius = int(cfg.get("stamp_bold_radius", 1))
     min_px = int(cfg.get("stamp_min_px", 18))
     max_px = int(cfg.get("stamp_max_px", 96))
 
@@ -317,6 +338,7 @@ def main(argv: List[str]) -> int:
                 padding,
                 opacity,
                 stroke_width,
+                bold_radius,
             )
             total += 1
 

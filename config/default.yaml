@@ -38,3 +38,5 @@ stamp_logo_scale: 0.12
 stamp_logo_max_h: 0.2
 stamp_padding: 10
 stamp_opacity: 0.95
+stamp_bold_radius: 1
+stamp_scale: 0.055
