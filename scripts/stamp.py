@@ -107,6 +107,22 @@ def _measure_text(text: str, font: ImageFont.FreeTypeFont) -> Tuple[int, int]:
     return bbox[2] - bbox[0], bbox[3] - bbox[1]
 
 
+def _parse_color(value: Optional[str]) -> Tuple[int, int, int]:
+    if not value:
+        return 255, 255, 255
+    text = value.strip()
+    if text.startswith("#") and len(text) == 7:
+        r = int(text[1:3], 16)
+        g = int(text[3:5], 16)
+        b = int(text[5:7], 16)
+        return r, g, b
+    if "," in text:
+        parts = [p.strip() for p in text.split(",") if p.strip()]
+        if len(parts) == 3:
+            return int(parts[0]), int(parts[1]), int(parts[2])
+    raise ValueError(f"Invalid color: {value}")
+
+
 def _apply_stamp(
     img_path: Path,
     out_path: Path,
@@ -116,6 +132,8 @@ def _apply_stamp(
     logo_path: Optional[Path],
     logo_scale: float,
     logo_max_h_ratio: float,
+    text_color: Tuple[int, int, int],
+    stroke_color: Tuple[int, int, int],
     scale: float,
     min_px: int,
     max_px: int,
@@ -137,8 +155,8 @@ def _apply_stamp(
     overlay = Image.new("RGBA", base.size, (0, 0, 0, 0))
 
     alpha = max(0, min(255, int(255 * opacity)))
-    fill = (255, 255, 255, alpha)
-    stroke_fill = (0, 0, 0, int(alpha * 0.4))
+    fill = (text_color[0], text_color[1], text_color[2], alpha)
+    stroke_fill = (stroke_color[0], stroke_color[1], stroke_color[2], int(alpha * 0.4))
 
     logo_h = 0
     if logo_path:
@@ -197,7 +215,7 @@ def _apply_stamp(
         if right_text:
             text_w, text_h = _measure_text(right_text, right_font)
             x = max(pad, w - text_w - pad)
-            y = max(pad, h - text_h - pad)
+            y = max(pad, h - text_h - pad - bottom_offset)
             _draw_text(
                 overlay,
                 right_text,
@@ -241,6 +259,10 @@ def _merge_cli(cfg: dict, args: argparse.Namespace) -> dict:
         cli["stamp_logo_scale"] = args.logo_scale
     if args.logo_max_h is not None:
         cli["stamp_logo_max_h"] = args.logo_max_h
+    if args.color:
+        cli["stamp_color"] = args.color
+    if args.stroke_color:
+        cli["stamp_stroke_color"] = args.stroke_color
     if args.scale is not None:
         cli["stamp_scale"] = args.scale
     if args.opacity is not None:
@@ -273,6 +295,8 @@ def main(argv: List[str]) -> int:
     parser.add_argument("--logo", help="Logo image path")
     parser.add_argument("--logo-scale", type=float, help="Logo width ratio (default: 0.12)")
     parser.add_argument("--logo-max-h", type=float, help="Logo max height ratio (default: 0.2)")
+    parser.add_argument("--color", help="Text color (#RRGGBB or r,g,b)")
+    parser.add_argument("--stroke-color", help="Stroke color (#RRGGBB or r,g,b)")
     parser.add_argument("--scale", type=float, help="Font size scale of width (default: 0.04)")
     parser.add_argument("--min-px", type=int, help="Min font size")
     parser.add_argument("--max-px", type=int, help="Max font size")
@@ -284,6 +308,7 @@ def main(argv: List[str]) -> int:
     args = parser.parse_args(argv)
 
     cfg = load_and_merge_config(Path(args.config))
+    default_data_root = Path(cfg.get("stamp_input", "./data")).expanduser().resolve()
     cfg = _merge_cli(cfg, args)
 
     in_root = Path(cfg.get("stamp_input", "./data")).expanduser().resolve()
@@ -302,6 +327,8 @@ def main(argv: List[str]) -> int:
         raise FileNotFoundError(f"Logo not found: {logo_path}")
     logo_scale = float(cfg.get("stamp_logo_scale", 0.12))
     logo_max_h_ratio = float(cfg.get("stamp_logo_max_h", 0.2))
+    text_color = _parse_color(cfg.get("stamp_color"))
+    stroke_color = _parse_color(cfg.get("stamp_stroke_color") or "#000000")
     scale = float(cfg.get("stamp_scale", 0.04))
     opacity = float(cfg.get("stamp_opacity", 0.6))
     padding = int(cfg.get("stamp_padding", 24))
@@ -310,18 +337,27 @@ def main(argv: List[str]) -> int:
     min_px = int(cfg.get("stamp_min_px", 18))
     max_px = int(cfg.get("stamp_max_px", 96))
 
-    roots = []
+    roots: List[Path] = []
     if date:
         roots = [in_root / date]
     else:
-        roots = [p for p in in_root.iterdir() if p.is_dir()]
+        # If user provided a specific input dir, process it directly
+        if args.in_dir:
+            roots = [in_root]
+        else:
+            roots = [p for p in in_root.iterdir() if p.is_dir()]
+
+    if args.in_dir and in_root.is_relative_to(default_data_root):
+        rel_base = default_data_root
+    else:
+        rel_base = in_root
 
     total = 0
     for day_root in roots:
         if not day_root.exists():
             continue
         for img_path in _iter_images(day_root):
-            rel = img_path.relative_to(in_root)
+            rel = img_path.relative_to(rel_base)
             out_path = out_root / rel
             _apply_stamp(
                 img_path,
@@ -332,6 +368,8 @@ def main(argv: List[str]) -> int:
                 logo_path,
                 logo_scale,
                 logo_max_h_ratio,
+                text_color,
+                stroke_color,
                 scale,
                 min_px,
                 max_px,

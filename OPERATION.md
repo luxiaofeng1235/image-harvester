@@ -106,9 +106,10 @@ python -m scripts.stamp --right-text "九界AI"
 默认从 `./data` 读取，输出到 `./out`，并使用 `./images/logo.png` 作为左上角 Logo。
 默认字体使用 `./fonts/msyh.ttf`（微软雅黑）。
 默认水印距离边缘为 10 像素（可用 `--padding` 覆盖）。
-默认文字透明度为 0.95（可用 `--opacity` 调整）。
+默认文字透明度为 1.0（可用 `--opacity` 调整）。
 默认启用轻微加粗（`stamp_bold_radius: 2`），可用 `--bold-radius` 调整。
-默认字号比例 `stamp_scale: 0.055`（可用 `--scale` 调整）。
+默认字号比例 `stamp_scale: 0.065`（可用 `--scale` 调整）。
+默认文字颜色为红色 `#FF0000`（可用 `--color` 调整）。
 
 ## 注意事项
 - 百度源包含**预检**：Range 0–2047 + 文件头校验 + 反爬过滤，可能导致获取量不足。
