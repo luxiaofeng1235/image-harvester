@@ -36,6 +36,7 @@ python -m scripts.stamp --right-text "九界AI"
 ```
 
 默认从 `./data` 读取，输出到 `./out`，并使用 `./images/logo.png` 作为左上角 Logo。
+默认字体使用 `./fonts/msyh.ttf`（微软雅黑）。
 默认水印距离边缘为 10 像素（可用 `--padding` 覆盖）。
 默认文字透明度为 0.85（可用 `--opacity` 调整）。
 
