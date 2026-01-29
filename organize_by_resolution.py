@@ -8,13 +8,17 @@ from pathlib import Path
 from PIL import Image
 import shutil
 
-def organize_images_by_resolution(source_dir='data'):
+def organize_images_by_resolution(source_dir='data', target_subdir='20260129'):
     """按分辨率整理图片"""
     source_path = Path(source_dir)
 
     if not source_path.exists():
         print(f"错误：目录 {source_dir} 不存在")
         return
+
+    # 创建目标子目录（例如 data/20260129）
+    target_base = source_path / target_subdir
+    target_base.mkdir(exist_ok=True)
 
     # 统计信息
     processed = 0
@@ -38,7 +42,8 @@ def organize_images_by_resolution(source_dir='data'):
 
             # 创建分辨率文件夹名称：宽度-高度
             resolution_folder = f"{width}-{height}"
-            resolution_path = source_path / resolution_folder
+            # 目标路径：data/20260129/{resolution}/
+            resolution_path = target_base / resolution_folder
 
             # 创建文件夹（如果不存在）
             resolution_path.mkdir(exist_ok=True)
@@ -51,7 +56,7 @@ def organize_images_by_resolution(source_dir='data'):
             processed += 1
             resolutions[resolution_folder] = resolutions.get(resolution_folder, 0) + 1
 
-            print(f"✓ {file_path.name} ({width}x{height}) -> {resolution_folder}/")
+            print(f"✓ {file_path.name} ({width}x{height}) -> {target_subdir}/{resolution_folder}/")
 
         except Exception as e:
             errors += 1
