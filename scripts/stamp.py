@@ -141,6 +141,7 @@ def _apply_stamp(
     opacity: float,
     stroke_width: int,
     bold_radius: int,
+    bottom_offset: int,
 ):
     with Image.open(img_path) as im:
         base = im.convert("RGBA")
@@ -273,6 +274,8 @@ def _merge_cli(cfg: dict, args: argparse.Namespace) -> dict:
         cli["stamp_stroke_width"] = args.stroke_width
     if args.bold_radius is not None:
         cli["stamp_bold_radius"] = args.bold_radius
+    if args.bottom_offset is not None:
+        cli["stamp_bottom_offset"] = args.bottom_offset
     if args.min_px is not None:
         cli["stamp_min_px"] = args.min_px
     if args.max_px is not None:
@@ -304,6 +307,7 @@ def main(argv: List[str]) -> int:
     parser.add_argument("--padding", type=int, help="Padding in px (default: 24)")
     parser.add_argument("--stroke-width", type=int, help="Stroke width (default: 2)")
     parser.add_argument("--bold-radius", type=int, help="Simulated bold radius (default: 1)")
+    parser.add_argument("--bottom-offset", type=int, help="Lift bottom text by px (default: 0)")
 
     args = parser.parse_args(argv)
 
@@ -334,6 +338,7 @@ def main(argv: List[str]) -> int:
     padding = int(cfg.get("stamp_padding", 24))
     stroke_width = int(cfg.get("stamp_stroke_width", 2))
     bold_radius = int(cfg.get("stamp_bold_radius", 1))
+    bottom_offset = int(cfg.get("stamp_bottom_offset", 0))
     min_px = int(cfg.get("stamp_min_px", 18))
     max_px = int(cfg.get("stamp_max_px", 96))
 
@@ -377,6 +382,7 @@ def main(argv: List[str]) -> int:
                 opacity,
                 stroke_width,
                 bold_radius,
+                bottom_offset,
             )
             total += 1
 
