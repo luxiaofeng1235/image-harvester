@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from typing import Iterable, List, Optional, Tuple
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 from src.utils.config import deep_merge, load_and_merge_config
 
@@ -73,8 +73,23 @@ def _draw_text(
     stroke_fill: Tuple[int, int, int, int],
     stroke_width: int,
     bold_radius: int,
+    glow_color: Tuple[int, int, int, int],
+    glow_radius: int,
 ):
     draw = ImageDraw.Draw(base)
+    if glow_radius > 0:
+        glow_layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
+        glow_draw = ImageDraw.Draw(glow_layer)
+        glow_draw.multiline_text(
+            position,
+            text,
+            font=font,
+            fill=glow_color,
+            align=align,
+            spacing=int(font.size * 0.2),
+        )
+        glow_layer = glow_layer.filter(ImageFilter.GaussianBlur(radius=glow_radius))
+        base.alpha_composite(glow_layer)
     if bold_radius > 0:
         for dx in range(-bold_radius, bold_radius + 1):
             for dy in range(-bold_radius, bold_radius + 1):
@@ -134,6 +149,9 @@ def _apply_stamp(
     logo_max_h_ratio: float,
     text_color: Tuple[int, int, int],
     stroke_color: Tuple[int, int, int],
+    glow_color: Tuple[int, int, int],
+    glow_opacity: float,
+    glow_radius: int,
     scale: float,
     min_px: int,
     max_px: int,
@@ -158,6 +176,8 @@ def _apply_stamp(
     alpha = max(0, min(255, int(255 * opacity)))
     fill = (text_color[0], text_color[1], text_color[2], alpha)
     stroke_fill = (stroke_color[0], stroke_color[1], stroke_color[2], int(alpha * 0.4))
+    glow_alpha = max(0, min(255, int(255 * glow_opacity)))
+    glow_fill = (glow_color[0], glow_color[1], glow_color[2], glow_alpha)
 
     logo_h = 0
     if logo_path:
@@ -205,6 +225,8 @@ def _apply_stamp(
             stroke_fill=stroke_fill,
             stroke_width=stroke_width,
             bold_radius=bold_radius,
+            glow_color=glow_fill,
+            glow_radius=glow_radius,
         )
 
     if right_text:
@@ -227,6 +249,8 @@ def _apply_stamp(
             stroke_fill=stroke_fill,
             stroke_width=stroke_width,
             bold_radius=bold_radius,
+            glow_color=glow_fill,
+            glow_radius=glow_radius,
         )
 
     stamped = Image.alpha_composite(base, overlay)
@@ -264,6 +288,12 @@ def _merge_cli(cfg: dict, args: argparse.Namespace) -> dict:
         cli["stamp_color"] = args.color
     if args.stroke_color:
         cli["stamp_stroke_color"] = args.stroke_color
+    if args.glow_color:
+        cli["stamp_glow_color"] = args.glow_color
+    if args.glow_radius is not None:
+        cli["stamp_glow_radius"] = args.glow_radius
+    if args.glow_opacity is not None:
+        cli["stamp_glow_opacity"] = args.glow_opacity
     if args.scale is not None:
         cli["stamp_scale"] = args.scale
     if args.opacity is not None:
@@ -300,6 +330,9 @@ def main(argv: List[str]) -> int:
     parser.add_argument("--logo-max-h", type=float, help="Logo max height ratio (default: 0.2)")
     parser.add_argument("--color", help="Text color (#RRGGBB or r,g,b)")
     parser.add_argument("--stroke-color", help="Stroke color (#RRGGBB or r,g,b)")
+    parser.add_argument("--glow-color", help="Glow color (#RRGGBB or r,g,b)")
+    parser.add_argument("--glow-radius", type=int, help="Glow blur radius (default: 4)")
+    parser.add_argument("--glow-opacity", type=float, help="Glow opacity 0..1 (default: 0.5)")
     parser.add_argument("--scale", type=float, help="Font size scale of width (default: 0.04)")
     parser.add_argument("--min-px", type=int, help="Min font size")
     parser.add_argument("--max-px", type=int, help="Max font size")
@@ -333,6 +366,9 @@ def main(argv: List[str]) -> int:
     logo_max_h_ratio = float(cfg.get("stamp_logo_max_h", 0.2))
     text_color = _parse_color(cfg.get("stamp_color"))
     stroke_color = _parse_color(cfg.get("stamp_stroke_color") or "#000000")
+    glow_color = _parse_color(cfg.get("stamp_glow_color") or cfg.get("stamp_color"))
+    glow_opacity = float(cfg.get("stamp_glow_opacity", 0.5))
+    glow_radius = int(cfg.get("stamp_glow_radius", 4))
     scale = float(cfg.get("stamp_scale", 0.04))
     opacity = float(cfg.get("stamp_opacity", 0.6))
     padding = int(cfg.get("stamp_padding", 24))
@@ -375,6 +411,9 @@ def main(argv: List[str]) -> int:
                 logo_max_h_ratio,
                 text_color,
                 stroke_color,
+                glow_color,
+                glow_opacity,
+                glow_radius,
                 scale,
                 min_px,
                 max_px,
