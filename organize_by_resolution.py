@@ -57,6 +57,7 @@ def organize_images_by_resolution(source_dir='data', target_subdir='20260129'):
             resolutions[resolution_folder] = resolutions.get(resolution_folder, 0) + 1
 
             print(f"✓ {file_path.name} ({width}x{height}) -> {target_subdir}/{resolution_folder}/")
+            print("done")
 
         except Exception as e:
             errors += 1
@@ -70,6 +71,7 @@ def organize_images_by_resolution(source_dir='data', target_subdir='20260129'):
     print(f"\n共创建 {len(resolutions)} 个分辨率文件夹:")
     for resolution, count in sorted(resolutions.items()):
         print(f"  {resolution}/ : {count} 张图片")
+    print("\ndone")
 
 if __name__ == '__main__':
     organize_images_by_resolution()
