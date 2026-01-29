@@ -108,7 +108,7 @@ python -m scripts.stamp --right-text "九界AI"
 默认水印距离边缘为 10 像素（可用 `--padding` 覆盖）。
 默认文字透明度为 1.0（可用 `--opacity` 调整）。
 默认关闭额外加粗（`stamp_bold_radius: 0`），可用 `--bold-radius` 调整。
-默认字号比例 `stamp_scale: 0.058`（可用 `--scale` 调整）。
+默认字号比例 `stamp_scale: 0.052`（可用 `--scale` 调整）。
 默认文字颜色为偏黄 `#FFD24A`（可用 `--color` 调整）。
 默认启用柔光（`stamp_glow_color: #FFE27A`, `stamp_glow_opacity: 0.6`, `stamp_glow_radius: 4`）。
 默认底部文字上移 `stamp_bottom_offset: 12`（可用 `--bottom-offset` 调整）。

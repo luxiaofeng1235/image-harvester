@@ -39,7 +39,7 @@ stamp_logo_max_h: 0.2
 stamp_padding: 10
 stamp_opacity: 1.0
 stamp_bold_radius: 0
-stamp_scale: 0.058
+stamp_scale: 0.052
 stamp_color: "#FFD24A"
 stamp_stroke_color: "#000000"
 stamp_glow_color: "#FFE27A"
