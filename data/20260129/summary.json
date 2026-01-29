@@ -1,0 +1,14 @@
+{
+  "total_urls": 3,
+  "saved": 3,
+  "filtered": 0,
+  "duplicates": 0,
+  "blocked": 0,
+  "errors": 0,
+  "failure_reasons": [],
+  "keywords": [
+    "风景"
+  ],
+  "date": "20260129",
+  "out": "/mnt/d/python_work/image-harvester/data"
+}

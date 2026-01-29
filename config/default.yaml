@@ -1,0 +1,31 @@
+# Default configuration
+keywords: []
+out: ./out
+count: 50
+concurrency: 8
+strict_order: true
+rate_limit:
+  default: 0.5
+  baidu: 0.5
+fetch_overage: 2
+probe_bytes: 262144
+hash_algo: sha1
+sizes: []
+size_rules:
+  - "w>=1200,h>=200"
+
+sources:
+  baidu:
+    enabled: true
+
+dedupe:
+  url: true
+  content_hash: true
+  perceptual_hash: false
+
+blocked_domains:
+  - pic.quanjing.com
+
+timeout: 10
+log_dir: ./logs
+log_level: INFO
