@@ -5,3 +5,6 @@ __pycache__/
 /frontend/node_modules
 /public/avatar
 /docs
+/data
+/logs
+/.pytest_cache
