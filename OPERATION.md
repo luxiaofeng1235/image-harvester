@@ -3,17 +3,17 @@
 本项目用于按关键词抓取百度图片，并按**日期 + 分辨率**归档到目录中。
 
 ## 目录结构
-输出目录默认在项目根目录的 `./out`：
+下载目录默认在项目根目录的 `./data`：
 
 ```
-out/YYYYMMDD/width-height/
+data/YYYYMMDD/width-height/
 ```
 
 例如：
 
 ```
-out/20260128/480-272/
-out/20260128/1325-146/
+data/20260128/480-272/
+data/20260128/1325-146/
 ```
 
 > 目录名中的分辨率 **来源于图片真实尺寸**，程序先解析图片大小，再按该大小归档。
@@ -64,7 +64,7 @@ python -m scripts.run --keywords "风景" --count 10 --sizes "w>=1,h>=1"
 ## 运行结果
 每次运行会生成：
 - 日志：`logs/run-YYYYMMDD-HHMMSS.log`
-- 汇总统计：`out/YYYYMMDD/summary.json`
+- 汇总统计：`data/YYYYMMDD/summary.json`
 
 ## 自动归类校验（可选）
 如需确认“目录名分辨率 == 图片真实分辨率”，可执行以下脚本：
@@ -74,7 +74,7 @@ python - <<'PY'
 from pathlib import Path
 from PIL import Image
 
-root = Path("./out")
+root = Path("./data")
 for day in root.iterdir():
     if not day.is_dir():
         continue
@@ -97,6 +97,13 @@ for day in root.iterdir():
                 print("error", img_path, e)
 PY
 ```
+
+## 水印剪辑（输出到 out）
+```bash
+python -m scripts.stamp --left-text "胡" --right-text "苏州九界\\n九界AI"
+```
+
+默认从 `./data` 读取，输出到 `./out`。
 
 ## 注意事项
 - 百度源包含**预检**：Range 0–2047 + 文件头校验 + 反爬过滤，可能导致获取量不足。

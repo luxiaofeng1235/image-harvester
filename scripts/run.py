@@ -120,7 +120,7 @@ def main(argv: List[str]) -> int:
     parser.add_argument("--out", help="Output directory")
     parser.add_argument("--count", type=int, help="Target download count per keyword")
     parser.add_argument("--sizes", action="append", help="Size rules, comma-separated or repeated")
-    parser.add_argument("--date", help="Override date (YYYY-MM-DD)")
+    parser.add_argument("--date", help="Override date (YYYYMMDD)")
     parser.add_argument("--sources", help="Comma-separated sources")
     parser.add_argument("--concurrency", type=int, help="Download concurrency")
     parser.add_argument("--rate-limit", type=float, help="Per-source rate limit seconds")

@@ -13,6 +13,8 @@
 python -m scripts.run --keywords "猫,狗" --count 50
 ```
 
+默认下载输出到 `./data`。
+
 ## CLI 参数
 必填：
 - `--keywords` 关键词（逗号分隔）
@@ -27,6 +29,13 @@ python -m scripts.run --keywords "猫,狗" --count 50
 - `--rate-limit` 每源限速（秒）
 - `--blocked-domains` 屏蔽域名列表（逗号分隔）
 - `--strict-order` 按搜索结果顺序下载（遇到 404/无效自动跳过）
+
+## 水印剪辑（输出到 out）
+```bash
+python -m scripts.stamp --left-text "胡" --right-text "苏州九界\\n九界AI"
+```
+
+默认从 `./data` 读取，输出到 `./out`。
 
 ## 分辨率规则示例
 - 精确匹配：`1300x250`

@@ -9,7 +9,7 @@
 - URL 去重 + 内容哈希去重
 - 下载前优先探测 Content-Type/尺寸
 - 按规则过滤分辨率
-- 输出目录：`out/YYYYMMDD/width-height/`
+- 输出目录：`data/YYYYMMDD/width-height/`
 
 ## 合规
 - 源可配置、可禁用

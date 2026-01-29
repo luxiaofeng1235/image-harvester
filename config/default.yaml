@@ -1,6 +1,6 @@
 # Default configuration
 keywords: []
-out: ./out
+out: ./data
 count: 50
 concurrency: 8
 strict_order: true
