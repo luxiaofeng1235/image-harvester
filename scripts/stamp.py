@@ -397,6 +397,7 @@ def main(argv: List[str]) -> int:
     for day_root in roots:
         if not day_root.exists():
             continue
+        print(f"processing_dir: {day_root}")
         for img_path in _iter_images(day_root):
             rel = img_path.relative_to(rel_base)
             out_path = out_root / rel
