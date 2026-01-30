@@ -28,6 +28,9 @@ python -m scripts.run --keywords "风景" --count 10 --strict-order
 # 基本水印（右下角文字）
 python -m scripts.stamp --right-text "九界AI"
 
+# 批量打水印（处理整个日期目录下所有分辨率文件夹）
+python -m scripts.stamp --in ./data/20260129 --right-text "九界AI" --bold-radius 0
+
 # 自定义输入/输出目录
 python -m scripts.stamp --in ./data/20260129/1920-1080 --out ./out --right-text "九界AI"
 
