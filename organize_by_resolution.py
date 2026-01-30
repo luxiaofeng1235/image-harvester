@@ -7,8 +7,9 @@ import os
 from pathlib import Path
 from PIL import Image
 import shutil
+from datetime import datetime
 
-def organize_images_by_resolution(source_dir='data', target_subdir='20260129'):
+def organize_images_by_resolution(source_dir='data', target_subdir=None):
     """按分辨率整理图片"""
     source_path = Path(source_dir)
 
@@ -16,7 +17,11 @@ def organize_images_by_resolution(source_dir='data', target_subdir='20260129'):
         print(f"错误：目录 {source_dir} 不存在")
         return
 
-    # 创建目标子目录（例如 data/20260129）
+    # 如果未指定目标子目录，使用当前日期（格式：YYYYMMDD）
+    if target_subdir is None:
+        target_subdir = datetime.now().strftime('%Y%m%d')
+
+    # 创建目标子目录（例如 data/20260130）
     target_base = source_path / target_subdir
     target_base.mkdir(exist_ok=True)
 
