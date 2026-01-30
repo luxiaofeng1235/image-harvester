@@ -49,15 +49,25 @@ pytest tests/test_filters.py -v
 
 ### 按分辨率整理图片
 ```bash
-# 将 data/ 根目录下的散落图片整理到 data/{当前日期}/{宽度-高度}/ 文件夹
-# 注意：只处理 data/ 根目录的图片，不递归子目录
+# 整理 data/ 根目录的图片到 data/{当前日期}/{宽度-高度}/ 文件夹
 python3 organize_by_resolution.py
 
+# 整理 data/20260130/ 目录的图片到 data/20260130/{宽度-高度}/ 文件夹
+python3 organize_by_resolution.py --dir data/20260130
+
+# 整理指定目录
+python3 organize_by_resolution.py --dir ./images
+
+# 查看帮助
+python3 organize_by_resolution.py --help
+
 # 功能说明：
-# - 扫描 data/ 根目录（跳过子目录）
+# - 扫描指定目录（不递归子目录）
 # - 读取图片分辨率（支持 .jpg, .jpeg, .png, .gif, .bmp, .webp）
-# - 自动使用当前系统日期（格式：YYYYMMDD）作为目标文件夹
-# - 移动到 data/{YYYYMMDD}/{宽度-高度}/ 文件夹
+# - 智能模式：
+#   * data/ 根目录 -> 创建日期子目录 data/{YYYYMMDD}/{分辨率}/
+#   * data/20260130/ 子目录 -> 就地整理 data/20260130/{分辨率}/
+# - 移动操作（不是复制）
 # - 同名文件会被覆盖（Linux/WSL2）
 ```
 
