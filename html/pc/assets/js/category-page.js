@@ -65,8 +65,36 @@
     if (!copy) return "";
     if (typeof copy === "string") return copy;
     if (typeof copy === "object") {
-      if (copy.summary) return copy.summary;
-      if (Array.isArray(copy.paragraphs) && copy.paragraphs[0]) return copy.paragraphs[0];
+      var blocks = [];
+
+      if (copy.summary) {
+        blocks.push(String(copy.summary));
+      }
+
+      if (Array.isArray(copy.paragraphs) && copy.paragraphs.length) {
+        copy.paragraphs.forEach(function (item) {
+          if (item) blocks.push(String(item));
+        });
+      }
+
+      if (copy.featuresTitle) {
+        blocks.push(String(copy.featuresTitle));
+      }
+
+      if (Array.isArray(copy.features) && copy.features.length) {
+        copy.features.forEach(function (item, idx) {
+          if (!item) return;
+          blocks.push(String(idx + 1) + "、" + String(item));
+        });
+      }
+
+      if (blocks.length) {
+        return blocks.join("\n\n");
+      }
+
+      if (Array.isArray(copy.paragraphs) && copy.paragraphs[0]) {
+        return String(copy.paragraphs[0]);
+      }
     }
     return "";
   }

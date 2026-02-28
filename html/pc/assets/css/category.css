@@ -144,11 +144,12 @@ a {
   color: #222222;
 }
 
-.highlight-content p {
+#highlight-copy {
   margin: 16px 0 0;
   color: var(--subtle-text);
   font-size: 14px;
-  line-height: 1.75;
+  line-height: 1.85;
+  white-space: pre-line;
 }
 
 .sub-category-section {
