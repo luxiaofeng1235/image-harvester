@@ -1,0 +1,952 @@
+<div id="web-dev-custom">
+    <link href="https://static.jsss999.com/upload/zrsite/web/default.css" rel="stylesheet" type="text/css"/>
+    <link href="https://static.jsss999.com/upload/zrsite/web/font.css" rel="stylesheet" type="text/css"/>
+    <link href="https://static.jsss999.com/upload/zrsite/web/iconfont.css" rel="stylesheet" type="text/css"/>
+    <link href="https://static.jsss999.com/upload/zrsite/web/media.css" rel="stylesheet" type="text/css"/>
+    <link href="https://static.jsss999.com/upload/zrsite/web/title.css" rel="stylesheet" type="text/css"/>
+    <link href="https://static.jsss999.com/upload/zrsite/web/sidebar.css" rel="stylesheet" type="text/css"/>
+
+    <link href="https://static.jsss999.com/upload/zrsite/web/HarmonyOS_Sans.css" rel="stylesheet" type="text/css"/>
+    <style type="text/css">.prop_rotate_angle sup, .prop_rotate_angle .posblk-deg {
+        font-size: 11px;
+        color: #CDCDCD;
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    ins#qiao-wrap {
+        height: 0;
+    }
+
+    #qiao-wrap {
+        display: block;
+    }
+
+    .scart_iframebox .sctit h2 {
+        color: #eb6100;
+        border-color: #eb6100 !important;
+    }
+
+    .scart_iframebox .sctit p.curpagetxt span.cur {
+        color: #eb6100
+    }
+    </style>
+    <style>.iframebox {
+        background-color: #eeeeee !important;
+        background-image: none !important;
+    }</style>
+    <style>
+        .wpsidebar-fkf.wpsidebar02 {
+            left: 18px !important;
+            right: auto !important;
+            z-index: 99999 !important;
+        }
+        .wpsidebar-fkf.wpsidebar02 .fkf-item-right {
+            right: auto;
+            left: 35px;
+            padding-right: 0;
+            padding-left: 25px;
+        }
+        .wpsidebar-fkf.wpsidebar02 .fkf-item-right-content .arrow,
+        .wpsidebar-fkf.wpsidebar02 .right-content-ewm .arrow {
+            right: auto;
+            left: -15px;
+            transform: rotate(180deg);
+        }
+        .wpsidebar-fkf.wpsidebar02 .fkf-item-right-ewm {
+            top: initial;
+            bottom: -15px;
+        }
+        .wpsidebar-fkf.wpsidebar02,
+        .wpsidebar-fkf.wpsidebar02 .fkf-item,
+        .wpsidebar-fkf.wpsidebar02 .fkf-item img {
+            pointer-events: auto;
+        }
+    </style>
+    <style>
+        /* 网站开发页内修复：仅作用当前 HTML 块 */
+        html, body {
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            height: auto !important;
+        }
+        #web-dev-custom #scroll_container {
+            height: auto !important;
+            overflow: visible !important;
+        }
+        #web-dev-custom #overflow_canvas_container,
+        #web-dev-custom #canvas {
+            overflow: visible !important;
+        }
+    </style>
+
+    <input type="hidden" value="4" name="_user_level_val"/>
+    <script type="text/javascript">
+        if (!window.jQuery) {
+            document.write('<script src="https://static.jsss999.com/upload/zrsite/common/jquery-3.7.1.min.js"><\\/script>');
+        }
+    </script>
+    <script type="text/javascript">
+        window.$ = window.jQuery;
+    </script>
+    <script type="text/javascript" src="https://static.jsss999.com/upload/zrsite/common/compat-shim-v1.3.js"></script>
+<script type="text/javascript" language="javascript" src="https://static.jsss999.com/upload/zrsite/index/jquery.custom.js"></script>
+<script type="text/javascript" language="javascript" src="https://static.jsss999.com/upload/zrsite/index/jquery.lazyload.js"></script>
+<script type="text/javascript" language="javascript" src="https://static.jsss999.com/upload/zrsite/index/jquery.rotateutility.js"></script>
+<script type="text/javascript" language="javascript" src="https://static.jsss999.com/upload/zrsite/index/lab.js"></script>
+<script type="text/javascript" language="javascript" src="https://static.jsss999.com/upload/zrsite/index/wopop_all.js"></script>
+
+
+<script type="text/javascript" language="javascript" src="https://static.jsss999.com/upload/zrsite/index/fullcollumn.js"></script>
+
+<script type="text/javascript" language="javascript" src="https://static.jsss999.com/upload/zrsite/index/ierotate.js"></script>
+<script type="text/javascript" language="javascript" src="https://static.jsss999.com/upload/zrsite/index/velocity.js"></script>
+<script type="text/javascript" language="javascript" src="https://static.jsss999.com/upload/zrsite/index/velocity.ui.js"></script>
+<script type="text/javascript" language="javascript" src="https://static.jsss999.com/upload/zrsite/index/effects.js"></script>
+<script type="text/javascript" language="javascript" src="https://static.jsss999.com/upload/zrsite/index/fullpagescroll.js"></script>
+<script type="text/javascript" language="javascript" src="https://static.jsss999.com/upload/zrsite/index/common.js"></script>
+<script type="text/javascript" language="javascript" src="https://static.jsss999.com/upload/zrsite/index/heightAdapt.js"></script>
+    <script type="text/javascript" language="javascript">
+        // 定义空函数避免报错
+        window.layer_media_init_func = window.layer_media_init_func || function() {};
+        window.create_pc_media_set_pic = window.create_pc_media_set_pic || function() {};
+        window.layer_shapes_draw_func = window.layer_shapes_draw_func || function() {};
+        $.parseInteger = $.parseInteger || function(val) {
+            return parseInt(val, 10) || 0;
+        };
+        $.fn.showEffects = $.fn.showEffects || function() {
+            return this.show();
+        };
+
+        var webmodel = {};
+
+        wp_pages_global_func($.extend({
+            'isedit': '0',
+            'islogin': '0',
+            'domain': 'pro23233665',
+            'p_rooturl': 'https://zr.jsss999.com',
+            'static_rooturl': 'https://static.ysjianzhan.cn/website',
+            'interface_locale': "zh_CN",
+            'dev_mode': "0",
+            'getsession': ''
+        }, {
+            "phpsessionid": "",
+            "punyurl": "https:\/\/zr.jsss999.com",
+            "curr_locale": "zh_CN",
+            "mscript_name": "",
+            "converted": false
+        }));
+
+    </script>
+
+    <link href="https://static.jsss999.com/upload/zrsite/common/common_layers-v2.css" rel="stylesheet" type="text/css"/>
+    <div id="page_set_css">
+    </div>
+    <input type="hidden" id="page_id" name="page_id" value="134" rpid="134">
+    <div id="scroll_container" class="scroll_contain" style="">
+        <div id="scroll_container_bg" style=";">&nbsp;</div>
+        <script>
+            initScrollcontainerHeight();
+        </script>
+        <div id="overflow_canvas_container">
+            <div id="canvas" style=" margin: 0 auto;width:1500px;;height:3042px">
+                <div id="layer8386179A46D89A8AF9CA47B2100D7442" class="full_column"
+                     style="width:1500px;position:absolute;top:0px;height:869px;z-index:100;">
+                    <div class="full_width "
+                         style="position:absolute;height:869px;background-color:#CCCCCC;background-image:url(https://static.jsss999.com/upload/zrsite/web/8d5aadc0250fc378bb96b8d37dd0dd2.png);background-position:center center;background-repeat:no-repeat;background-size:cover;">
+                    </div>
+                    <div class="full_content"
+                         style="width:1500px; position:absolute;left:0;top:0;margin-left: 0px;;height:869px;">
+                        <div id='layer1115A7025C1FDAB8E4FE1FECB8B1025C' type='media' class='cstlayer'
+                             style='left: 86px; top: 312px; position: absolute; z-index: 100; width: 1318px; height: 371px; '
+                             mid="" fatherid='layer8386179A46D89A8AF9CA47B2100D7442' deg='0'>
+                            <script>
+                                create_pc_media_set_pic('layer1115A7025C1FDAB8E4FE1FECB8B1025C', false);
+                            </script>
+                            <div class="wp-media_content" style="overflow: hidden; width: 1318px; height: 371px;"
+                                 type="0">
+                                <div class="img_over"
+                                     style='overflow: hidden; border-color: transparent; border-width: 0px; position: relative; width: 1318px; height: 371px;'>
+
+                                    <div class="imgloading" style="z-index:100;"></div>
+                                    <img id="wp-media-image_layer1115A7025C1FDAB8E4FE1FECB8B1025C"
+                                         onerror="set_thumb_layer1115A7025C1FDAB8E4FE1FECB8B1025C(this);"
+                                         onload="set_thumb_layer1115A7025C1FDAB8E4FE1FECB8B1025C(this);"
+                                         class="paragraph_image" type="zoom"
+                                         src="https://static.jsss999.com/upload/zrsite/web/8otf.png"
+                                         style="width: 1318px; height: 371px;;"/>
+                                </div>
+
+                            </div>
+                            <script>
+                                (function () {
+                                    layer_media_init_func('layer1115A7025C1FDAB8E4FE1FECB8B1025C', {
+                                        "isedit": false,
+                                        "has_effects": false
+                                    });
+                                })()
+                            </script>
+                        </div>
+                        <script>                 $('#layer1115A7025C1FDAB8E4FE1FECB8B1025C').triggerHandler('layer_ready');</script>
+                        <div id='layer4F755FA854B2078D53653476A3B2A24D' type='title' class='cstlayer'
+                             style='left: 337px; top: 188px; position: absolute; z-index: 105; width: 845px; height: 63px; '
+                             mid="" fatherid='layer8386179A46D89A8AF9CA47B2100D7442' deg='0'>
+                            <div class="wp-title_content"
+                                 style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 63px; width: 845px; display: block;">
+                                <p style="text-align: center;"><font color="#ffffff" face="HarmonyOSSansCNRegular"><span
+                                        style="font-size: 21px; color: #ffffff !important;">你的平面网站太老了！新的时代来临，网站结合Ai + 三维 + 数字化，客户来了挪不开眼睛，好的网站带你业绩暴涨！</span></font>
+                                </p></div>
+                            <script type="text/javascript">
+                                $(function () {
+                                    $('.wp-title_content').each(function () {
+                                        if ($(this).find('div').attr('align') == 'justify') {
+                                            $(this).find('div').css({
+                                                'text-justify': 'inter-ideograph',
+                                                'text-align': 'justify'
+                                            });
+                                        }
+                                    })
+                                })
+                            </script>
+
+                        </div>
+                        <script>                 $('#layer4F755FA854B2078D53653476A3B2A24D').triggerHandler('layer_ready');</script>
+                        <div id='layerF585B028D858B0EB4B111E08F6DA41B0' type='title' class='cstlayer'
+                             style='left: 0px; top: 121px; position: absolute; z-index: 101; width: 1500px; height: 65px; '
+                             mid="" fatherid='layer8386179A46D89A8AF9CA47B2100D7442' deg='0'>
+                            <div class="wp-title_content"
+                                 style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 65px; width: 1500px; display: block;">
+                                <div style="text-align: center;"><strong><span
+                                        style="font-size: 41px; color: #ffffff !important; font-family: HarmonyOSSansCNBlack; letter-spacing: 4px;">让Ai唤醒您的网站</span></strong>
+                                </div>
+                            </div>
+
+                        </div>
+                        <script>                 $('#layerF585B028D858B0EB4B111E08F6DA41B0').triggerHandler('layer_ready');</script>
+                        <div id='layer2CAF558E005E1717F706EFBD9C3B9903' type='title' class='cstlayer'
+                             style='left: 1143px; top: 334px; position: absolute; z-index: 102; width: 150px; height: 40px; '
+                             mid="" fatherid='layer8386179A46D89A8AF9CA47B2100D7442' deg='0'>
+                            <div class="wp-title_content"
+                                 style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 40px; width: 150px; display: block;">
+                                <div style="text-align: center;"><span
+                                        style="font-size: 30px; letter-spacing: 5px; font-family: HarmonyOSSansCNMedium; color: #ffffff !important;">三维</span>
+                                </div>
+                            </div>
+
+                        </div>
+                        <script>                 $('#layer2CAF558E005E1717F706EFBD9C3B9903').triggerHandler('layer_ready');</script>
+                        <div id='layerAE86B639FB5A542C3396DA1E061F0E8B' type='title' class='cstlayer'
+                             style='left: 163px; top: 621px; position: absolute; z-index: 103; width: 150px; height: 40px; '
+                             mid="" fatherid='layer8386179A46D89A8AF9CA47B2100D7442' deg='0'>
+                            <div class="wp-title_content"
+                                 style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 40px; width: 150px; display: block;">
+                                <div style="text-align: center;"><span
+                                        style="font-size: 30px; letter-spacing: 5px; font-family: HarmonyOSSansCNMedium; color: #ffffff !important;">VR</span>
+                                </div>
+                            </div>
+
+                        </div>
+                        <script>                 $('#layerAE86B639FB5A542C3396DA1E061F0E8B').triggerHandler('layer_ready');</script>
+                        <div id='layerEE5CB258D72D58D5C5778267B66D2A10' type='title' class='cstlayer'
+                             style='left: 1163px; top: 623px; position: absolute; z-index: 104; width: 150px; height: 40px; '
+                             mid="" fatherid='layer8386179A46D89A8AF9CA47B2100D7442' deg='0'>
+                            <div class="wp-title_content"
+                                 style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 40px; width: 150px; display: block;">
+                                <div style="text-align: center;"><span
+                                        style="font-size: 30px; letter-spacing: 5px; font-family: HarmonyOSSansCNMedium; color: #ffffff !important;">数字化</span>
+                                </div>
+                            </div>
+
+                        </div>
+                        <script>                 $('#layerEE5CB258D72D58D5C5778267B66D2A10').triggerHandler('layer_ready');</script>
+                        <div class="fullcontent_opacity"
+                             style="width: 100%;height: 100%;position: absolute;left: 0;right: 0;top: 0;display:none;"></div>
+                    </div>
+                </div>
+                <script>
+                    $(document).on('click', '.content_copen', function () {
+                        $(this).closest(".full_column").hide();
+                    });
+                    var $fullwidth = $('#layer8386179A46D89A8AF9CA47B2100D7442 .full_width');
+                    $fullwidth.css({
+                        left: 0 - $('#canvas').offset().left + $('#scroll_container').offset().left - $('#scroll_container').scrollLeft() - $.parseInteger($('#canvas').css("borderLeftWidth")),
+                        width: $('#scroll_container_bg').width()
+                    });
+                    $(function () {
+                        var videoParams = {
+                            "id": "layer8386179A46D89A8AF9CA47B2100D7442",
+                            "bgauto": null,
+                            "ctauto": null,
+                            "bVideouse": null,
+                            "cVideouse": null,
+                            "bgvHeight": null,
+                            "bgvWidth": null
+                        };
+                        fullcolumn_bgvideo_init_func(videoParams);
+                        var bgHoverParams = {
+                            "full": {
+                                "hover": null,
+                                "opacity": null,
+                                "bg": "#CCCCCC",
+                                "id": "layer8386179A46D89A8AF9CA47B2100D7442",
+                                "bgopacity": null,
+                                "zindextopcolorset": ""
+                            },
+                            "full_con": {
+                                "hover": null,
+                                "opacity": null,
+                                "bg": null,
+                                "id": "layer8386179A46D89A8AF9CA47B2100D7442",
+                                "bgopacity": null
+                            }
+                        };
+                        fullcolumn_HoverInit(bgHoverParams);
+                    });
+                </script>
+
+
+                <div id='layer3D3A40B5DACED151E20F6C101B987A75' type='sidebar' class='cstlayer'
+                     style='left: 1386px; top: 247px; position: absolute; z-index: 116; width: 114px; height: 87px; display: block; '
+                     mid="" deg='0'>
+                    <div class="wp-sidebar_content"
+                         style="overflow: hidden; border-color: transparent; border-width: 0px; width: 114px; height: 87px; border-style: solid; padding: 0px;;visibility:hidden">
+                        <!--start-->
+                        <link href="https://static.jsss999.com/upload/zrsite/web/sidebar02.css" rel="stylesheet"
+                              type="text/css"/>
+                        <script type="text/javascript">
+
+                        </script>
+
+                        <script type="text/javascript">
+                            $(function () {
+                                var celancount = $('.wpsidebar02').length;
+                                if (!celancount) $("<div class=\"wpsidebar-fkf wpsidebar02\"><ul class=\"fkf\"><li class=\"fkf-item\"><img src=\"https://static.jsss999.com/upload/zrsite/common/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png\"><img class=\"hover\" src=\"https://static.jsss999.com/upload/zrsite/common/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png\"><div class=\"fkf-item-right\"><div class=\"fkf-item-right-content right-content-tele\"><img class=\"arrow\" src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/arrow-r.png\"><div class=\"fkf-item-right-content-top\" ><img src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-4.png\" style=\"width: 25px;height: 25px;\"><h2 class=\"txt_fam\">180 6619 0606<\/h2><p class=\"txt_fam\"><\/p><\/div><div class=\"fkf-item-right-content-top\" ><img src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-4.png\" style=\"width: 25px;height: 25px;\"><h2 class=\"txt_fam\">189 6208 2198<\/h2><p class=\"txt_fam\"><\/p><\/div><\/div><\/div><\/li><li class=\"fkf-item\"><img src=\"https://static.jsss999.com/upload/zrsite/common/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg\"><img class=\"hover\" src=\"https://static.jsss999.com/upload/zrsite/common/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg\"><div class=\"fkf-item-right fkf-item-right-ewm\"><div class=\"right-content-ewm\"><img class=\"arrow\" src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/arrow-r.png\"><div class=\"ewm\"><div><img src=\"https://static.jsss999.com/upload/zrsite/common/1_moxe.jpg\"><\/div><p>\u5fae\u4fe1\u626b\u4e00\u626b<\/p><\/div><div class=\"ewm\"><div><img src=\"https://static.jsss999.com/upload/zrsite/common/2_7gzi.jpg\"><\/div><p>\u5fae\u4fe1\u626b\u4e00\u626b<\/p><\/div><\/div><\/div><\/li><li class=\"fkf-item sgotop\"><img src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-8.png\"><img class=\"hover\" src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-88.png\"><\/li><\/ul><\/div>").appendTo('body');
+
+                                function autoImg(type) {
+                                }
+
+                                $('.wpsidebar02 a.custom').hover(function () {
+                                    var def = $(this).find("img").attr("data-over");
+                                    $(this).find("img").attr("src", def);
+                                }, function () {
+                                    var hov = $(this).find("img").attr("data-out");
+                                    $(this).find("img").attr("src", hov);
+                                })
+                                //showjs
+                                $('.wpsidebar02 li.smember img.hover').click(function () {
+                                    sidebar_cart_colse();
+                                    if (4 > 3) {
+                                        wp_shoppingCart_1(parseToURL('wp_user_manage', 'user_manage'), {
+                                            title: '',
+                                            width: 1000,
+                                            height: 560
+                                        });
+                                        return false;
+                                    }
+                                    $LAB.script("https://static.jsss999.com/upload/zrsite/index/custom_dialog.js").wait(function () {
+                                        show_custom_panel(parseToURL('userlogin', 'login_dialog'), {
+                                            title: '登录', overlay: true, id: 'wp_sidebar_dialog_login'
+                                        });
+                                    });
+                                });
+                                $('.wpsidebar02 li.scart img.hover').click(function () {
+                                    kf_close();
+                                    remove_login();
+                                    $('.rm_bz,.rm_kf').stop().animate({right: '-291px'}, 10);
+                                });
+
+                                function remove_login() {
+                                    $('#wp_sidebar_dialog_login,#wp-floatpanel_overlay').remove();
+                                };
+
+                                function kf_close() {
+                                    $('.wp_celan_detailcontent,.rm_bz,.rm_kf').stop().animate({'left': '-291px'}, 300);
+                                    $('.wp_celan_content').find('.s_arrow').css("display", "none");
+                                    $('.wp_celan_content').find('p.p3').css("background", "none");
+                                };
+
+                                function sidebar_cart_colse() {
+                                    $('#shopping_cart-items,#wp-floatpanel_overlay').remove();
+                                };
+                                //左侧参数
+                                $.sidebar_aleft = '1';
+                                $.sidebar_pathimg = 'https://static.ysjianzhan.cn/website/plugin/sidebar/images/';
+                                $.sidebar_menuclolr = '#6aa84f';
+                                $.sidebar_linkstr = JSON.parse('{"help":{"linkurl":"","target":""},"message":{"linkurl":"","target":""}}');
+                            });
+                        </script>
+                        <script src="https://static.jsss999.com/upload/zrsite/web/rightmenu.js"
+                                type="text/javascript"></script>
+
+                        <!--右侧菜单end-->
+                        <!--end-->
+                    </div>
+                    <script language="javascript">
+                        (function (window) {
+                            $('#layer3D3A40B5DACED151E20F6C101B987A75').hide();
+                            if (!window.wp_shoppingCart_1) {
+                                function wp_shoppingCart_1(load_url, option) {
+                                    $LAB
+                                        .script("https://static.jsss999.com/upload/zrsite/index/usermanage.js")
+                                        .wait(function () {
+                                            wp_openManageDialog(load_url, option);
+                                        });
+                                }
+
+                                window.wp_shoppingCart_1 = wp_shoppingCart_1;
+                            }
+                        })(window);
+                    </script>
+                </div>
+                <script>                 $('#layer3D3A40B5DACED151E20F6C101B987A75').triggerHandler('layer_ready');</script>
+                <div id='layerF93D0CBDCCF420092B35248F8A996123' type='title' class='cstlayer'
+                     style='left: 175px; top: 333px; position: absolute; z-index: 123; width: 150px; height: 40px; '
+                     mid="" deg='0'>
+                    <div class="wp-title_content"
+                         style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 40px; width: 150px; display: block;">
+                        <div style="text-align: center;"><span
+                                style="font-size: 30px; letter-spacing: 5px; font-family: HarmonyOSSansCNMedium; color: #ffffff !important;">平面</span>
+                        </div>
+                    </div>
+
+                </div>
+                <script>                 $('#layerF93D0CBDCCF420092B35248F8A996123').triggerHandler('layer_ready');</script>
+                
+                <div id='layer0DECA0B5634FC62F039652E7F1442453' type='title' class='cstlayer'
+                     style='left: 586px; top: 913px; position: absolute; z-index: 102; width: 328px; height: 48px; '
+                     mid="" deg='0'>
+                    <div class="wp-title_content"
+                         style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 48px; width: 328px; display: block;">
+                        <div style="text-align: center;"><strong><span
+                                style="font-size: 32px; color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;;">多样化案例</span></strong>
+                        </div>
+                    </div>
+
+                </div>
+                <script>                 $('#layer0DECA0B5634FC62F039652E7F1442453').triggerHandler('layer_ready');</script>
+                <div id='layer6111F8F2825F27714E3AB7483843AC68' type='title' class='cstlayer'
+                     style='left: 312px; top: 971px; position: absolute; z-index: 103; width: 876px; height: 79px; '
+                     mid="" deg='0'>
+                    <div class="wp-title_content"
+                         style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 79px; width: 876px; display: block;">
+                        <div style="text-align: center;"><font color="#4b5563" face="Microsoft YaHei"><span
+                                style="font-size: 23px;">网站结合数字化、智能化、VR、三维，中热 Ai 打造高吸引力、高互动、高转化的网站，降维打击同行！</span></font>
+                        </div>
+                    </div>
+
+                </div>
+                <script>                 $('#layer6111F8F2825F27714E3AB7483843AC68').triggerHandler('layer_ready');</script>
+                <div id='layer82B1A74CC07439D78B93A18C768B7A4A' type='media' class='cstlayer'
+                     style='left: 0px; top: 1059px; position: absolute; z-index: 121; width: 721px; height: 428px; '
+                     mid="" deg='0'>
+                    <script>
+                        create_pc_media_set_pic('layer82B1A74CC07439D78B93A18C768B7A4A', false);
+                    </script>
+                    <div class="wp-media_content"
+                         style="border-radius:30px;-moz-border-radius:30px;-webkit-border-radius:30px; overflow: hidden; width: 715px; height: 422px; border-width: 3px; border-style: solid; padding: 0px; background-position: left top;"
+                         type="0">
+                        <div class="img_over"
+                             style='overflow: hidden; border-color: transparent; border-width: 0px; position: relative; width: 715px; height: 422px;'>
+
+                            <div class="imgloading" style="z-index:100;"></div>
+                            <img id="wp-media-image_layer82B1A74CC07439D78B93A18C768B7A4A"
+                                 onerror="set_thumb_layer82B1A74CC07439D78B93A18C768B7A4A(this);"
+                                 onload="set_thumb_layer82B1A74CC07439D78B93A18C768B7A4A(this);" class="paragraph_image"
+                                 type="cut"
+                                 src="https://static.jsss999.com/upload/zrsite/web/0a8e2c2a13d2159001c1c341055f17e.jpg"
+                                 style="width: 715px; height: 422px; top: 0px; left: 0px; position: relative;;"/>
+                        </div>
+
+                    </div>
+                    <script>
+                        (function () {
+                            layer_media_init_func('layer82B1A74CC07439D78B93A18C768B7A4A', {
+                                "isedit": false,
+                                "has_effects": false
+                            });
+                        })()
+                    </script>
+                </div>
+                <script>                 if ($.browser.msie && $.browser.version < 9) $('#layer82B1A74CC07439D78B93A18C768B7A4A').find('div:first').addClass('layer_content');
+                $('#layer82B1A74CC07439D78B93A18C768B7A4A').triggerHandler('layer_ready');</script>
+                <div id='layerF9D3567241F016FC71A13C6E200A15D4' type='media' class='cstlayer'
+                     style='left: 779px; top: 1059px; position: absolute; z-index: 104; width: 721px; height: 428px; '
+                     mid="" deg='0'>
+                    <script>
+                        create_pc_media_set_pic('layerF9D3567241F016FC71A13C6E200A15D4', false);
+                    </script>
+                    <div class="wp-media_content"
+                         style="border-radius:30px;-moz-border-radius:30px;-webkit-border-radius:30px; overflow: hidden; width: 715px; height: 422px; border-width: 3px; border-style: solid; padding: 0px; background-position: center bottom; background-repeat:no-repeat;"
+                         type="0">
+                        <div class="img_over"
+                             style='overflow: hidden; border-color: transparent; border-width: 0px; position: relative; width: 715px; height: 422px;'>
+
+                            <div class="imgloading" style="z-index:100;"></div>
+                            <img id="wp-media-image_layerF9D3567241F016FC71A13C6E200A15D4"
+                                 onerror="set_thumb_layerF9D3567241F016FC71A13C6E200A15D4(this);"
+                                 onload="set_thumb_layerF9D3567241F016FC71A13C6E200A15D4(this);" class="paragraph_image"
+                                 type="cut" src="https://static.jsss999.com/upload/zrsite/web/b6o8.png"
+                                 style="width: 715px; height: 477px; top: 0px; left: 0px; position: relative;;"/>
+                        </div>
+
+                    </div>
+                    <script>
+                        (function () {
+                            layer_media_init_func('layerF9D3567241F016FC71A13C6E200A15D4', {
+                                "isedit": false,
+                                "has_effects": false
+                            });
+                        })()
+                    </script>
+                </div>
+                <script>                 if ($.browser.msie && $.browser.version < 9) $('#layerF9D3567241F016FC71A13C6E200A15D4').find('div:first').addClass('layer_content');
+                $('#layerF9D3567241F016FC71A13C6E200A15D4').triggerHandler('layer_ready');</script>
+                <div id='layerCB13C9EF5AE3E806615FC38D81F138F5' type='title' class='cstlayer'
+                     style='left: 1045px; top: 1509px; position: absolute; z-index: 106; width: 169px; height: 39px; '
+                     mid="" deg='0'>
+                    <div class="wp-title_content"
+                         style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 39px; width: 169px; display: block;">
+                        <div style="text-align: center;"><span
+                                style="color: rgb(0, 0, 0); font-family: &quot;HarmonyOS Sans SC&quot;, &quot;HarmonyOS Sans SC&quot;; font-size: 24px;"><span
+                                style="font-size: 24px; font-family: &quot;Microsoft YaHei&quot;; color: rgb(0, 0, 0);">三维</span></span>
+                        </div>
+                    </div>
+
+                </div>
+                <script>                 $('#layerCB13C9EF5AE3E806615FC38D81F138F5').triggerHandler('layer_ready');</script>
+                <div id='layerE7914C9E212918CE9907A7A188A4D0F7' type='title' class='cstlayer'
+                     style='left: 275px; top: 1509px; position: absolute; z-index: 105; width: 169px; height: 39px; '
+                     mid="" deg='0'>
+                    <div class="wp-title_content"
+                         style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 39px; width: 169px; display: block;">
+                        <div style="text-align: center;"><span
+                                style="font-size: 24px; color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;;">平面</span><span
+                                style="font-size: 24px; color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;;"></span>
+                        </div>
+                    </div>
+
+                </div>
+                <script>                 $('#layerE7914C9E212918CE9907A7A188A4D0F7').triggerHandler('layer_ready');</script>
+                <div id='layerB055E4655FBF30101BA5C391384660D1' type='media' class='cstlayer'
+                     style='left: 0px; top: 1583px; position: absolute; z-index: 107; width: 721px; height: 428px; '
+                     mid="" deg='0'>
+                    <script>
+                        create_pc_media_set_pic('layerB055E4655FBF30101BA5C391384660D1', false);
+                    </script>
+                    <div class="wp-media_content"
+                         style="border-radius:30px;-moz-border-radius:30px;-webkit-border-radius:30px; overflow: hidden; width: 715px; height: 422px; border-width: 3px; border-style: solid; padding: 0px;"
+                         type="0">
+                        <div class="img_over"
+                             style='overflow: hidden; border-color: transparent; border-width: 0px; position: relative; width: 715px; height: 422px;'>
+
+                            <div class="imgloading" style="z-index:100;"></div>
+                            <img id="wp-media-image_layerB055E4655FBF30101BA5C391384660D1"
+                                 onerror="set_thumb_layerB055E4655FBF30101BA5C391384660D1(this);"
+                                 onload="set_thumb_layerB055E4655FBF30101BA5C391384660D1(this);" class="paragraph_image"
+                                 type="cut"
+                                 src="https://static.jsss999.com/upload/zrsite/web/294e74a88ece14dfd85c2f42c5cdd90.jpg"
+                                 style="width: 715px; height: 422px; top: 0px; left: 0px; position: relative;;"/>
+                        </div>
+
+                    </div>
+                    <script>
+                        (function () {
+                            layer_media_init_func('layerB055E4655FBF30101BA5C391384660D1', {
+                                "isedit": false,
+                                "has_effects": false
+                            });
+                        })()
+                    </script>
+                </div>
+                <script>                 if ($.browser.msie && $.browser.version < 9) $('#layerB055E4655FBF30101BA5C391384660D1').find('div:first').addClass('layer_content');
+                $('#layerB055E4655FBF30101BA5C391384660D1').triggerHandler('layer_ready');</script>
+                <div id='layerC27D54EF4B1FCFCB45D9AE51D2340074' type='media' class='cstlayer'
+                     style='left: 779px; top: 1583px; position: absolute; z-index: 108; width: 721px; height: 428px; '
+                     mid="" deg='0'>
+                    <script>
+                        create_pc_media_set_pic('layerC27D54EF4B1FCFCB45D9AE51D2340074', false);
+                    </script>
+                    <div class="wp-media_content"
+                         style="border-radius:30px;-moz-border-radius:30px;-webkit-border-radius:30px; overflow: hidden; width: 715px; height: 422px; border-width: 3px; border-style: solid; padding: 0px;"
+                         type="0">
+                        <div class="img_over"
+                             style='overflow: hidden; border-color: transparent; border-width: 0px; position: relative; width: 715px; height: 422px;'>
+
+                            <div class="imgloading" style="z-index:100;"></div>
+                            <img id="wp-media-image_layerC27D54EF4B1FCFCB45D9AE51D2340074"
+                                 onerror="set_thumb_layerC27D54EF4B1FCFCB45D9AE51D2340074(this);"
+                                 onload="set_thumb_layerC27D54EF4B1FCFCB45D9AE51D2340074(this);" class="paragraph_image"
+                                 type="cut" src="https://static.jsss999.com/upload/zrsite/web/uryf.jpg"
+                                 style="width: 715px; height: 422px; top: 0px; left: 0px; position: relative;;"/>
+                        </div>
+
+                    </div>
+                    <script>
+                        (function () {
+                            layer_media_init_func('layerC27D54EF4B1FCFCB45D9AE51D2340074', {
+                                "isedit": false,
+                                "has_effects": false
+                            });
+                        })()
+                    </script>
+                </div>
+                <script>                 if ($.browser.msie && $.browser.version < 9) $('#layerC27D54EF4B1FCFCB45D9AE51D2340074').find('div:first').addClass('layer_content');
+                $('#layerC27D54EF4B1FCFCB45D9AE51D2340074').triggerHandler('layer_ready');</script>
+                <div id='layer54F32BFCC61BD3B7016C719ACA35CB7A' type='title' class='cstlayer'
+                     style='left: 275px; top: 2033px; position: absolute; z-index: 109; width: 181px; height: 39px; '
+                     mid="" deg='0'>
+                    <div class="wp-title_content"
+                         style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 39px; width: 181px; display: block;">
+                        <div style="text-align: center;"><font color="#000000" face="Microsoft YaHei"><span
+                                style="font-size: 24px;">VR全景展示</span></font></div>
+                    </div>
+
+                </div>
+                <script>                 $('#layer54F32BFCC61BD3B7016C719ACA35CB7A').triggerHandler('layer_ready');</script>
+                <div id='layer886BAFF0DC259979882294230CA0973E' type='title' class='cstlayer'
+                     style='left: 1045px; top: 2033px; position: absolute; z-index: 110; width: 169px; height: 39px; '
+                     mid="" deg='0'>
+                    <div class="wp-title_content"
+                         style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 39px; width: 169px; display: block;">
+                        <div style="text-align: center;"><span
+                                style="color: rgb(0, 0, 0); font-family: &quot;HarmonyOS Sans SC&quot;, &quot;HarmonyOS Sans SC&quot;; font-size: 24px;"><span
+                                style="font-size: 24px; font-family: &quot;Microsoft YaHei&quot;; color: rgb(0, 0, 0);">数字化</span></span>
+                        </div>
+                    </div>
+
+                </div>
+                <script>                 $('#layer886BAFF0DC259979882294230CA0973E').triggerHandler('layer_ready');</script>
+                <div id='layer2D2229EDF7150F90725E9312700EA9E8' type='title' class='cstlayer'
+                     style='left: 586px; top: 2133px; position: absolute; z-index: 111; width: 328px; height: 48px; '
+                     mid="" deg='0'>
+                    <div class="wp-title_content"
+                         style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 48px; width: 328px; display: block;">
+                        <div style="text-align: center;"><strong><span
+                                style="font-size: 32px; color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;;">Ai + 网站的优势</span></strong>
+                        </div>
+                    </div>
+
+                </div>
+                <script>                 $('#layer2D2229EDF7150F90725E9312700EA9E8').triggerHandler('layer_ready');</script>
+                <div id='layer85BB965384ED157737113BF18CF2856F' type='title' class='cstlayer'
+                     style='left: 314px; top: 2191px; position: absolute; z-index: 112; width: 876px; height: 39px; '
+                     mid="" deg='0'>
+                    <div class="wp-title_content"
+                         style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 39px; width: 876px; display: block;">
+                        <div style="text-align: center;"><font color="#4b5563" face="Microsoft YaHei"><span
+                                style="font-size: 23px;">告别传统网站营销难、转化难</span></font></div>
+                    </div>
+
+                </div>
+                <script>                 $('#layer85BB965384ED157737113BF18CF2856F').triggerHandler('layer_ready');</script>
+                <div id='layer6D75F599B0BA3775F830710A1CE49AC1' type='title' class='cstlayer'
+                     style='left: 1148px; top: 2278px; position: absolute; z-index: 115; width: 224px; height: 39px; '
+                     mid="" deg='0'>
+                    <div class="wp-title_content"
+                         style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 39px; width: 224px; display: block;">
+                        <div style="text-align: center;"><span
+                                style="font-size: 26px; color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;;"><strong>更多的交互功能</strong></span>
+                        </div>
+                    </div>
+
+                </div>
+                <script>                 $('#layer6D75F599B0BA3775F830710A1CE49AC1').triggerHandler('layer_ready');</script>
+                <div id='layerD035520CCC02405A3FFF05CB9FC55782' type='title' class='cstlayer'
+                     style='left: 127px; top: 2278px; position: absolute; z-index: 113; width: 224px; height: 39px; '
+                     mid="" deg='0'>
+                    <div class="wp-title_content"
+                         style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 39px; width: 224px; display: block;">
+                        <div style="text-align: center;"><span
+                                style="font-size: 26px; color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;;"><strong>更优的空间感受</strong></span>
+                        </div>
+                    </div>
+
+                </div>
+                <script>                 $('#layerD035520CCC02405A3FFF05CB9FC55782').triggerHandler('layer_ready');</script>
+                <div id='layer1BB24378C2B1099A172453FA8A85C724' type='title' class='cstlayer'
+                     style='left: 637px; top: 2278px; position: absolute; z-index: 117; width: 224px; height: 39px; display: block; '
+                     mid="" deg='0'>
+                    <div class="wp-title_content"
+                         style="overflow-wrap: break-word; padding: 0px; border-color: transparent; border-width: 0px; height: 39px; width: 224px; display: block;">
+                        <div style="text-align: center;"><span
+                                style="font-size: 26px; color: rgb(0, 0, 0); font-family: &quot;Microsoft YaHei&quot;;"><strong>更强的视觉效果</strong></span>
+                        </div>
+                    </div>
+
+                </div>
+                <script>                 $('#layer1BB24378C2B1099A172453FA8A85C724').triggerHandler('layer_ready');</script>
+                <div id='layerCBDCDB41CD0C389161E00DC411A486CE' type='media' class='cstlayer'
+                     style='left: 510px; top: 2347px; position: absolute; z-index: 116; width: 480px; height: 288px; '
+                     mid="" deg='0'>
+                    <script>
+                        create_pc_media_set_pic('layerCBDCDB41CD0C389161E00DC411A486CE', false);
+                    </script>
+                    <div class="wp-media_content"
+                         style="border-radius:30px;-moz-border-radius:30px;-webkit-border-radius:30px; overflow: hidden; width: 474px; height: 282px; border-width: 3px; border-style: solid; padding: 0px;"
+                         type="0">
+                        <div class="img_over"
+                             style='overflow: hidden; border-color: transparent; border-width: 0px; position: relative; width: 474px; height: 282px;'>
+
+                            <div class="imgloading" style="z-index:100;"></div>
+                            <img id="wp-media-image_layerCBDCDB41CD0C389161E00DC411A486CE"
+                                 onerror="set_thumb_layerCBDCDB41CD0C389161E00DC411A486CE(this);"
+                                 onload="set_thumb_layerCBDCDB41CD0C389161E00DC411A486CE(this);" class="paragraph_image"
+                                 type="cut" src="https://static.jsss999.com/upload/zrsite/web/1_qbsb.jpg"
+                                 style="width: 474px; height: 282px; top: 0px; left: 0px; position: relative;;"/>
+                        </div>
+
+                    </div>
+                    <script>
+                        (function () {
+                            layer_media_init_func('layerCBDCDB41CD0C389161E00DC411A486CE', {
+                                "isedit": false,
+                                "has_effects": false
+                            });
+                        })()
+                    </script>
+                </div>
+                <script>                 if ($.browser.msie && $.browser.version < 9) $('#layerCBDCDB41CD0C389161E00DC411A486CE').find('div:first').addClass('layer_content');
+                $('#layerCBDCDB41CD0C389161E00DC411A486CE').triggerHandler('layer_ready');</script>
+                <div id='layer9D1A9B4600DD1ED472F94E0C2466FD5D' type='media' class='cstlayer'
+                     style='left: 0px; top: 2347px; position: absolute; z-index: 118; width: 480px; height: 288px; '
+                     mid="" deg='0'>
+                    <script>
+                        create_pc_media_set_pic('layer9D1A9B4600DD1ED472F94E0C2466FD5D', false);
+                    </script>
+                    <div class="wp-media_content"
+                         style="border-radius:30px;-moz-border-radius:30px;-webkit-border-radius:30px; overflow: hidden; width: 474px; height: 282px; border-width: 3px; border-style: solid; padding: 0px;"
+                         type="0">
+                        <div class="img_over"
+                             style='overflow: hidden; border-color: transparent; border-width: 0px; position: relative; width: 474px; height: 282px;'>
+
+                            <div class="imgloading" style="z-index:100;"></div>
+                            <img id="wp-media-image_layer9D1A9B4600DD1ED472F94E0C2466FD5D"
+                                 onerror="set_thumb_layer9D1A9B4600DD1ED472F94E0C2466FD5D(this);"
+                                 onload="set_thumb_layer9D1A9B4600DD1ED472F94E0C2466FD5D(this);" class="paragraph_image"
+                                 type="cut" src="https://static.jsss999.com/upload/zrsite/web/2_3v6p.png"
+                                 style="width: 474px; height: 282px; top: 0px; left: 0px; position: relative;;"/>
+                        </div>
+
+                    </div>
+                    <script>
+                        (function () {
+                            layer_media_init_func('layer9D1A9B4600DD1ED472F94E0C2466FD5D', {
+                                "isedit": false,
+                                "has_effects": false
+                            });
+                        })()
+                    </script>
+                </div>
+                <script>                 if ($.browser.msie && $.browser.version < 9) $('#layer9D1A9B4600DD1ED472F94E0C2466FD5D').find('div:first').addClass('layer_content');
+                $('#layer9D1A9B4600DD1ED472F94E0C2466FD5D').triggerHandler('layer_ready');</script>
+                <div id='layer831715E0249CA980228D4A0C5163F2B3' type='media' class='cstlayer'
+                     style='left: 1020px; top: 2347px; position: absolute; z-index: 114; width: 480px; height: 288px; '
+                     mid="" deg='0'>
+                    <script>
+                        create_pc_media_set_pic('layer831715E0249CA980228D4A0C5163F2B3', false);
+                    </script>
+                    <div class="wp-media_content"
+                         style="border-radius:30px;-moz-border-radius:30px;-webkit-border-radius:30px; overflow: hidden; width: 474px; height: 282px; border-width: 3px; border-style: solid; padding: 0px;"
+                         type="0">
+                        <div class="img_over"
+                             style='overflow: hidden; border-color: transparent; border-width: 0px; position: relative; width: 474px; height: 282px;'>
+
+                            <div class="imgloading" style="z-index:100;"></div>
+                            <img id="wp-media-image_layer831715E0249CA980228D4A0C5163F2B3"
+                                 onerror="set_thumb_layer831715E0249CA980228D4A0C5163F2B3(this);"
+                                 onload="set_thumb_layer831715E0249CA980228D4A0C5163F2B3(this);" class="paragraph_image"
+                                 type="cut" src="https://static.jsss999.com/upload/zrsite/web/1_h4g1.png"
+                                 style="width: 474px; height: 282px; top: 0px; left: 0px; position: relative;;"/>
+                        </div>
+
+                    </div>
+                    <script>
+                        (function () {
+                            layer_media_init_func('layer831715E0249CA980228D4A0C5163F2B3', {
+                                "isedit": false,
+                                "has_effects": false
+                            });
+                        })()
+                    </script>
+                </div>
+                <script>                 if ($.browser.msie && $.browser.version < 9) $('#layer831715E0249CA980228D4A0C5163F2B3').find('div:first').addClass('layer_content');
+                $('#layer831715E0249CA980228D4A0C5163F2B3').triggerHandler('layer_ready');</script>
+                <div id='layerFA02E05E16D0E91EE96DE7985CB965FD' type='media' class='cstlayer'
+                     style='left: 1020px; top: 2678px; position: absolute; z-index: 119; width: 480px; height: 288px; '
+                     mid="" deg='0'>
+                    <script>
+                        create_pc_media_set_pic('layerFA02E05E16D0E91EE96DE7985CB965FD', false);
+                    </script>
+                    <div class="wp-media_content"
+                         style="border-radius:30px;-moz-border-radius:30px;-webkit-border-radius:30px; overflow: hidden; width: 474px; height: 282px; border-width: 3px; border-style: solid; padding: 0px;"
+                         type="0">
+                        <div class="img_over"
+                             style='overflow: hidden; border-color: transparent; border-width: 0px; position: relative; width: 474px; height: 282px;'>
+
+                            <div class="imgloading" style="z-index:100;"></div>
+                            <img id="wp-media-image_layerFA02E05E16D0E91EE96DE7985CB965FD"
+                                 onerror="set_thumb_layerFA02E05E16D0E91EE96DE7985CB965FD(this);"
+                                 onload="set_thumb_layerFA02E05E16D0E91EE96DE7985CB965FD(this);" class="paragraph_image"
+                                 type="cut"
+                                 src="https://static.jsss999.com/upload/zrsite/web/56bcecf0a7135893b0479ceeef47fe5.jpg"
+                                 style="width: 474px; height: 282px; top: 0px; left: 0px; position: relative;;"/>
+                        </div>
+
+                    </div>
+                    <script>
+                        (function () {
+                            layer_media_init_func('layerFA02E05E16D0E91EE96DE7985CB965FD', {
+                                "isedit": false,
+                                "has_effects": false
+                            });
+                        })()
+                    </script>
+                </div>
+                <script>                 if ($.browser.msie && $.browser.version < 9) $('#layerFA02E05E16D0E91EE96DE7985CB965FD').find('div:first').addClass('layer_content');
+                $('#layerFA02E05E16D0E91EE96DE7985CB965FD').triggerHandler('layer_ready');</script>
+                <div id='layer026E966074FC574B25587E5C260B9073' type='media' class='cstlayer'
+                     style='left: 0px; top: 2678px; position: absolute; z-index: 120; width: 480px; height: 288px; '
+                     mid="" deg='0'>
+                    <script>
+                        create_pc_media_set_pic('layer026E966074FC574B25587E5C260B9073', false);
+                    </script>
+                    <div class="wp-media_content"
+                         style="border-radius:30px;-moz-border-radius:30px;-webkit-border-radius:30px; overflow: hidden; width: 474px; height: 282px; border-width: 3px; border-style: solid; padding: 0px;"
+                         type="0">
+                        <div class="img_over"
+                             style='overflow: hidden; border-color: transparent; border-width: 0px; position: relative; width: 474px; height: 282px;'>
+
+                            <div class="imgloading" style="z-index:100;"></div>
+                            <img id="wp-media-image_layer026E966074FC574B25587E5C260B9073"
+                                 onerror="set_thumb_layer026E966074FC574B25587E5C260B9073(this);"
+                                 onload="set_thumb_layer026E966074FC574B25587E5C260B9073(this);" class="paragraph_image"
+                                 type="zoom"
+                                 src="https://static.jsss999.com/upload/zrsite/web/15572fcb55eedba31e0fdeea4816275.jpg"
+                                 style="width: auto; height: 282px; top: 0px; left: -24px; position: relative;;"/>
+                        </div>
+
+                    </div>
+                    <script>
+                        (function () {
+                            layer_media_init_func('layer026E966074FC574B25587E5C260B9073', {
+                                "isedit": false,
+                                "has_effects": false
+                            });
+                        })()
+                    </script>
+                </div>
+                <script>                 if ($.browser.msie && $.browser.version < 9) $('#layer026E966074FC574B25587E5C260B9073').find('div:first').addClass('layer_content');
+                $('#layer026E966074FC574B25587E5C260B9073').triggerHandler('layer_ready');</script>
+                <div id='layerF465D0BF8E295DD33F39748BF74C6623' type='media' class='cstlayer'
+                     style='left: 510px; top: 2679px; position: absolute; z-index: 122; width: 480px; height: 288px; '
+                     mid="" deg='0'>
+                    <script>
+                        create_pc_media_set_pic('layerF465D0BF8E295DD33F39748BF74C6623', false);
+                    </script>
+                    <div class="wp-media_content"
+                         style="border-radius:30px;-moz-border-radius:30px;-webkit-border-radius:30px; overflow: hidden; width: 474px; height: 282px; border-width: 3px; border-style: solid; padding: 0px;"
+                         type="0">
+                        <div class="img_over"
+                             style='overflow: hidden; border-color: transparent; border-width: 0px; position: relative; width: 474px; height: 282px;'>
+
+                            <div class="imgloading" style="z-index:100;"></div>
+                            <img id="wp-media-image_layerF465D0BF8E295DD33F39748BF74C6623"
+                                 onerror="set_thumb_layerF465D0BF8E295DD33F39748BF74C6623(this);"
+                                 onload="set_thumb_layerF465D0BF8E295DD33F39748BF74C6623(this);" class="paragraph_image"
+                                 type="zoom"
+                                 src="https://static.jsss999.com/upload/zrsite/web/3c48d489bd75068644649acc9a3d787.jpg"
+                                 style="width: 474px; height: auto; top: -17px; left: 0px; position: relative;;"/>
+                        </div>
+
+                    </div>
+                    <script>
+                        (function () {
+                            layer_media_init_func('layerF465D0BF8E295DD33F39748BF74C6623', {
+                                "isedit": false,
+                                "has_effects": false
+                            });
+                        })()
+                    </script>
+                </div>
+                <script>                 if ($.browser.msie && $.browser.version < 9) $('#layerF465D0BF8E295DD33F39748BF74C6623').find('div:first').addClass('layer_content');
+                $('#layerF465D0BF8E295DD33F39748BF74C6623').triggerHandler('layer_ready');</script>
+            </div>
+        </div>    <!--//wp-mobile_navigate end-->
+    </div>
+
+
+    <style type="text/css">.full_column-fixed {
+        position: fixed;
+        top: 0;
+        _position: absolute;
+        _top: expression(getTop());
+    }</style>
+    <script type="text/javascript">
+        init_fullcolumn_fixed_code();
+    </script>
+    <script type="text/javascript">
+        var b;
+
+
+        $._wp_previewimgmode = false;
+        doc_end_exec();
+        if ($._wp_previewimgmode) {
+            $('.cstlayer img.img_lazy_load').trigger('appear');
+        }
+    </script>
+
+    <script>
+        function wx_open_login_dialog(func) {
+            func(true);
+        }
+    </script>
+    <script>
+        wopop_navigator_standalone_func();
+    </script>
+    <script>
+        // 兜底：点击“向上”图标强制回到顶部（兼容动态侧栏、jQuery/非 jQuery 场景）
+        (function () {
+            var goTopSelector = [
+                '.wpsidebar02 li.sgotop',
+                '.wpsidebar02 li.sgotop img',
+                '.wpsidebar03 .sgotop',
+                '.wpsidebar03 .sgotop img',
+                'li.sgotopdd',
+                'li.sgotopdd img',
+                '.wp_celan_content p.ptop'
+            ].join(', ');
+
+            function scrollToTopNow() {
+                var sc = document.getElementById('scroll_container');
+                if (sc) {
+                    sc.scrollTop = 0;
+                }
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+                if (window.jQuery) {
+                    window.jQuery('#scroll_container').stop(true).animate({ scrollTop: 0 }, 300);
+                    window.jQuery('html, body').stop(true).animate({ scrollTop: 0 }, 300);
+                }
+                if (window.scrollTo) {
+                    try {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } catch (err) {
+                        window.scrollTo(0, 0);
+                    }
+                }
+            }
+
+            document.addEventListener('click', function (e) {
+                var target = e.target && e.target.closest ? e.target.closest(goTopSelector) : null;
+                if (!target) {
+                    return;
+                }
+                e.preventDefault();
+                e.stopPropagation();
+                scrollToTopNow();
+            }, true);
+        })();
+    </script>
+
+
+</div>

@@ -1,0 +1,24 @@
+三维建模  500  https://static.jsss999.com/upload/suchao/jianmo.jpg
+三维动画  2000  https://static.jsss999.com/upload/suchao/donghua.jpg
+三维动画+特效  5000  https://static.jsss999.com/upload/suchao/donghua_texiao.jpg
+三维动画+特效场景搭建  20000 https://static.jsss999.com/upload/suchao/donghua_changjingdajian.jpg
+三维动画+特效场景搭建+功能+交互 20000  https://static.jsss999.com/upload/suchao/texiao_changjing_jiaohu.webp
+VR展厅：WV-400-1  299 https://static.jsss999.com/upload/suchao/WV-400-1.png
+VR展厅：WV-400-2  899 https://static.jsss999.com/upload/suchao/WV-400-2.png
+VR展厅：WV-400-3  3999 https://static.jsss999.com/upload/suchao/WV-400-3.png
+VR展馆：WV-400-4  29999 https://static.jsss999.com/upload/suchao/WV-400-4.png
+VR展馆：WV-400-5 29999 https://static.jsss999.com/upload/suchao/WV-400-5.png
+平面网站  3000  https://static.jsss999.com/upload/suchao/pingmianwangzhan.png
+VR网站 	5000   https://static.jsss999.com/upload/suchao/vr_site.jpg
+三维网站 20000  https://static.jsss999.com/upload/suchao/sanwei_site.jpeg
+虚拟一体化网站 50000 https://static.jsss999.com/upload/suchao/xuniyitihua_site.jpg
+Ai网站	100000    https://static.jsss999.com/upload/suchao/ai_site.jpg
+平面APP 50000   https://static.jsss999.com/upload/suchao/pingmian_app.png
+VR APP  500000  https://static.jsss999.com/upload/suchao/vr_app.png
+三维APP 800000  https://static.jsss999.com/upload/suchao/sanwei_app.png
+数字化APP 1000000  https://static.jsss999.com/upload/suchao/shuzihua_app.webp
+平面+可视化 50000    https://static.jsss999.com/upload/suchao/pingmina_keshihua.webp
+平面+模拟数据+可视化 200000 https://static.jsss999.com/upload/suchao/xuni_keshihua.jpg
+立体+数据+可视化 500000 https://static.jsss999.com/upload/suchao/liti_shuju_keshihua.webp
+立体+数据+交互+可视化 800000  https://static.jsss999.com/upload/suchao/liti-shuju-jiaohu-keshihua.jpg
+立体+数据+交互+可视化+预警+操作+多路通信 1000000 https://static.jsss999.com/upload/suchao/jiaohu-duolutongxin.png

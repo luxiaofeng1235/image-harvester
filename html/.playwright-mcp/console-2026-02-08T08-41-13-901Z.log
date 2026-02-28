@@ -1,0 +1,8 @@
+[     693ms] [WARNING] jQuery.Deferred exception: Cannot read properties of undefined (reading 'top') TypeError: Cannot read properties of undefined (reading 'top')
+    at HTMLDocument.<anonymous> (https://zr.jsss999.com/wp-content/themes/mine-educn//assets/js/index.js:1:1449)
+    at e (https://zr.jsss999.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1:2:27028)
+    at t (https://zr.jsss999.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1:2:27330) undefined @ https://zr.jsss999.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1:1
+[   19230ms] TypeError: Cannot read properties of undefined (reading 'top')
+    at HTMLDocument.<anonymous> (https://zr.jsss999.com/wp-content/themes/mine-educn//assets/js/index.js:1:1449)
+    at e (https://zr.jsss999.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1:2:27028)
+    at t (https://zr.jsss999.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1:2:27330)

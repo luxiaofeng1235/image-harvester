@@ -1,0 +1,60 @@
+<link rel="stylesheet" href="./assets/css/category.css" />
+
+<div
+  class="category-page"
+  data-config-url="./config/home-category-content-config.json"
+  data-api-base="https://zr.jsss999.com/wp-json/wp/v2/posts"
+>
+  <div class="page-main">
+    <div class="top-hero-strip" aria-label="顶部背景图">
+      <div id="top-hero-bg" class="top-hero-bg"></div>
+    </div>
+
+    <div class="category-switcher container" aria-label="大分类切换">
+      <div id="main-category-tabs" class="main-tabs"></div>
+    </div>
+
+    <div class="highlight-section container">
+      <div class="highlight-card">
+        <div class="highlight-image-wrap">
+          <img id="highlight-image" src="" alt="分类主图" loading="lazy" />
+        </div>
+        <div class="highlight-content">
+          <h1 id="highlight-title">产品系列</h1>
+          <p id="highlight-copy">加载中...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-category-section container" aria-label="子分类切换">
+      <div id="sub-category-tabs" class="sub-tabs"></div>
+    </div>
+
+    <div class="products-section container" aria-label="产品列表">
+      <div class="section-head">
+        <h2>产品列表</h2>
+        <p id="result-meta" class="result-meta"></p>
+      </div>
+
+      <div id="loading-state" class="state-card">正在加载产品数据...</div>
+      <div id="error-state" class="state-card state-error" hidden></div>
+      <div id="empty-state" class="state-card" hidden>当前分类暂无文章。</div>
+
+      <div id="product-grid" class="product-grid" hidden></div>
+      <nav id="pagination" class="pagination" aria-label="分页" hidden></nav>
+    </div>
+
+    <div class="scene-top-image-section container" aria-label="应用范围顶部图">
+      <img id="scene-top-image" src="" alt="应用范围顶部图" loading="lazy" />
+    </div>
+
+    <div class="scenes-section container" aria-label="应用范围">
+      <h2>应用范围</h2>
+      <div id="scene-grid" class="scene-grid"></div>
+    </div>
+  </div>
+</div>
+
+<script src="./assets/js/category-api.js"></script>
+<script src="./assets/js/category-render.js"></script>
+<script src="./assets/js/category-page.js"></script>
