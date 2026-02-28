@@ -140,16 +140,32 @@ a {
 
 .highlight-content h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 24px;
+  line-height: 1.35;
   color: #222222;
+  word-break: break-word;
+}
+
+#highlight-brief {
+  margin: 8px 0 0;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 700;
+  color: #1f1f1f;
+  word-break: break-word;
+}
+
+#highlight-brief + #highlight-copy {
+  margin-top: 8px;
 }
 
 #highlight-copy {
-  margin: 16px 0 0;
+  margin: 12px 0 0;
   color: var(--subtle-text);
-  font-size: 14px;
-  line-height: 1.85;
+  font-size: 13px;
+  line-height: 1.7;
   white-space: pre-line;
+  word-break: break-word;
 }
 
 .sub-category-section {

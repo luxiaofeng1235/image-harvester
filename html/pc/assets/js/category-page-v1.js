@@ -22,6 +22,7 @@
     subTabs: document.getElementById("sub-category-tabs"),
     highlightImage: document.getElementById("highlight-image"),
     highlightTitle: document.getElementById("highlight-title"),
+    highlightBrief: document.getElementById("highlight-brief"),
     highlightCopy: document.getElementById("highlight-copy"),
     sceneGrid: document.getElementById("scene-grid"),
     resultMeta: document.getElementById("result-meta"),
@@ -84,7 +85,7 @@
       if (Array.isArray(copy.features) && copy.features.length) {
         copy.features.forEach(function (item, idx) {
           if (!item) return;
-          blocks.push(String(idx + 1) + "、" + String(item));
+          blocks.push(String(idx + 1) + ". " + String(item));
         });
       }
 
@@ -228,12 +229,17 @@
       ? extractSummary(activeSub.defaultCopy)
       : extractSummary(activeCategory.defaultCopy);
 
+    var highlightBrief = activeSub && activeSub.shortTitle
+      ? String(activeSub.shortTitle)
+      : "";
+
     var highlightImage = activeSub && activeSub.imageUrl
       ? activeSub.imageUrl
       : (activeCategory.defaultImage || "");
 
     global.CategoryRender.renderHighlight(refs, {
       title: highlightTitle,
+      brief: highlightBrief,
       copy: highlightCopy,
       imageUrl: highlightImage
     });

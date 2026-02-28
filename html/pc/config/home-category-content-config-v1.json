@@ -36,6 +36,7 @@
           "key": "thermal_oil_heater",
           "name": "导热油加热器系列产品",
           "shortName": "导热油加热器",
+          "shortTitle": "环保、节能、低压",
           "wpCategoryId": 42,
           "imageUrl": "https://static.jsss999.com/upload/zrsite/category/jiareqi/%E5%AF%BC%E7%83%AD%E6%B2%B9%E5%8A%A0%E7%83%AD%E5%99%A8.jpg",
           "defaultCopy": {
@@ -56,6 +57,7 @@
           "key": "pipeline_heater",
           "name": "管道加热器系列产品",
           "shortName": "管道加热器",
+          "shortTitle": "升温快、效率高",
           "aliasNames": [
             "导管加热器"
           ],
@@ -74,6 +76,7 @@
           "key": "air_duct_heater",
           "name": "风道加热器系列产品",
           "shortName": "风道加热器",
+          "shortTitle": "加热均匀、性能好",
           "wpCategoryId": 44,
           "imageUrl": "https://static.jsss999.com/upload/zrsite/category/jiareqi/%E9%A3%8E%E9%81%93%E5%8A%A0%E7%83%AD%E5%99%A8.png",
           "defaultCopy": {
@@ -88,6 +91,7 @@
           "key": "electric_heater",
           "name": "电加热器系列产品",
           "shortName": "电加热器",
+          "shortTitle": "适应性强、种类多",
           "wpCategoryId": 45,
           "imageUrl": "https://static.jsss999.com/upload/zrsite/category/jiareqi/%E7%94%B5%E5%8A%A0%E7%83%AD%E5%99%A8.png",
           "defaultCopy": {
@@ -101,6 +105,7 @@
           "key": "electric_heating_element",
           "name": "电加热元件系列产品",
           "shortName": "电加热元件",
+          "shortTitle": "热效性高、散热快",
           "wpCategoryId": 46,
           "imageUrl": "https://static.jsss999.com/upload/zrsite/category/jiareqi/%E7%94%B5%E5%8A%A0%E7%83%AD%E5%85%83%E4%BB%B6.png",
           "defaultCopy": {

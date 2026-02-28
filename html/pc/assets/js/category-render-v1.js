@@ -45,6 +45,11 @@
 
   function renderHighlight(refs, payload) {
     refs.highlightTitle.textContent = payload.title || "产品系列";
+    if (refs.highlightBrief) {
+      var brief = payload.brief || "";
+      refs.highlightBrief.textContent = brief;
+      refs.highlightBrief.hidden = !brief;
+    }
     refs.highlightCopy.textContent = payload.copy || "";
 
     if (payload.imageUrl) {
