@@ -225,6 +225,7 @@
     var highlightTitle = activeSub
       ? (activeSub.shortName || activeSub.name)
       : (activeCategory.categoryDisplayName || activeCategory.categoryName);
+    var isCategoryTitle = !activeSub;
 
     var highlightCopy = activeSub
       ? extractSummary(activeSub.defaultCopy)
@@ -233,7 +234,6 @@
     var highlightBrief = activeSub && activeSub.shortTitle
       ? String(activeSub.shortTitle)
       : "";
-    var highlightBriefLoose = !!(activeSub && activeSub.briefLoose);
 
     var highlightImage = activeSub && activeSub.imageUrl
       ? activeSub.imageUrl
@@ -241,8 +241,8 @@
 
     global.CategoryRender.renderHighlight(refs, {
       title: highlightTitle,
+      isCategoryTitle: isCategoryTitle,
       brief: highlightBrief,
-      briefLoose: highlightBriefLoose,
       copy: highlightCopy,
       imageUrl: highlightImage
     });

@@ -45,11 +45,12 @@
 
   function renderHighlight(refs, payload) {
     refs.highlightTitle.textContent = payload.title || "产品系列";
+    var brief = payload.brief || "";
     if (refs.highlightContent) {
-      refs.highlightContent.classList.toggle("brief-loose", !!payload.briefLoose);
+      refs.highlightContent.classList.toggle("is-category-title", !!payload.isCategoryTitle);
+      refs.highlightContent.classList.toggle("has-brief", !!brief);
     }
     if (refs.highlightBrief) {
-      var brief = payload.brief || "";
       refs.highlightBrief.textContent = brief;
       refs.highlightBrief.hidden = !brief;
     }
