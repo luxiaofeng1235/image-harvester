@@ -91,7 +91,7 @@
       }
 
       if (blocks.length) {
-        return blocks.join("\n\n");
+        return blocks.join("\n");
       }
 
       if (Array.isArray(copy.paragraphs) && copy.paragraphs[0]) {
