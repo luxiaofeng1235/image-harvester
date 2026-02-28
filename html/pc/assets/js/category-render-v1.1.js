@@ -4,7 +4,7 @@
   function makeButton(className, text, active, onClick) {
     var btn = document.createElement("button");
     btn.type = "button";
-    btn.className = className + (active ? " is-active" : "");
+    btn.className = className + (active ? " zr-cat-active" : "");
     btn.textContent = text;
     if (typeof onClick === "function") {
       btn.addEventListener("click", onClick);
@@ -17,7 +17,7 @@
     categories.forEach(function (item) {
       var type = String(item.type);
       var btn = makeButton(
-        "main-tab",
+        "zr-cat-main-tab",
         item.categoryName,
         type === String(activeType),
         function () {
@@ -32,7 +32,7 @@
     container.innerHTML = "";
     subCategories.forEach(function (item) {
       var btn = makeButton(
-        "sub-tab",
+        "zr-cat-sub-tab",
         item.shortName || item.name,
         Number(activeSubId) === Number(item.wpCategoryId),
         function () {
@@ -47,8 +47,8 @@
     refs.highlightTitle.textContent = payload.title || "产品系列";
     var brief = payload.brief || "";
     if (refs.highlightContent) {
-      refs.highlightContent.classList.toggle("is-category-title", !!payload.isCategoryTitle);
-      refs.highlightContent.classList.toggle("has-brief", !!brief);
+      refs.highlightContent.classList.toggle("zr-cat-is-category-title", !!payload.isCategoryTitle);
+      refs.highlightContent.classList.toggle("zr-cat-has-brief", !!brief);
     }
     if (refs.highlightBrief) {
       refs.highlightBrief.textContent = brief;
@@ -89,7 +89,7 @@
       if (!url) return;
 
       var wrap = document.createElement("div");
-      wrap.className = "scene-item";
+      wrap.className = "zr-cat-scene-item";
 
       var img = document.createElement("img");
       img.loading = "lazy";
@@ -100,7 +100,7 @@
 
       if (label) {
         var caption = document.createElement("div");
-        caption.className = "scene-caption";
+        caption.className = "zr-cat-scene-caption";
         caption.textContent = label;
         wrap.appendChild(caption);
       }
@@ -115,7 +115,7 @@
 
     list.forEach(function (item) {
       var article = document.createElement("article");
-      article.className = "product-card";
+      article.className = "zr-cat-product-card";
 
       var link = document.createElement("a");
       link.href = item.link || "#";
@@ -123,20 +123,20 @@
       link.rel = "noopener noreferrer";
 
       var img = document.createElement("img");
-      img.className = "product-thumb";
+      img.className = "zr-cat-product-thumb";
       img.loading = "lazy";
       img.src = item.imageUrl || fallbackImage || "";
       img.alt = item.title || "产品图片";
 
       var body = document.createElement("div");
-      body.className = "product-body";
+      body.className = "zr-cat-product-body";
 
       var title = document.createElement("h3");
-      title.className = "product-title";
+      title.className = "zr-cat-product-title";
       title.textContent = item.title || "未命名文章";
 
       var summary = document.createElement("p");
-      summary.className = "product-summary";
+      summary.className = "zr-cat-product-summary";
       summary.textContent = item.summary || "";
 
       body.appendChild(title);
@@ -187,7 +187,7 @@
 
     container.hidden = false;
 
-    var prev = makeButton("page-btn", "上一页", false, function () {
+    var prev = makeButton("zr-cat-page-btn", "上一页", false, function () {
       if (page > 1) onPageChange(page - 1);
     });
     prev.disabled = page <= 1;
@@ -197,19 +197,19 @@
     pageItems.forEach(function (item) {
       if (item === "...") {
         var dots = document.createElement("span");
-        dots.className = "page-dots";
+        dots.className = "zr-cat-page-dots";
         dots.textContent = "...";
         container.appendChild(dots);
         return;
       }
 
-      var btn = makeButton("page-btn", String(item), Number(item) === Number(page), function () {
+      var btn = makeButton("zr-cat-page-btn", String(item), Number(item) === Number(page), function () {
         onPageChange(Number(item));
       });
       container.appendChild(btn);
     });
 
-    var next = makeButton("page-btn", "下一页", false, function () {
+    var next = makeButton("zr-cat-page-btn", "下一页", false, function () {
       if (page < totalPages) onPageChange(page + 1);
     });
     next.disabled = page >= totalPages;

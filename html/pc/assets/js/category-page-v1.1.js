@@ -15,23 +15,23 @@
   };
 
   var refs = {
-    root: document.querySelector(".category-page"),
-    topHeroBg: document.getElementById("top-hero-bg"),
-    sceneTopImage: document.getElementById("scene-top-image"),
-    mainTabs: document.getElementById("main-category-tabs"),
-    subTabs: document.getElementById("sub-category-tabs"),
-    highlightContent: document.querySelector(".highlight-content"),
-    highlightImage: document.getElementById("highlight-image"),
-    highlightTitle: document.getElementById("highlight-title"),
-    highlightBrief: document.getElementById("highlight-brief"),
-    highlightCopy: document.getElementById("highlight-copy"),
-    sceneGrid: document.getElementById("scene-grid"),
-    resultMeta: document.getElementById("result-meta"),
-    loadingState: document.getElementById("loading-state"),
-    errorState: document.getElementById("error-state"),
-    emptyState: document.getElementById("empty-state"),
-    productGrid: document.getElementById("product-grid"),
-    pagination: document.getElementById("pagination")
+    root: document.querySelector(".zr-cat-page"),
+    topHeroBg: document.getElementById("zr-cat-top-hero-bg"),
+    sceneTopImage: document.getElementById("zr-cat-scene-top-image"),
+    mainTabs: document.getElementById("zr-cat-main-category-tabs"),
+    subTabs: document.getElementById("zr-cat-sub-category-tabs"),
+    highlightContent: document.querySelector(".zr-cat-highlight-content"),
+    highlightImage: document.getElementById("zr-cat-highlight-image"),
+    highlightTitle: document.getElementById("zr-cat-highlight-title"),
+    highlightBrief: document.getElementById("zr-cat-highlight-brief"),
+    highlightCopy: document.getElementById("zr-cat-highlight-copy"),
+    sceneGrid: document.getElementById("zr-cat-scene-grid"),
+    resultMeta: document.getElementById("zr-cat-result-meta"),
+    loadingState: document.getElementById("zr-cat-loading-state"),
+    errorState: document.getElementById("zr-cat-error-state"),
+    emptyState: document.getElementById("zr-cat-empty-state"),
+    productGrid: document.getElementById("zr-cat-product-grid"),
+    pagination: document.getElementById("zr-cat-pagination")
   };
 
   function getConfigUrl() {
