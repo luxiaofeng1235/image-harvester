@@ -117,7 +117,7 @@ a {
   display: grid;
   grid-template-columns: 56% 44%;
   gap: 18px;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .highlight-image-wrap {
@@ -131,6 +131,13 @@ a {
   background: #f8f8f8;
 }
 
+.highlight-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+  padding-top: 10px;
+}
+
 #highlight-image {
   width: 100%;
   height: 100%;
@@ -138,21 +145,17 @@ a {
   display: block;
 }
 
-.highlight-content h1 {
-  margin: 0;
+#highlight-title {
+  margin: 0 0 10px;
   font-size: 24px;
   line-height: 1.35;
   color: #222222;
   word-break: break-word;
 }
 
-.highlight-content.is-category-title h1 {
+.highlight-content.is-category-title #highlight-title {
   font-size: 26px;
   line-height: 1.3;
-  transform: translateY(-4px);
-}
-
-.highlight-content.has-brief h1 {
   transform: translateY(-4px);
 }
 
@@ -166,20 +169,34 @@ a {
 }
 
 .highlight-content.has-brief #highlight-brief {
-  margin-top: 14px;
+  margin-top: 8px;
 }
 
 #highlight-brief + #highlight-copy {
-  margin-top: 6px;
+  margin-top: 10px;
 }
 
 #highlight-copy {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   color: var(--subtle-text);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.7;
   white-space: pre-line;
   word-break: break-word;
+}
+
+.highlight-content:not(.has-brief) #highlight-copy {
+  margin-top: 14px;
+}
+
+.highlight-text-group {
+  margin-top: auto;
+  margin-bottom: auto;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transform: translateY(40px);
 }
 
 .sub-category-section {
