@@ -155,6 +155,10 @@ a {
   word-break: break-word;
 }
 
+.highlight-content.brief-loose #highlight-brief {
+  margin-top: 14px;
+}
+
 #highlight-brief + #highlight-copy {
   margin-top: 8px;
 }

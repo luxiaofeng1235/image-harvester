@@ -20,6 +20,7 @@
     sceneTopImage: document.getElementById("scene-top-image"),
     mainTabs: document.getElementById("main-category-tabs"),
     subTabs: document.getElementById("sub-category-tabs"),
+    highlightContent: document.querySelector(".highlight-content"),
     highlightImage: document.getElementById("highlight-image"),
     highlightTitle: document.getElementById("highlight-title"),
     highlightBrief: document.getElementById("highlight-brief"),
@@ -232,6 +233,7 @@
     var highlightBrief = activeSub && activeSub.shortTitle
       ? String(activeSub.shortTitle)
       : "";
+    var highlightBriefLoose = !!(activeSub && activeSub.briefLoose);
 
     var highlightImage = activeSub && activeSub.imageUrl
       ? activeSub.imageUrl
@@ -240,6 +242,7 @@
     global.CategoryRender.renderHighlight(refs, {
       title: highlightTitle,
       brief: highlightBrief,
+      briefLoose: highlightBriefLoose,
       copy: highlightCopy,
       imageUrl: highlightImage
     });

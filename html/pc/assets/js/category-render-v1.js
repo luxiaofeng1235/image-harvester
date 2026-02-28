@@ -45,6 +45,9 @@
 
   function renderHighlight(refs, payload) {
     refs.highlightTitle.textContent = payload.title || "产品系列";
+    if (refs.highlightContent) {
+      refs.highlightContent.classList.toggle("brief-loose", !!payload.briefLoose);
+    }
     if (refs.highlightBrief) {
       var brief = payload.brief || "";
       refs.highlightBrief.textContent = brief;
