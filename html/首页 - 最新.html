@@ -229,42 +229,42 @@
                             <div id="layerBD4BA54D27F239424CB34FEE9C845286_container" class="container" style="visibility:visible;">
                                 <div class="grid" style="width:220px;border-color:transparent;border-style:none;">
                                     <div class="imgholder">
-                                        <a href="https://static.jsss999.com/upload/zrsite/index/slider/9aedbda2111616aabe80c2520620392-v2.webp">
+                                        <a href="https://static.jsss999.com/upload/zrsite/index/slider/9aedbda2111616aabe80c2520620392-v2.webp" data-case-title="导热油加热器（撬装）">
                                             <img src="https://static.jsss999.com/upload/zrsite/index/slider/9aedbda2111616aabe80c2520620392-v2.webp" alt=""/>
                                         </a>
                                     </div>
                                 </div>
                                 <div class="grid" style="width:220px;border-color:transparent;border-style:none;">
                                     <div class="imgholder">
-                                        <a href="https://static.jsss999.com/upload/zrsite/index/slider/z0u2-v2.webp">
+                                        <a href="https://static.jsss999.com/upload/zrsite/index/slider/z0u2-v2.webp" data-case-title="精密过滤器">
                                             <img src="https://static.jsss999.com/upload/zrsite/index/slider/z0u2-v2.webp" alt=""/>
                                         </a>
                                     </div>
                                 </div>
                                 <div class="grid" style="width:220px;border-color:transparent;border-style:none;">
                                     <div class="imgholder">
-                                        <a href="https://static.jsss999.com/upload/zrsite/index/slider/c0qt-v2.webp">
+                                        <a href="https://static.jsss999.com/upload/zrsite/index/slider/c0qt-v2.webp" data-case-title="风道加热器">
                                             <img src="https://static.jsss999.com/upload/zrsite/index/slider/c0qt-v2.webp" alt=""/>
                                         </a>
                                     </div>
                                 </div>
                                 <div class="grid" style="width:220px;border-color:transparent;border-style:none;">
                                     <div class="imgholder">
-                                        <a href="https://static.jsss999.com/upload/zrsite/index/slider/h5cw-v2.webp">
+                                        <a href="https://static.jsss999.com/upload/zrsite/index/slider/h5cw-v2.webp" data-case-title="篮式除污器">
                                             <img src="https://static.jsss999.com/upload/zrsite/index/slider/h5cw-v2.webp" alt=""/>
                                         </a>
                                     </div>
                                 </div>
                                 <div class="grid" style="width:220px;border-color:transparent;border-style:none;">
                                     <div class="imgholder">
-                                        <a href="https://static.jsss999.com/upload/zrsite/index/slider/fbrl-v2.webp">
+                                        <a href="https://static.jsss999.com/upload/zrsite/index/slider/fbrl-v2.webp" data-case-title="烘道">
                                             <img src="https://static.jsss999.com/upload/zrsite/index/slider/fbrl-v2.webp" alt=""/>
                                         </a>
                                     </div>
                                 </div>
                                 <div class="grid" style="width:220px;border-color:transparent;border-style:none;">
                                     <div class="imgholder">
-                                        <a href="https://static.jsss999.com/upload/zrsite/index/slider/x6zp-v2.webp">
+                                        <a href="https://static.jsss999.com/upload/zrsite/index/slider/x6zp-v2.webp" data-case-title="管道加热器">
                                             <img src="https://static.jsss999.com/upload/zrsite/index/slider/x6zp-v2.webp" alt=""/>
                                         </a>
                                     </div>
@@ -311,7 +311,7 @@
                                     return;
                                 }
 
-                                $LAB.script('https://static.ysjianzhan.cn/website/plugin/blocksit/js/jquery.lightbox.js?v=1').wait(function () {
+                                $LAB.script('https://static.jsss999.com/upload/zrsite/index/common/jquery.lightbox.js').wait(function () {
                                     doBind();
                                 });
                             }
@@ -1333,6 +1333,126 @@ mso-font-kerning:1.0000pt;"><o:p></o:p></span></p>
         window.jQuery(function () {
             window.jQuery(sel).each(function () { setDefault(window.jQuery(this)); });
         });
+    })();
+    </script>
+    <style>
+    /* 精品案例六宫格：hover 显示标题遮罩 */
+    #layerBD4BA54D27F239424CB34FEE9C845286_container .imgholder {
+        position: relative;
+        overflow: hidden;
+    }
+    #layerBD4BA54D27F239424CB34FEE9C845286_container .imgholder a {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+    #layerBD4BA54D27F239424CB34FEE9C845286_container .case-hover-label {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 58%;
+        padding: 0 10px;
+        background: transparent;
+        color: #fff;
+        font-size: 30px;
+        font-weight: 700;
+        line-height: 1.15;
+        text-align: center;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+        opacity: 0;
+        transform: translateY(-50%) scale(0.98);
+        transition: opacity .2s ease, transform .2s ease;
+        pointer-events: none;
+        z-index: 2;
+    }
+    #layerBD4BA54D27F239424CB34FEE9C845286_container .imgholder:hover .case-hover-label {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+    }
+    </style>
+    <script>
+    // 精品案例六宫格：按 data-case-title 注入 hover 文案层
+    (function () {
+        if (!window.jQuery) return;
+        var $ = window.jQuery;
+        var selector = '#layerBD4BA54D27F239424CB34FEE9C845286_container .imgholder a';
+
+        function bindCaseHoverLabel() {
+            $(selector).each(function () {
+                var $a = $(this);
+                if ($a.find('.case-hover-label').length) return;
+                var title = $.trim($a.attr('data-case-title') || '');
+                if (!title) return;
+                $('<span class="case-hover-label"></span>').text(title).appendTo($a);
+            });
+        }
+
+        $(bindCaseHoverLabel);
+        $(window).on('load', bindCaseHoverLabel);
+        setTimeout(bindCaseHoverLabel, 300);
+        setTimeout(bindCaseHoverLabel, 1200);
+    })();
+    </script>
+    <style>
+    /* 主要项目四图：hover 显示标题遮罩 */
+    #layerF15EBA07194960C2C0ED806B8ADB7586 .img_over .media_link,
+    #layer9D9AAFAF82A9E37EFD4BFCDB4FD6F964 .img_over .media_link,
+    #layer0A400C9A6592ABCF6C8DD618A9FC388D .img_over .media_link,
+    #layerA6A73498D59918856EA20F34541F843C .img_over .media_link {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+    #home-custom .major-hover-label {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 12px 12px;
+        background: rgba(95, 95, 95, 0.74);
+        color: #fff;
+        font-size: 36px;
+        font-weight: 700;
+        line-height: 1.15;
+        text-align: center;
+        opacity: 0;
+        transform: translateY(100%);
+        transition: opacity .2s ease, transform .2s ease;
+        pointer-events: none;
+        z-index: 2;
+    }
+    #home-custom .media_link:hover .major-hover-label {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    </style>
+    <script>
+    // 主要项目四图：注入 hover 文案
+    (function () {
+        if (!window.jQuery) return;
+        var $ = window.jQuery;
+        var titleMap = {
+            layerF15EBA07194960C2C0ED806B8ADB7586: '产品展示',
+            layer9D9AAFAF82A9E37EFD4BFCDB4FD6F964: 'VR展示',
+            layer0A400C9A6592ABCF6C8DD618A9FC388D: '三维展示',
+            layerA6A73498D59918856EA20F34541F843C: '数字化'
+        };
+
+        function bindMajorHoverLabels() {
+            $.each(titleMap, function (layerId, title) {
+                var $a = $('#' + layerId + ' .img_over a.media_link').first();
+                if (!$a.length) return;
+                if ($a.find('.major-hover-label').length) return;
+                $('<span class="major-hover-label"></span>').text(title).appendTo($a);
+            });
+        }
+
+        $(bindMajorHoverLabels);
+        $(window).on('load', bindMajorHoverLabels);
+        setTimeout(bindMajorHoverLabels, 300);
+        setTimeout(bindMajorHoverLabels, 1200);
     })();
     </script>
 
