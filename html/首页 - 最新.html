@@ -137,14 +137,14 @@
         #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:hover,
         #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:focus,
         #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:active {
-            background-color: transparent !important;
+            background-color: rgba(60, 120, 216, 1) !important;
             background-image: none !important;
-            color: #47cdff !important;
-            border-color: #47cdff !important;
-            border-top-color: #47cdff !important;
-            border-right-color: #47cdff !important;
-            border-bottom-color: #47cdff !important;
-            border-left-color: #47cdff !important;
+            color: #ffffff !important;
+            border-color: rgba(159, 197, 232, 1) !important;
+            border-top-color: rgba(159, 197, 232, 1) !important;
+            border-right-color: rgba(159, 197, 232, 1) !important;
+            border-bottom-color: rgba(159, 197, 232, 1) !important;
+            border-left-color: rgba(159, 197, 232, 1) !important;
         }
         #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link::before,
         #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link::after {
@@ -159,7 +159,7 @@
         #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:hover .button_circle-label,
         #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:focus .button_circle-label,
         #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:active .button_circle-label {
-            color: #47cdff !important;
+            color: #ffffff !important;
         }
     </style>
     <input type="hidden" value="4" name="_user_level_val"/>
@@ -1380,6 +1380,53 @@ mso-font-kerning:1.0000pt;"><o:p></o:p></span></p>
         setTimeout(ensureStaticLayersVisible, 120);
         setTimeout(ensureStaticLayersVisible, 600);
         setTimeout(ensureStaticLayersVisible, 1500);
+    })();
+    </script>
+    <script>
+    // 对齐源站：更多案例按钮默认灰色，hover 蓝色（强制覆盖运行时样式）
+    (function () {
+        if (!window.jQuery) return;
+        var sel = '#layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link';
+        var lsel = '#layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-label';
+        var $doc = window.jQuery(document);
+
+        function setDefault($btn) {
+            $btn.css({
+                backgroundColor: 'transparent',
+                borderColor: '#5a5a5a',
+                borderTopColor: '#5a5a5a',
+                borderRightColor: '#5a5a5a',
+                borderBottomColor: '#5a5a5a',
+                borderLeftColor: '#5a5a5a',
+                color: '#666666'
+            });
+            $btn.find(lsel).css('color', '#666666');
+        }
+
+        function setHover($btn) {
+            $btn.css({
+                backgroundColor: 'rgba(60, 120, 216, 1)',
+                borderColor: 'rgba(159, 197, 232, 1)',
+                borderTopColor: 'rgba(159, 197, 232, 1)',
+                borderRightColor: 'rgba(159, 197, 232, 1)',
+                borderBottomColor: 'rgba(159, 197, 232, 1)',
+                borderLeftColor: 'rgba(159, 197, 232, 1)',
+                color: '#ffffff'
+            });
+            $btn.find(lsel).css('color', '#ffffff');
+        }
+
+        $doc.off('mouseenter.homeBtnFix mouseleave.homeBtnFix', sel)
+            .on('mouseenter.homeBtnFix', sel, function () {
+                setHover(window.jQuery(this));
+            })
+            .on('mouseleave.homeBtnFix', sel, function () {
+                setDefault(window.jQuery(this));
+            });
+
+        window.jQuery(function () {
+            window.jQuery(sel).each(function () { setDefault(window.jQuery(this)); });
+        });
     })();
     </script>
 
