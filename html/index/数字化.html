@@ -539,16 +539,71 @@ wopop_navigator_standalone_func();
             }
         });
 
-        $(document).off('click.wpFixGoTop').on('click.wpFixGoTop', '.wpsidebar02.zr-custom-sidebar li.sgotop, .wpsidebar02.zr-custom-sidebar li.sgotop img.hover', function (e) {
+        $(document).off('click.wpFixGoTop').on('click.wpFixGoTop', '.wpsidebar02.zr-custom-sidebar li.sgotop, .wpsidebar02.zr-custom-sidebar li.sgotop img, .wpsidebar03 .sgotop, .wpsidebar03 .sgotop img, li.sgotopdd, li.sgotopdd img, .wp_celan_content p.ptop', function (e) {
             e.preventDefault();
+            e.stopPropagation();
             var $sc = $('#scroll_container');
-            if ($sc.length) $sc.stop(true).animate({ scrollTop: 0 }, 500);
-            $('html, body').stop(true).animate({ scrollTop: 0 }, 500);
+            if ($sc.length) $sc.stop(true).animate({ scrollTop: 0 }, 300);
+            $('html, body').stop(true).animate({ scrollTop: 0 }, 300);
             document.documentElement.scrollTop = 0;
             document.body.scrollTop = 0;
+            if (window.scrollTo) {
+                try {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } catch (err) {
+                    window.scrollTo(0, 0);
+                }
+            }
             return false;
         });
     });
+})();
+</script>
+
+<script>
+// 兜底：点击“向上”图标强制回到顶部（兼容动态侧栏、jQuery/非 jQuery 场景）
+(function () {
+    var goTopSelector = [
+        '.wpsidebar02.zr-custom-sidebar li.sgotop',
+        '.wpsidebar02.zr-custom-sidebar li.sgotop img',
+        '.wpsidebar02 li.sgotop',
+        '.wpsidebar02 li.sgotop img',
+        '.wpsidebar03 .sgotop',
+        '.wpsidebar03 .sgotop img',
+        'li.sgotopdd',
+        'li.sgotopdd img',
+        '.wp_celan_content p.ptop'
+    ].join(', ');
+
+    function scrollToTopNow() {
+        var sc = document.getElementById('scroll_container');
+        if (sc) {
+            sc.scrollTop = 0;
+        }
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        if (window.jQuery) {
+            window.jQuery('#scroll_container').stop(true).animate({ scrollTop: 0 }, 300);
+            window.jQuery('html, body').stop(true).animate({ scrollTop: 0 }, 300);
+        }
+        if (window.scrollTo) {
+            try {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (err) {
+                window.scrollTo(0, 0);
+            }
+        }
+    }
+
+    document.addEventListener('click', function (e) {
+        var target = e.target && e.target.closest ? e.target.closest(goTopSelector) : null;
+        if (!target) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        scrollToTopNow();
+    }, true);
 })();
 </script>
 
