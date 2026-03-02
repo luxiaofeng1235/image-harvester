@@ -34,6 +34,9 @@ html,body{height:auto !important;overflow-y:auto !important;overflow-x:hidden !i
 #top-hero-slider .hero-arrow:hover{opacity:1;}
 #top-hero-slider .hero-arrow.prev{left:25px;background-image:url('https://static.jsss999.com/upload/zrsite/index/slider/left_arrow.png');}
 #top-hero-slider .hero-arrow.next{right:25px;background-image:url('https://static.jsss999.com/upload/zrsite/index/slider/right_arrow.png');}
+#top-hero-slider .hero-dots{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);display:flex;gap:10px;z-index:3;}
+#top-hero-slider .hero-dot{width:12px;height:12px;border:1px solid rgba(255,255,255,.9);background:rgba(0,0,0,.35);padding:0;cursor:pointer;}
+#top-hero-slider .hero-dot.is-active{background:#fff;}
 
 /* Keep "查看更多" buttons visually identical to source page */
 #layer8B673AA5B2BEC956621B27C4C82AF6A8 .button_arrowright-container{height:50px;line-height:50px;position:relative;overflow:hidden;}
@@ -91,6 +94,10 @@ initScrollcontainerHeight();
   <div class="top-hero-slide"><img src="https://static.jsss999.com/upload/zrsite/index/slider/wysm.png" alt="slide-2"/></div>
   <button class="hero-arrow prev" type="button" aria-label="prev"></button>
   <button class="hero-arrow next" type="button" aria-label="next"></button>
+  <div class="hero-dots" aria-label="slide-dots">
+    <button class="hero-dot is-active" type="button" data-index="0" aria-label="go-slide-1"></button>
+    <button class="hero-dot" type="button" data-index="1" aria-label="go-slide-2"></button>
+  </div>
 </div>
 
     <div id="layer8B673AA5B2BEC956621B27C4C82AF6A8" class="full_column"   style="width:1500px;position:absolute;top:780px;height:1843px;z-index:104;">
@@ -454,15 +461,25 @@ if($._wp_previewimgmode){
   var box=document.getElementById('top-hero-slider');
   if(!box){return;}
   var slides=box.querySelectorAll('.top-hero-slide');
+  var dots=box.querySelectorAll('.hero-dot');
   if(!slides || slides.length<2){return;}
   var prevBtn=box.querySelector('.hero-arrow.prev');
   var nextBtn=box.querySelector('.hero-arrow.next');
   var i=0;
   var timer=null;
+  function syncActive(){
+    slides.forEach(function(slide,idx){
+      slide.classList.toggle('is-active', idx===i);
+    });
+    if(dots && dots.length){
+      dots.forEach(function(dot,idx){
+        dot.classList.toggle('is-active', idx===i);
+      });
+    }
+  }
   function go(nextIndex){
-    slides[i].classList.remove('is-active');
     i=(nextIndex+slides.length)%slides.length;
-    slides[i].classList.add('is-active');
+    syncActive();
   }
   function play(){
     timer=setInterval(function(){ go(i+1); },3000);
@@ -485,6 +502,19 @@ if($._wp_previewimgmode){
       resetPlay();
     });
   }
+  if(dots && dots.length){
+    dots.forEach(function(dot){
+      dot.addEventListener('click',function(e){
+        e.preventDefault();
+        var idx=parseInt(dot.getAttribute('data-index'),10);
+        if(!isNaN(idx)){
+          go(idx);
+          resetPlay();
+        }
+      });
+    });
+  }
+  syncActive();
   play();
 })();
 </script>
