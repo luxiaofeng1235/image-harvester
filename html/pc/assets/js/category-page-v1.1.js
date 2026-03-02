@@ -37,7 +37,7 @@
   function getConfigUrl() {
     return (
       (refs.root && refs.root.getAttribute("data-config-url")) ||
-      "./config/home-category-content-config.json"
+      "https://static.jsss999.com/upload/zrsite/category/common/home-category-content-config-v1.1.json"
     );
   }
 
