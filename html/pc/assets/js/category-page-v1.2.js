@@ -56,10 +56,11 @@
 
   function parseUrlState(search) {
     var params = new URLSearchParams(search || "");
+    var pageParam = params.get("pg") || params.get("page");
     return {
       type: params.get("type") || "1",
       sub: params.get("sub") ? toPositiveInt(params.get("sub"), null) : null,
-      page: toPositiveInt(params.get("page"), 1)
+      page: toPositiveInt(pageParam, 1)
     };
   }
 
@@ -150,7 +151,7 @@
     var params = new URLSearchParams();
     params.set("type", String(state.type));
     if (state.sub) params.set("sub", String(state.sub));
-    if (state.page > 1) params.set("page", String(state.page));
+    if (state.page > 1) params.set("pg", String(state.page));
 
     var nextUrl = window.location.pathname + "?" + params.toString();
     if (replace) {
