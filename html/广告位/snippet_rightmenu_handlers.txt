@@ -1,0 +1,43 @@
+   133	$('li.sgotopdd img.hover').click(function () {
+   134		if (!$("html,body").is(":animated")) {
+   135			$('#scroll_container').animate({ scrollTop: 0 }, 800);
+   136		}
+   137		return false;
+   138	})
+   139	
+   140	$('.wpsidebar02 li.smessage img.hover').click(function () {
+   141		if ($.sidebar_linkstr.message.linkurl) {
+   142			if($.sidebar_linkstr.message.target=='_blank'){
+   143				var newwindow=window.open('about:blank');
+   144				newwindow.location.href=$.sidebar_linkstr.message.linkurl;
+   145				return '';
+   146			}
+   147			location.href=$.sidebar_linkstr.message.linkurl;
+   148		}
+   149		return false;
+   150	})
+   151	
+   152	$('.wpsidebar02 li.shelp img.hover').click(function () {
+   153		if ($.sidebar_linkstr.help.linkurl) {
+   154			if($.sidebar_linkstr.help.target=='_blank'){
+   155				var newwindow=window.open('about:blank');
+   156				newwindow.location.href=$.sidebar_linkstr.help.linkurl;
+   157				return '';
+   158			}
+   159			location.href=$.sidebar_linkstr.help.linkurl;
+   160		}
+   161		return false;
+   162	})
+   163	
+   164	$('.wpsidebar02 li.sgotop img.hover,.wpsidebar03 .sgotop img.img_active').click(function () {
+   165		if (!$("html,body").is(":animated")) {
+   166			$('#scroll_container').animate({ scrollTop: 0 }, 500);
+   167		}
+   168		return false;
+   169	})
+   170	$('.wpsidebar03 .gobottom img.img_active').click(function(){
+   171		if (!$("html,body").is(":animated")){
+   172			$('#scroll_container').animate({ scrollTop:$('#scroll_container_bg').height()}, 500);
+   173		}
+   174		return false;
+   175	})

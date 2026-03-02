@@ -1,0 +1,79 @@
+<div id='layerCBEBB2153194013B26685B04DC2EF79E' type='sidebar'  class='cstlayer' style='left: 1386px; top: 2223px; position: absolute; z-index: 143; width: 114px; height: 87px; display: block; '  mid=""    deg='0'><div class="wp-sidebar_content" style="overflow: hidden; border-color: transparent; border-width: 0px; width: 114px; height: 87px; border-style: solid; padding: 0px;;visibility:hidden">
+<!--start-->
+<link href="https://static.ysjianzhan.cn/website/plugin/sidebar/css/sidebar02.css?t=3" rel="stylesheet" type="text/css" />
+<script type="text/javascript">
+	
+</script>
+
+<script type="text/javascript">
+$(function(){
+        var celancount= $('.wpsidebar02').length;
+	if(!celancount) $("<div class=\"wpsidebar-fkf wpsidebar02\"><ul class=\"fkf\"><li class=\"fkf-item\"><img src=\"https:\/\/pro23233665-pic5.ysjianzhan.cn\/upload\/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png\"><img class=\"hover\" src=\"https:\/\/pro23233665-pic5.ysjianzhan.cn\/upload\/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png\"><div class=\"fkf-item-right\"><div class=\"fkf-item-right-content right-content-tele\"><img class=\"arrow\" src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/arrow-r.png\"><div class=\"fkf-item-right-content-top\" ><img src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-4.png\" style=\"width: 25px;height: 25px;\"><h2 class=\"txt_fam\">180 6619 0606<\/h2><p class=\"txt_fam\"><\/p><\/div><div class=\"fkf-item-right-content-top\" ><img src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-4.png\" style=\"width: 25px;height: 25px;\"><h2 class=\"txt_fam\">189 6208 2198<\/h2><p class=\"txt_fam\"><\/p><\/div><\/div><\/div><\/li><li class=\"fkf-item\"><img src=\"https:\/\/pro23233665-pic5.ysjianzhan.cn\/upload\/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg\"><img class=\"hover\" src=\"https:\/\/pro23233665-pic5.ysjianzhan.cn\/upload\/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg\"><div class=\"fkf-item-right fkf-item-right-ewm\"><div class=\"right-content-ewm\"><img class=\"arrow\" src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/arrow-r.png\"><div class=\"ewm\"><div><img src=\"https:\/\/pro23233665-pic5.ysjianzhan.cn\/upload\/1_moxe.jpg\"><\/div><p>\u5fae\u4fe1\u626b\u4e00\u626b<\/p><\/div><div class=\"ewm\"><div><img src=\"https:\/\/pro23233665-pic5.ysjianzhan.cn\/upload\/2_7gzi.jpg\"><\/div><p>\u5fae\u4fe1\u626b\u4e00\u626b<\/p><\/div><\/div><\/div><\/li><li class=\"fkf-item sgotop\"><img src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-8.png\"><img class=\"hover\" src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-88.png\"><\/li><\/ul><\/div>").appendTo('body'); 	function autoImg(type){}
+			$('.wpsidebar02 a.custom').hover(function(){
+		var def=$(this).find("img").attr("data-over");
+			$(this).find("img").attr("src",def);
+	},function(){
+		var hov=$(this).find("img").attr("data-out");
+			$(this).find("img").attr("src",hov);
+	})
+    //showjs
+            $('.wpsidebar02 li.smember img.hover').click(function () {
+		sidebar_cart_colse();
+                if(4>3){
+                    wp_shoppingCart_1(parseToURL('wp_user_manage','user_manage'),{title:'',width:1000,height:560});
+                    return false;
+                }
+		$LAB.script("https://static.ysjianzhan.cn/website/script/datepicker/custom_dialog.js").wait(function(){
+			show_custom_panel(parseToURL('userlogin','login_dialog'),{
+				title:'登录',overlay:true,id:'wp_sidebar_dialog_login'
+			});
+		});
+    });
+    $('.wpsidebar02 li.scart img.hover').click(function () {
+		kf_close();remove_login();
+        $('.rm_bz,.rm_kf').stop().animate({ right: '-291px' }, 10);
+        $LAB.script("https://static.ysjianzhan.cn/website/plugin/tb_shopping_cart/js/tb_shopping_cart_browser.js").wait(function(){
+        wp_shoppingCart(parseToURL("tb_shopping_cart","showItems"),{
+                title:"购物车",
+                width: 791,
+                top:60
+        });
+        });
+    });
+    function remove_login(){
+		$('#wp_sidebar_dialog_login,#wp-floatpanel_overlay').remove();
+    };
+    function kf_close(){
+				$('.wp_celan_detailcontent,.rm_bz,.rm_kf').stop().animate({ 'left': '-291px' }, 300);
+		$('.wp_celan_content').find('.s_arrow').css("display","none");
+		$('.wp_celan_content').find('p.p3').css("background", "none");
+    };
+    function sidebar_cart_colse(){
+		$('#shopping_cart-items,#wp-floatpanel_overlay').remove();
+    };
+    //左侧参数
+    $.sidebar_aleft = '1';
+    $.sidebar_pathimg = 'https://static.ysjianzhan.cn/website/plugin/sidebar/images/';
+    $.sidebar_menuclolr = '#6aa84f';
+    $.sidebar_linkstr = $.parseJSON('{"help":{"linkurl":"","target":""},"message":{"linkurl":"","target":""}}');
+});
+</script>
+<script src="https://static.ysjianzhan.cn/website/plugin/sidebar/js/rightmenu.js?v=5" type="text/javascript"></script>
+
+<!--右侧菜单end-->
+<!--end-->
+</div>
+<script language="javascript">
+(function(window){
+           $('#layerCBEBB2153194013B26685B04DC2EF79E').hide();
+        if(!window.wp_shoppingCart_1){
+          function wp_shoppingCart_1(load_url,option){
+                $LAB
+                .script("https://static.ysjianzhan.cn/website/script/usermanagepc/usermanage.js")
+                .wait(function(){
+                      wp_openManageDialog(load_url,option);
+                 });
+          }
+          window.wp_shoppingCart_1 = wp_shoppingCart_1;
+     }
+})(window);
