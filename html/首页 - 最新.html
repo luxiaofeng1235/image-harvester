@@ -112,20 +112,43 @@
             object-fit: cover;
         }
         /* 对齐源站：更多案例按钮默认透明底，避免被全局按钮皮肤覆盖成黄色 */
-        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link {
+        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .wpbtn-wrapper {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link,
+        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:hover,
+        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:focus,
+        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:active {
             background-color: transparent !important;
+            background-image: none !important;
             color: #666666 !important;
+            border: 1px solid #5a5a5a !important;
             border-color: #5a5a5a !important;
+            border-top-color: #5a5a5a !important;
+            border-right-color: #5a5a5a !important;
+            border-bottom-color: #5a5a5a !important;
+            border-left-color: #5a5a5a !important;
+            border-image: none !important;
+            border-image-source: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+            transform: none !important;
+            filter: none !important;
         }
-        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link .button_circle-label {
+        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link::before,
+        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link::after {
+            content: none !important;
+            display: none !important;
+            border: none !important;
+            background: transparent !important;
+        }
+        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link .button_circle-label,
+        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:hover .button_circle-label,
+        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:focus .button_circle-label,
+        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:active .button_circle-label {
             color: #666666 !important;
-        }
-        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:hover {
-            background-color: rgba(60, 120, 216, 1) !important;
-            border-color: rgba(159, 197, 232, 1) !important;
-        }
-        #home-custom #layerFB03D3B3B55A74E2F0DD0ECC2E41145C .button_circle-link:hover .button_circle-label {
-            color: #ffffff !important;
         }
     </style>
     <input type="hidden" value="4" name="_user_level_val"/>
