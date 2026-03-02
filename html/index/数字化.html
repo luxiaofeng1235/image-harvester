@@ -40,12 +40,12 @@
 html,body{overflow-y:auto !important;}
 #scroll_container,#overflow_canvas_container{height:auto !important;overflow:visible !important;}
 #scroll_container_bg{display:none !important;height:0 !important;min-height:0 !important;}
-/* remove online consultation widgets */
+/* remove online consultation widgets (keep custom sidebar) */
 #layer1BFD44D0D05549FCFD97EFE215C62B85,
 #layerDF805E2C8ED4AE6206DAE8A239267F99,
 #layer2A5CACA60DE406C51E24DE9894236BF3,
 #layer978EF4A71AB308BD887BD7F62DE27D18,
-.wpsidebar-fkf,
+.wpsidebar-fkf:not(.zr-custom-sidebar),
 #qiao-wrap,
 #qiao-icon-wrap,
 ins#qiao-wrap,
@@ -55,6 +55,29 @@ ins#qiao-icon-wrap,
 .embed-icon,
 .embed-group-icon,
 a[href*="tongji.baidu.com/hm-web/welcome/ico"]{display:none !important;}
+
+.wpsidebar-fkf.wpsidebar02.zr-custom-sidebar {
+    left: 18px !important;
+    right: auto !important;
+    z-index: 99999 !important;
+    display: block !important;
+}
+.wpsidebar-fkf.wpsidebar02.zr-custom-sidebar .fkf-item-right {
+    right: auto;
+    left: 35px;
+    padding-right: 0;
+    padding-left: 25px;
+}
+.wpsidebar-fkf.wpsidebar02.zr-custom-sidebar .fkf-item-right-content .arrow,
+.wpsidebar-fkf.wpsidebar02.zr-custom-sidebar .right-content-ewm .arrow {
+    right: auto;
+    left: -15px;
+    transform: rotate(180deg);
+}
+.wpsidebar-fkf.wpsidebar02.zr-custom-sidebar .fkf-item-right-ewm {
+    top: initial;
+    bottom: -15px;
+}
 </style>
 </head>
 <body  >
@@ -469,6 +492,66 @@ function wx_open_login_dialog(func){
 wopop_navigator_standalone_func();
 </script>
  
+<script>
+(function () {
+    if (!window.jQuery) return;
+    var $ = window.jQuery;
+
+    if (!document.querySelector('link[data-zr-sidebar02]')) {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'https://static.jsss999.com/upload/zrsite/ai_platform/sidebar02.css';
+        link.setAttribute('data-zr-sidebar02', '1');
+        document.head.appendChild(link);
+    }
+
+    $(function () {
+        $('.wpsidebar-fkf.wpsidebar02').not('.zr-custom-sidebar').remove();
+
+        if (!$('.wpsidebar02.zr-custom-sidebar').length) {
+            var sidebarHtml = '<div class=\"wpsidebar-fkf wpsidebar02 zr-custom-sidebar\"><ul class=\"fkf\"><li class=\"fkf-item\"><img src=\"https://static.jsss999.com/upload/zrsite/common/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png\"><img class=\"hover\" src=\"https://static.jsss999.com/upload/zrsite/common/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png\"><div class=\"fkf-item-right\"><div class=\"fkf-item-right-content right-content-tele\"><img class=\"arrow\" src=\"https://static.ysjianzhan.cn/website/plugin/sidebar/images/arrow-r.png\"><div class=\"fkf-item-right-content-top\"><img src=\"https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-4.png\" style=\"width:25px;height:25px;\"><h2 class=\"txt_fam\">180 6619 0606</h2><p class=\"txt_fam\"></p></div><div class=\"fkf-item-right-content-top\"><img src=\"https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-4.png\" style=\"width:25px;height:25px;\"><h2 class=\"txt_fam\">189 6208 2198</h2><p class=\"txt_fam\"></p></div></div></div></li><li class=\"fkf-item\"><img src=\"https://static.jsss999.com/upload/zrsite/common/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg\"><img class=\"hover\" src=\"https://static.jsss999.com/upload/zrsite/common/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg\"><div class=\"fkf-item-right fkf-item-right-ewm\"><div class=\"right-content-ewm\"><img class=\"arrow\" src=\"https://static.ysjianzhan.cn/website/plugin/sidebar/images/arrow-r.png\"><div class=\"ewm\"><div><img src=\"https://static.jsss999.com/upload/zrsite/common/1_moxe.jpg\"></div><p>微信扫一扫</p></div><div class=\"ewm\"><div><img src=\"https://static.jsss999.com/upload/zrsite/common/2_7gzi.jpg\"></div><p>微信扫一扫</p></div></div></div></li><li class=\"fkf-item sgotop\"><img src=\"https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-8.png\"><img class=\"hover\" src=\"https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-88.png\"></li></ul></div>';
+            $(sidebarHtml).appendTo('body');
+        }
+
+        if (!document.querySelector('script[data-zr-rightmenu]')) {
+            var s = document.createElement('script');
+            s.src = 'https://static.jsss999.com/upload/zrsite/ai_platform/rightmenu.js';
+            s.type = 'text/javascript';
+            s.setAttribute('data-zr-rightmenu', '1');
+            document.body.appendChild(s);
+        }
+
+        $(document).off('click.wpSidebarPanel').on('click.wpSidebarPanel', '.wpsidebar02.zr-custom-sidebar .fkf-item', function (e) {
+            var $item = $(this);
+            if ($item.hasClass('sgotop')) return;
+            var $panel = $item.find('.fkf-item-right');
+            if (!$panel.length) return;
+            e.preventDefault();
+            e.stopPropagation();
+            $('.wpsidebar02.zr-custom-sidebar .fkf-item-right').not($panel).hide();
+            $panel.toggle();
+        });
+
+        $(document).off('click.wpSidebarPanelDoc').on('click.wpSidebarPanelDoc', function (e) {
+            if (!$(e.target).closest('.wpsidebar02.zr-custom-sidebar .fkf-item').length) {
+                $('.wpsidebar02.zr-custom-sidebar .fkf-item-right').hide();
+            }
+        });
+
+        $(document).off('click.wpFixGoTop').on('click.wpFixGoTop', '.wpsidebar02.zr-custom-sidebar li.sgotop, .wpsidebar02.zr-custom-sidebar li.sgotop img.hover', function (e) {
+            e.preventDefault();
+            var $sc = $('#scroll_container');
+            if ($sc.length) $sc.stop(true).animate({ scrollTop: 0 }, 500);
+            $('html, body').stop(true).animate({ scrollTop: 0 }, 500);
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+            return false;
+        });
+    });
+})();
+</script>
+
 
 	  
 	
