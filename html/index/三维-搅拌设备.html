@@ -416,14 +416,79 @@ wopop_navigator_standalone_func();
             document.body.appendChild(s);
         }
 
+        $('.wpsidebar02 a.custom').hover(function () {
+            var def = $(this).find('img').attr('data-over');
+            $(this).find('img').attr('src', def);
+        }, function () {
+            var hov = $(this).find('img').attr('data-out');
+            $(this).find('img').attr('src', hov);
+        });
+
+        $('.wpsidebar02 li.smember img.hover').off('click').on('click', function () {
+            sidebar_cart_colse();
+            if (4 > 3) {
+                wp_shoppingCart_1(parseToURL('wp_user_manage', 'user_manage'), {
+                    title: '',
+                    width: 1000,
+                    height: 560
+                });
+                return false;
+            }
+            $LAB.script('https://static.jsss999.com/upload/zrsite/index/custom_dialog.js').wait(function () {
+                show_custom_panel(parseToURL('userlogin', 'login_dialog'), {
+                    title: '登录', overlay: true, id: 'wp_sidebar_dialog_login'
+                });
+            });
+        });
+
+        $('.wpsidebar02 li.scart img.hover').off('click').on('click', function () {
+            kf_close();
+            remove_login();
+            $('.rm_bz,.rm_kf').stop().animate({ right: '-291px' }, 10);
+        });
+
+        function remove_login() {
+            $('#wp_sidebar_dialog_login,#wp-floatpanel_overlay').remove();
+        }
+        function kf_close() {
+            $('.wp_celan_detailcontent,.rm_bz,.rm_kf').stop().animate({ left: '-291px' }, 300);
+            $('.wp_celan_content').find('.s_arrow').css('display', 'none');
+            $('.wp_celan_content').find('p.p3').css('background', 'none');
+        }
+        function sidebar_cart_colse() {
+            $('#shopping_cart-items,#wp-floatpanel_overlay').remove();
+        }
+
         $.sidebar_aleft = '1';
         $.sidebar_pathimg = 'https://static.ysjianzhan.cn/website/plugin/sidebar/images/';
         $.sidebar_menuclolr = '#6aa84f';
         $.sidebar_linkstr = JSON.parse('{"help":{"linkurl":"","target":""},"message":{"linkurl":"","target":""}}');
 
+        // 兜底：移动端/无 hover 场景下，点击侧边栏项目也可展开
+        $(document).off('click.wpSidebarPanel').on('click.wpSidebarPanel', '.wpsidebar02 .fkf-item', function (e) {
+            var $item = $(this);
+            if ($item.hasClass('sgotop')) {
+                return;
+            }
+            var $panel = $item.find('.fkf-item-right');
+            if (!$panel.length) {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            $('.wpsidebar02 .fkf-item-right').not($panel).hide();
+            $panel.toggle();
+        });
+
+        $(document).off('click.wpSidebarPanelDoc').on('click.wpSidebarPanelDoc', function (e) {
+            if (!$(e.target).closest('.wpsidebar02 .fkf-item').length) {
+                $('.wpsidebar02 .fkf-item-right').hide();
+            }
+        });
+
         $(document).off('click.wpFixGoTop').on(
             'click.wpFixGoTop',
-            '.wpsidebar02 li.sgotop img.hover, .wpsidebar03 .sgotop img.img_active, li.sgotopdd img.hover, .wp_celan_content p.ptop',
+            '.wpsidebar02 li.sgotop, .wpsidebar02 li.sgotop img.hover, .wpsidebar03 .sgotop img.img_active, li.sgotopdd img.hover, .wp_celan_content p.ptop',
             function (e) {
                 e.preventDefault();
                 var $sc = $('#scroll_container');
