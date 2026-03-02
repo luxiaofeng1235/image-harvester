@@ -27,6 +27,36 @@
 <style type="text/css">.prop_rotate_angle sup,.prop_rotate_angle .posblk-deg{font-size:11px; color:#CDCDCD; font-weight:normal; font-style:normal; }ins#qiao-wrap{height:0;} #qiao-wrap{display:block;}
 .scart_iframebox .sctit h2{color:#eb6100;border-color:#eb6100!important;} .scart_iframebox .sctit p.curpagetxt span.cur{color:#eb6100}
 </style><style>.iframebox{background-color:#eeeeee!important;background-image:none!important;}</style>
+
+<style>
+    .wpsidebar-fkf.wpsidebar02 {
+        left: 18px !important;
+        right: auto !important;
+        z-index: 99999 !important;
+    }
+    .wpsidebar-fkf.wpsidebar02 .fkf-item-right {
+        right: auto;
+        left: 35px;
+        padding-right: 0;
+        padding-left: 25px;
+    }
+    .wpsidebar-fkf.wpsidebar02 .fkf-item-right-content .arrow,
+    .wpsidebar-fkf.wpsidebar02 .right-content-ewm .arrow {
+        right: auto;
+        left: -15px;
+        transform: rotate(180deg);
+    }
+    .wpsidebar-fkf.wpsidebar02 .fkf-item-right-ewm {
+        top: initial;
+        bottom: -15px;
+    }
+    .wpsidebar-fkf.wpsidebar02,
+    .wpsidebar-fkf.wpsidebar02 .fkf-item,
+    .wpsidebar-fkf.wpsidebar02 .fkf-item img {
+        pointer-events: auto;
+    }
+</style>
+
 <style type="text/css">
 .wp-unslider_content .banner .dots li,
 .wp-unslider_content .dotsnew div{
@@ -355,6 +385,60 @@ wopop_navigator_standalone_func();
   
 	
 
+
+
+<script>
+(function () {
+    if (!window.jQuery) return;
+    var $ = window.jQuery;
+
+    if (!document.querySelector('link[data-zr-sidebar02]')) {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'https://static.jsss999.com/upload/zrsite/ai_platform/sidebar02.css';
+        link.setAttribute('data-zr-sidebar02', '1');
+        document.head.appendChild(link);
+    }
+
+    $(function () {
+        var celancount = $('.wpsidebar02').length;
+        if (!celancount) {
+            var sidebarHtml = `<div class="wpsidebar-fkf wpsidebar02"><ul class="fkf"><li class="fkf-item"><img src="https://static.jsss999.com/upload/zrsite/common/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png"><img class="hover" src="https://static.jsss999.com/upload/zrsite/common/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png"><div class="fkf-item-right"><div class="fkf-item-right-content right-content-tele"><img class="arrow" src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/arrow-r.png"><div class="fkf-item-right-content-top"><img src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-4.png" style="width:25px;height:25px;"><h2 class="txt_fam">180 6619 0606</h2><p class="txt_fam"></p></div><div class="fkf-item-right-content-top"><img src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-4.png" style="width:25px;height:25px;"><h2 class="txt_fam">189 6208 2198</h2><p class="txt_fam"></p></div></div></div></li><li class="fkf-item"><img src="https://static.jsss999.com/upload/zrsite/common/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg"><img class="hover" src="https://static.jsss999.com/upload/zrsite/common/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg"><div class="fkf-item-right fkf-item-right-ewm"><div class="right-content-ewm"><img class="arrow" src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/arrow-r.png"><div class="ewm"><div><img src="https://static.jsss999.com/upload/zrsite/common/1_moxe.jpg"></div><p>微信扫一扫</p></div><div class="ewm"><div><img src="https://static.jsss999.com/upload/zrsite/common/2_7gzi.jpg"></div><p>微信扫一扫</p></div></div></div></li><li class="fkf-item sgotop"><img src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-8.png"><img class="hover" src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-88.png"></li></ul></div>`;
+            $(sidebarHtml).appendTo('body');
+        }
+
+        if (!document.querySelector('script[data-zr-rightmenu]')) {
+            var s = document.createElement('script');
+            s.src = 'https://static.jsss999.com/upload/zrsite/ai_platform/rightmenu.js';
+            s.type = 'text/javascript';
+            s.setAttribute('data-zr-rightmenu', '1');
+            document.body.appendChild(s);
+        }
+
+        $.sidebar_aleft = '1';
+        $.sidebar_pathimg = 'https://static.ysjianzhan.cn/website/plugin/sidebar/images/';
+        $.sidebar_menuclolr = '#6aa84f';
+        $.sidebar_linkstr = JSON.parse('{"help":{"linkurl":"","target":""},"message":{"linkurl":"","target":""}}');
+
+        $(document).off('click.wpFixGoTop').on(
+            'click.wpFixGoTop',
+            '.wpsidebar02 li.sgotop img.hover, .wpsidebar03 .sgotop img.img_active, li.sgotopdd img.hover, .wp_celan_content p.ptop',
+            function (e) {
+                e.preventDefault();
+                var $sc = $('#scroll_container');
+                if ($sc.length) {
+                    $sc.stop(true).animate({ scrollTop: 0 }, 500);
+                }
+                $('html, body').stop(true).animate({ scrollTop: 0 }, 500);
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+                return false;
+            }
+        );
+    });
+})();
+</script>
 
 </body>
   </html>
