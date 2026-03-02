@@ -847,3 +847,39 @@ ins#qiao-wrap {
         }, true);
     })();
 </script>
+<script>
+// 兜底：部分环境下第三方脚本会把 html 锁成 overflow:hidden，导致页面无法滚动
+(function () {
+    function unlockScroll() {
+        var de = document.documentElement;
+        var body = document.body;
+        var sc = document.getElementById('scroll_container');
+
+        if (de) {
+            de.style.overflowY = 'auto';
+            de.style.overflowX = 'hidden';
+            de.style.height = 'auto';
+        }
+        if (body) {
+            body.style.overflowY = 'auto';
+            body.style.overflowX = 'hidden';
+            body.style.height = 'auto';
+        }
+        if (sc) {
+            sc.style.height = 'auto';
+            sc.style.overflow = 'visible';
+            sc.style.overflowY = 'visible';
+            sc.style.overflowX = 'hidden';
+        }
+    }
+
+    unlockScroll();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', unlockScroll);
+    }
+    window.addEventListener('load', unlockScroll);
+    setTimeout(unlockScroll, 300);
+    setTimeout(unlockScroll, 1200);
+    setTimeout(unlockScroll, 2500);
+})();
+</script>
