@@ -668,5 +668,42 @@ if($._wp_previewimgmode){
 })();
 </script>
 
+<script>
+// 兜底：强制侧边栏可点（兼容右侧脚本事件冲突场景）
+(function () {
+    function hidePanels() {
+        var panels = document.querySelectorAll('.wpsidebar02 .fkf-item-right');
+        for (var i = 0; i < panels.length; i++) {
+            panels[i].style.display = 'none';
+        }
+    }
+
+    document.addEventListener('click', function (e) {
+        var item = e.target.closest && e.target.closest('.wpsidebar02 .fkf-item');
+        if (!item) {
+            hidePanels();
+            return;
+        }
+
+        if (item.classList.contains('sgotop')) {
+            e.preventDefault();
+            var sc = document.getElementById('scroll_container');
+            if (sc) sc.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+            return;
+        }
+
+        var panel = item.querySelector('.fkf-item-right');
+        if (!panel) return;
+
+        e.preventDefault();
+        var isOpen = window.getComputedStyle(panel).display !== 'none';
+        hidePanels();
+        panel.style.display = isOpen ? 'none' : 'block';
+    }, true);
+})();
+</script>
+
 </body>
   </html>
