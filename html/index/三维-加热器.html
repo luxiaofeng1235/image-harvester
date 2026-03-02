@@ -138,6 +138,8 @@ initScrollcontainerHeight();
 
 <script type="text/javascript">
 $(function(){
+        // disable legacy sidebar bootstrap to avoid duplicate bindings/conflicts
+        return;
         var celancount= $('.wpsidebar02').length;
 	if(!celancount) $("<div class=\"wpsidebar-fkf wpsidebar02\"><ul class=\"fkf\"><li class=\"fkf-item\"><img src=\"https:\/\/static.jsss999.com\/upload\/zrsite\/common\/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png\"><img class=\"hover\" src=\"https:\/\/static.jsss999.com\/upload\/zrsite\/common\/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png\"><div class=\"fkf-item-right\"><div class=\"fkf-item-right-content right-content-tele\"><img class=\"arrow\" src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/arrow-r.png\"><div class=\"fkf-item-right-content-top\" ><img src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-4.png\" style=\"width: 25px;height: 25px;\"><h2 class=\"txt_fam\">180 6619 0606<\/h2><p class=\"txt_fam\"><\/p><\/div><div class=\"fkf-item-right-content-top\" ><img src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-4.png\" style=\"width: 25px;height: 25px;\"><h2 class=\"txt_fam\">189 6208 2198<\/h2><p class=\"txt_fam\"><\/p><\/div><\/div><\/div><\/li><li class=\"fkf-item\"><img src=\"https:\/\/static.jsss999.com\/upload\/zrsite\/common\/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg\"><img class=\"hover\" src=\"https:\/\/static.jsss999.com\/upload\/zrsite\/common\/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg\"><div class=\"fkf-item-right fkf-item-right-ewm\"><div class=\"right-content-ewm\"><img class=\"arrow\" src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/arrow-r.png\"><div class=\"ewm\"><div><img src=\"https:\/\/static.jsss999.com\/upload\/zrsite\/common\/1_moxe.jpg\"><\/div><p>\u5fae\u4fe1\u626b\u4e00\u626b<\/p><\/div><div class=\"ewm\"><div><img src=\"https:\/\/static.jsss999.com\/upload\/zrsite\/common\/2_7gzi.jpg\"><\/div><p>\u5fae\u4fe1\u626b\u4e00\u626b<\/p><\/div><\/div><\/div><\/li><li class=\"fkf-item sgotop\"><img src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-8.png\"><img class=\"hover\" src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-88.png\"><\/li><\/ul><\/div>").appendTo('body'); 	function autoImg(type){}
 			$('.wpsidebar02 a.custom').hover(function(){
@@ -189,7 +191,7 @@ $(function(){
     $.sidebar_linkstr = $.parseJSON('{"help":{"linkurl":"","target":""},"message":{"linkurl":"","target":""}}');
 });
 </script>
-<script src="https://static.jsss999.com/upload/zrsite/ai_platform/rightmenu.js" type="text/javascript"></script>
+<script src="https://static.jsss999.com/upload/zrsite/ai_platform/rightmenu.js" type="text/javascript" data-zr-rightmenu="1"></script>
 
 <!--右侧菜单end-->
 <!--end-->
@@ -511,7 +513,14 @@ $(function(){
 			
 		
 			$('#layerF9B3FCAC909D3ED96F017ACC9056CEC7').find('.wp-buttons_content a.btnarea ').bind('click',function(e){
-		window.history.go(-1);
+		e.preventDefault();
+		var isLocalPreview = /^(127\\.0\\.0\\.1|localhost)$/i.test(window.location.hostname);
+		var fallbackUrl = isLocalPreview ? './三维-new.html' : 'https://zr.jsss999.com/index.php/ai%e4%b8%89%e7%bb%b4/';
+		if (window.history.length > 1 && document.referrer) {
+			window.history.back();
+		} else {
+			window.location.href = fallbackUrl;
+		}
 	});
 	
 			    
