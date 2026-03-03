@@ -1541,5 +1541,33 @@ mso-font-kerning:1.0000pt;"><o:p></o:p></span></p>
         setTimeout(bindCasesHoverLabels, 1200);
     })();
     </script>
+    <style>
+    /* WP 全局样式兜底：防止首页标题/hover 文案被覆盖成黑色 */
+    #home-custom #layer1FF0FFA38A10992A4A66F25C51B188D0 .wp-title_content,
+    #home-custom #layer1FF0FFA38A10992A4A66F25C51B188D0 .wp-title_content *,
+    #home-custom #layerE0F4962746E5E2F009C868CA76AC5352 .wp-title_content,
+    #home-custom #layerE0F4962746E5E2F009C868CA76AC5352 .wp-title_content *,
+    #home-custom #layer92CDD6E3502D41BAC96B07FD48EC1F6D .wp-title_content,
+    #home-custom #layer92CDD6E3502D41BAC96B07FD48EC1F6D .wp-title_content *,
+    #home-custom #layer6D23A9905DE867FF66783BD9534D1C3A .wp-title_content,
+    #home-custom #layer6D23A9905DE867FF66783BD9534D1C3A .wp-title_content * {
+        color: #5a5a5a !important;
+    }
+
+    #home-custom #layer7052249CA453824A8316F8B3076BADE0 .wp-title_content,
+    #home-custom #layer7052249CA453824A8316F8B3076BADE0 .wp-title_content *,
+    #home-custom #layer92EDE3B4B23AD656AD5819144082EA6F .wp-title_content,
+    #home-custom #layer92EDE3B4B23AD656AD5819144082EA6F .wp-title_content *,
+    #home-custom #layer7AA044D9A60FE1800E423720B68FABF3 .wp-title_content,
+    #home-custom #layer7AA044D9A60FE1800E423720B68FABF3 .wp-title_content * {
+        color: #ffffff !important;
+    }
+
+    #home-custom .major-hover-label,
+    #home-custom .cases-hover-label,
+    #home-custom .case-hover-label {
+        color: #ffffff !important;
+    }
+    </style>
 
 </div>
