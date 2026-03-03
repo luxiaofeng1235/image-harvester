@@ -102,15 +102,78 @@
   <script src="./vr-more-products-v2.js"></script>
   <script>
     (function () {
-      var sidebar = document.querySelector(".wpsidebar02");
-      if (!sidebar) return;
+      var goTopSelector = [
+        ".wpsidebar02 li.sgotop",
+        ".wpsidebar02 li.sgotop img",
+        ".wpsidebar03 .sgotop",
+        ".wpsidebar03 .sgotop img",
+        "li.sgotopdd",
+        "li.sgotopdd img",
+        ".wp_celan_content p.ptop"
+      ].join(", ");
 
-      document.addEventListener("click", function (event) {
-        if (event.target.closest(".wpsidebar02 li.sgotop")) {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-          event.preventDefault();
+      function scrollToTopNow() {
+        var sc = document.getElementById("scroll_container");
+        if (sc) {
+          sc.scrollTop = 0;
         }
-      });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        if (window.jQuery) {
+          window.jQuery("#scroll_container").stop(true).animate({ scrollTop: 0 }, 300);
+          window.jQuery("html, body").stop(true).animate({ scrollTop: 0 }, 300);
+        }
+        if (window.scrollTo) {
+          try {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } catch (err) {
+            window.scrollTo(0, 0);
+          }
+        }
+      }
+
+      document.addEventListener("click", function (e) {
+        var target = e.target && e.target.closest ? e.target.closest(goTopSelector) : null;
+        if (!target) return;
+        e.preventDefault();
+        e.stopPropagation();
+        scrollToTopNow();
+      }, true);
+    })();
+  </script>
+  <script>
+    (function () {
+      function unlockScroll() {
+        var de = document.documentElement;
+        var body = document.body;
+        var sc = document.getElementById("scroll_container");
+
+        if (de) {
+          de.style.overflowY = "auto";
+          de.style.overflowX = "hidden";
+          de.style.height = "auto";
+        }
+        if (body) {
+          body.style.overflowY = "auto";
+          body.style.overflowX = "hidden";
+          body.style.height = "auto";
+        }
+        if (sc) {
+          sc.style.height = "auto";
+          sc.style.overflow = "visible";
+          sc.style.overflowY = "visible";
+          sc.style.overflowX = "hidden";
+        }
+      }
+
+      unlockScroll();
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", unlockScroll);
+      }
+      window.addEventListener("load", unlockScroll);
+      setTimeout(unlockScroll, 300);
+      setTimeout(unlockScroll, 1200);
+      setTimeout(unlockScroll, 2500);
     })();
   </script>
 </body>
