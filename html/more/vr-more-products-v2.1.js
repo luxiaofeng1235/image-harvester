@@ -6,8 +6,9 @@
 
   var apiBase = root.getAttribute("data-api-base") || "https://zr.jsss999.com/wp-json/wp/v2/posts";
   var categoryId = Number(root.getAttribute("data-category-id") || 66);
-  var perPage = Number(root.getAttribute("data-per-page") || 6);
+  var defaultPerPage = toPositiveInt(root.getAttribute("data-per-page"), 6, 1, 50);
   var defaultCover = root.getAttribute("data-default-cover") || "";
+  var initialQuery = parseInitialQuery();
 
   var els = {
     meta: document.getElementById("vr-result-meta"),
@@ -19,7 +20,9 @@
   };
 
   var state = {
-    page: getInitialPage(),
+    page: initialQuery.page,
+    perPage: initialQuery.perPage,
+    pageParamKey: initialQuery.pageParamKey,
     total: 0,
     totalPages: 0,
     categoryName: "VR展示",
@@ -33,22 +36,62 @@
     fetchAndRender(state.page);
   }
 
-  function getInitialPage() {
+  function toPositiveInt(value, fallback, min, max) {
+    var num = Number(value);
+    if (!Number.isFinite(num) || num <= 0) return fallback;
+    num = Math.floor(num);
+    if (Number.isFinite(min) && num < min) return min;
+    if (Number.isFinite(max) && num > max) return max;
+    return num;
+  }
+
+  function parseInitialQuery() {
     var sp = new URLSearchParams(window.location.search);
-    var p = Number(sp.get("vr_page") || 1);
-    return Number.isFinite(p) && p > 0 ? p : 1;
+    var pageKeys = ["vr_page", "pg", "page"];
+    var page = 1;
+    var pageParamKey = "vr_page";
+
+    pageKeys.some(function (key) {
+      var candidate = toPositiveInt(sp.get(key), null, 1, 9999);
+      if (!candidate) return false;
+      page = candidate;
+      pageParamKey = key;
+      return true;
+    });
+
+    var perPage = toPositiveInt(sp.get("per_page"), defaultPerPage, 1, 50);
+
+    return {
+      page: page,
+      perPage: perPage,
+      pageParamKey: pageParamKey
+    };
   }
 
   function setQueryPage(page) {
     var url = new URL(window.location.href);
-    url.searchParams.set("vr_page", String(page));
+    var pageKeys = ["vr_page", "pg", "page"];
+    var key = state.pageParamKey || "vr_page";
+
+    if (!pageKeys.includes(key)) key = "vr_page";
+    url.searchParams.set(key, String(page));
+
+    pageKeys.forEach(function (k) {
+      if (k !== key && url.searchParams.has(k)) {
+        url.searchParams.set(k, String(page));
+      }
+    });
+
+    if (url.searchParams.has("per_page")) {
+      url.searchParams.set("per_page", String(state.perPage));
+    }
     window.history.replaceState({}, "", url.toString());
   }
 
   function buildUrl(page) {
     var params = new URLSearchParams({
       categories: String(categoryId),
-      per_page: String(perPage),
+      per_page: String(state.perPage),
       page: String(page),
       orderby: "date",
       order: "desc",
@@ -221,8 +264,8 @@
 
   function updateMeta() {
     if (!els.meta) return;
-    var start = state.total === 0 ? 0 : (state.page - 1) * perPage + 1;
-    var end = Math.min(state.page * perPage, state.total);
+    var start = state.total === 0 ? 0 : (state.page - 1) * state.perPage + 1;
+    var end = Math.min(state.page * state.perPage, state.total);
     els.meta.textContent = state.categoryName + " · 共 " + state.total + " 篇，当前显示 " + start + "-" + end;
   }
 
@@ -251,14 +294,25 @@
 
     fetch(buildUrl(page))
       .then(function (res) {
-        if (!res.ok) {
-          throw new Error("HTTP " + res.status);
+        if (res.ok) {
+          var total = Number(res.headers.get("X-WP-Total") || 0);
+          var totalPages = Number(res.headers.get("X-WP-TotalPages") || 0);
+          state.total = Number.isFinite(total) ? total : 0;
+          state.totalPages = Number.isFinite(totalPages) ? totalPages : 0;
+          return res.json();
         }
-        var total = Number(res.headers.get("X-WP-Total") || 0);
-        var totalPages = Number(res.headers.get("X-WP-TotalPages") || 0);
-        state.total = Number.isFinite(total) ? total : 0;
-        state.totalPages = Number.isFinite(totalPages) ? totalPages : 0;
-        return res.json();
+
+        return res
+          .json()
+          .catch(function () {
+            return {};
+          })
+          .then(function (errBody) {
+            var err = new Error("HTTP " + res.status);
+            err.status = res.status;
+            err.code = errBody && errBody.code ? errBody.code : "";
+            throw err;
+          });
       })
       .then(function (items) {
         updateMeta();
@@ -271,6 +325,12 @@
         showState("grid");
       })
       .catch(function (err) {
+        if (err && err.code === "rest_post_invalid_page_number" && state.page !== 1) {
+          state.page = 1;
+          setQueryPage(1);
+          fetchAndRender(1);
+          return;
+        }
         showState("error", "列表加载失败（" + err.message + "），请刷新重试。");
       });
   }
