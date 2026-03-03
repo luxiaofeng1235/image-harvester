@@ -81,7 +81,18 @@
 
   function pickCover(post) {
     var media = post && post._embedded && post._embedded["wp:featuredmedia"];
-    if (Array.isArray(media) && media[0] && media[0].source_url) return media[0].source_url;
+    var first = Array.isArray(media) ? media[0] : null;
+    if (!first) return state.categoryImage || defaultCover;
+
+    var sizes = first.media_details && first.media_details.sizes;
+    if (sizes) {
+      if (sizes.medium_large && sizes.medium_large.source_url) return sizes.medium_large.source_url;
+      if (sizes.large && sizes.large.source_url) return sizes.large.source_url;
+      if (sizes.medium && sizes.medium.source_url) return sizes.medium.source_url;
+      if (sizes.full && sizes.full.source_url) return sizes.full.source_url;
+    }
+
+    if (first.source_url) return first.source_url;
     return state.categoryImage || defaultCover;
   }
 
