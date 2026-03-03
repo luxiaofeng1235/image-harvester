@@ -297,8 +297,21 @@
                                     if (!$.fn.lightBox) {
                                         return;
                                     }
+                                    var $imgLinks = $container.find('.imgholder a');
+                                    if (!$imgLinks.length) {
+                                        $container.data('lightbox_bound', true);
+                                        return;
+                                    }
+                                    // 首页这 6 张图保留图片弹窗：强制使用当前缩略图地址作为弹层源。
+                                    $imgLinks.each(function () {
+                                        var $a = $(this);
+                                        var src = $a.find('img').attr('src');
+                                        if (src) {
+                                            $a.attr('href', src);
+                                        }
+                                    });
                                     var plugindir = 'https://static.ysjianzhan.cn/website/plugin/blocksit/';
-                                    $container.find('.imgholder a').lightBox({
+                                    $imgLinks.lightBox({
                                         imageLoading: plugindir + 'images/lightbox-ico-loading.gif',
                                         imageBtnPrev: plugindir + 'images/lightbox-btn-prev.gif',
                                         imageBtnNext: plugindir + 'images/lightbox-btn-next.gif',
