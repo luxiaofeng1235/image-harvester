@@ -7,6 +7,7 @@
   <title>VR更多产品列表</title>
   <link rel="icon" href="https://static.jsss999.com/upload/zrsite/index/vr/more/q98s.ico" />
   <link rel="stylesheet" href="./vr-more-products-v2.css" />
+  <link rel="stylesheet" href="https://static.jsss999.com/upload/zrsite/ai_platform/sidebar02.css" />
 </head>
 <body>
   <main
@@ -53,6 +54,64 @@
     </section>
   </main>
 
+  <div class="wpsidebar-fkf wpsidebar02" aria-label="侧边栏">
+    <ul class="fkf">
+      <li class="fkf-item">
+        <img src="https://static.jsss999.com/upload/zrsite/common/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png" alt="电话咨询" />
+        <img class="hover" src="https://static.jsss999.com/upload/zrsite/common/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png" alt="电话咨询" />
+        <div class="fkf-item-right">
+          <div class="fkf-item-right-content right-content-tele">
+            <img class="arrow" src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/arrow-r.png" alt="" />
+            <div class="fkf-item-right-content-top">
+              <img src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-4.png" style="width:25px;height:25px;" alt="" />
+              <h2 class="txt_fam">180 6619 0606</h2>
+              <p class="txt_fam"></p>
+            </div>
+            <div class="fkf-item-right-content-top">
+              <img src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-4.png" style="width:25px;height:25px;" alt="" />
+              <h2 class="txt_fam">189 6208 2198</h2>
+              <p class="txt_fam"></p>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li class="fkf-item">
+        <img src="https://static.jsss999.com/upload/zrsite/common/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg" alt="微信咨询" />
+        <img class="hover" src="https://static.jsss999.com/upload/zrsite/common/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg" alt="微信咨询" />
+        <div class="fkf-item-right fkf-item-right-ewm">
+          <div class="right-content-ewm">
+            <img class="arrow" src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/arrow-r.png" alt="" />
+            <div class="ewm">
+              <div><img src="https://static.jsss999.com/upload/zrsite/common/1_moxe.jpg" alt="微信二维码1" /></div>
+              <p>微信扫一扫</p>
+            </div>
+            <div class="ewm">
+              <div><img src="https://static.jsss999.com/upload/zrsite/common/2_7gzi.jpg" alt="微信二维码2" /></div>
+              <p>微信扫一扫</p>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li class="fkf-item sgotop">
+        <img src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-8.png" alt="返回顶部" />
+        <img class="hover" src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-88.png" alt="返回顶部" />
+      </li>
+    </ul>
+  </div>
+
   <script src="./vr-more-products-v2.js"></script>
+  <script>
+    (function () {
+      var sidebar = document.querySelector(".wpsidebar02");
+      if (!sidebar) return;
+
+      document.addEventListener("click", function (event) {
+        if (event.target.closest(".wpsidebar02 li.sgotop")) {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          event.preventDefault();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
