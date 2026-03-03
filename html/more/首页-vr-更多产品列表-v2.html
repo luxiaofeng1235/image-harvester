@@ -109,10 +109,6 @@
         }
         document.documentElement.scrollTop = 0;
         document.body.scrollTop = 0;
-        if (window.jQuery) {
-          window.jQuery("#scroll_container").stop(true).animate({ scrollTop: 0 }, 300);
-          window.jQuery("html, body").stop(true).animate({ scrollTop: 0 }, 300);
-        }
         if (window.scrollTo) {
           try {
             window.scrollTo({ top: 0, behavior: "smooth" });
