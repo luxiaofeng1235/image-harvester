@@ -56,6 +56,24 @@
         pointer-events: auto;
     }
 </style>
+<style type="text/css">
+    /* 兜底：WP 嵌入后若第三方脚本锁滚动，这里强制恢复可滚动 */
+    html, body {
+        height: auto !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    #scroll_container {
+        height: auto !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    #overflow_canvas_container, #canvas {
+        overflow: visible !important;
+    }
+</style>
 <style>
 /* Fallback for "更多产品" arrow button when external cssx MIME is not treated as stylesheet */
 #layer7D82D169151FB84497F966DDABCFC740 {
@@ -682,10 +700,46 @@ wopop_navigator_standalone_func();
         }, true);
     })();
 </script>
+<script>
+// 兜底：部分环境下第三方脚本会把 html 锁成 overflow:hidden，导致页面无法滚动
+(function () {
+    function unlockScroll() {
+        var de = document.documentElement;
+        var body = document.body;
+        var sc = document.getElementById('scroll_container');
+
+        if (de) {
+            de.style.overflowY = 'auto';
+            de.style.overflowX = 'hidden';
+            de.style.height = 'auto';
+        }
+        if (body) {
+            body.style.overflowY = 'auto';
+            body.style.overflowX = 'hidden';
+            body.style.height = 'auto';
+        }
+        if (sc) {
+            sc.style.height = 'auto';
+            sc.style.overflow = 'visible';
+            sc.style.overflowY = 'visible';
+            sc.style.overflowX = 'hidden';
+        }
+    }
+
+    unlockScroll();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', unlockScroll);
+    }
+    window.addEventListener('load', unlockScroll);
+    setTimeout(unlockScroll, 300);
+    setTimeout(unlockScroll, 1200);
+    setTimeout(unlockScroll, 2500);
+})();
+</script>
  
 
-	  
-	
+		  
+		
 <script type="text/javascript"> var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://"); document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3F36893b6cb3f8f8fe15b6828ef9eee429' type='text/javascript'%3E%3C/script%3E"))</script>
 
  
