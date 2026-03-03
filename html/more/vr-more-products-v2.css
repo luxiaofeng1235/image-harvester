@@ -1,0 +1,251 @@
+:root {
+  --vr-max-width: 1500px;
+  --vr-container: 1300px;
+  --vr-primary: #0b7ac9;
+  --vr-border: #e8ebef;
+  --vr-text: #1f2937;
+  --vr-subtext: #6b7280;
+  --vr-bg: #f6f8fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  color: var(--vr-text);
+  background: var(--vr-bg);
+}
+
+.vr-more-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.vr-top {
+  position: relative;
+  width: 100%;
+  min-height: 620px;
+  background: #f0f2f5;
+}
+
+.vr-top-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url("https://static.jsss999.com/upload/zrsite/index/vr/more/l9hc.png");
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.vr-top::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+.vr-player-shell {
+  position: relative;
+  z-index: 1;
+  max-width: var(--vr-max-width);
+  margin: 0 auto;
+  height: 620px;
+}
+
+.vr-player-frame {
+  width: 984px;
+  max-width: calc(100vw - 40px);
+  position: absolute;
+  top: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: block;
+}
+
+.vr-player-wrap {
+  width: 854px;
+  max-width: calc(100vw - 80px);
+  aspect-ratio: 854 / 450;
+  position: absolute;
+  top: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+}
+
+.vr-player {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+}
+
+.vr-list-section {
+  max-width: var(--vr-container);
+  margin: 0 auto;
+  padding: 40px 16px 56px;
+}
+
+.vr-list-header h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+  color: #111827;
+}
+
+.vr-result-meta {
+  margin: 10px 0 0;
+  color: var(--vr-subtext);
+  font-size: 14px;
+}
+
+.vr-state-card {
+  margin-top: 20px;
+  border: 1px solid var(--vr-border);
+  border-radius: 10px;
+  background: #fff;
+  padding: 24px;
+  color: var(--vr-subtext);
+  text-align: center;
+}
+
+.vr-state-error {
+  color: #b42318;
+  border-color: #f3c0c0;
+  background: #fff6f6;
+}
+
+.vr-grid {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.vr-card {
+  display: block;
+  border: 1px solid var(--vr-border);
+  border-radius: 12px;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.vr-card:hover {
+  transform: translateY(-2px);
+  border-color: #d8dee8;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.vr-card-cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  background: #eef2f7;
+}
+
+.vr-card-body {
+  padding: 14px 14px 16px;
+}
+
+.vr-card-title {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.45;
+  color: #111827;
+}
+
+.vr-card-meta {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--vr-subtext);
+}
+
+.vr-card-action {
+  margin-top: 10px;
+  color: var(--vr-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.vr-pagination {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.vr-page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #fff;
+  color: #1f2937;
+  font-size: 14px;
+  line-height: 34px;
+  cursor: pointer;
+}
+
+.vr-page-btn:hover:not([disabled]) {
+  border-color: var(--vr-primary);
+  color: var(--vr-primary);
+}
+
+.vr-page-btn[disabled] {
+  cursor: not-allowed;
+  color: #a5adba;
+  background: #f8fafc;
+}
+
+.vr-page-btn.is-active {
+  color: #fff;
+  background: var(--vr-primary);
+  border-color: var(--vr-primary);
+}
+
+@media (max-width: 1200px) {
+  .vr-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .vr-top {
+    min-height: 440px;
+  }
+
+  .vr-player-shell {
+    height: 440px;
+  }
+
+  .vr-player-frame {
+    top: 36px;
+  }
+
+  .vr-player-wrap {
+    top: 54px;
+    max-width: calc(100vw - 28px);
+  }
+
+  .vr-list-header h1 {
+    font-size: 26px;
+  }
+
+  .vr-grid {
+    grid-template-columns: 1fr;
+  }
+}

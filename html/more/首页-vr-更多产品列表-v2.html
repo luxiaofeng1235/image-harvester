@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>VR更多产品列表</title>
+  <link rel="icon" href="https://static.jsss999.com/upload/zrsite/index/vr/more/q98s.ico" />
+  <link rel="stylesheet" href="./vr-more-products-v2.css" />
+</head>
+<body>
+  <main
+    class="vr-more-page"
+    data-api-base="https://zr.jsss999.com/wp-json/wp/v2/posts"
+    data-category-id="66"
+    data-per-page="6"
+    data-default-cover="https://zr.jsss999.com/wp-content/uploads/2026/03/wysm.png"
+  >
+    <section class="vr-top" aria-label="顶部视觉区域">
+      <div class="vr-top-bg"></div>
+      <div class="vr-player-shell">
+        <img
+          class="vr-player-frame"
+          src="https://static.jsss999.com/upload/zrsite/index/vr/more/jtym.png"
+          alt="VR展示背景"
+          loading="lazy"
+        />
+        <div class="vr-player-wrap">
+          <iframe
+            class="vr-player"
+            src="https://static.jsss999.com/upload/zrsite/index/vr/more/chtml_1653716090.html"
+            title="VR播放器"
+            frameborder="0"
+            allow="fullscreen; xr-spatial-tracking; gyroscope; accelerometer; magnetometer; autoplay"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+      </div>
+    </section>
+
+    <section class="vr-list-section" aria-label="更多产品列表">
+      <header class="vr-list-header">
+        <h1>更多产品</h1>
+        <p id="vr-result-meta" class="vr-result-meta">正在加载...</p>
+      </header>
+
+      <div id="vr-loading" class="vr-state-card">正在加载列表数据...</div>
+      <div id="vr-error" class="vr-state-card vr-state-error" hidden></div>
+      <div id="vr-empty" class="vr-state-card" hidden>当前分类暂无文章。</div>
+
+      <div id="vr-grid" class="vr-grid" hidden></div>
+      <nav id="vr-pagination" class="vr-pagination" aria-label="列表分页" hidden></nav>
+    </section>
+  </main>
+
+  <script src="./vr-more-products-v2.js"></script>
+</body>
+</html>
