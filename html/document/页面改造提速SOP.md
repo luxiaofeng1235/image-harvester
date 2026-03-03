@@ -152,3 +152,26 @@ rg -n 'www\\.zgzonre\\.com' out/page173/page173-embed-min.html out/page173/video
 3. 最后统一“平铺 OSS 替换 + 200 验收”
 4. 每页完成后留 `manifest.txt`，避免传漏
 
+---
+
+## 10. 临时回退记录（page169 / 首页-VR）
+
+### 10.1 现状
+
+- 页面：`index/首页-VR.html`
+- 元素：`#layer7D82D169151FB84497F966DDABCFC740`（“更多产品”按钮）
+- 处理：临时隐藏，避免上线前继续调样式占用时间
+
+### 10.2 当前生效代码
+
+```css
+#layer7D82D169151FB84497F966DDABCFC740 {
+  display: none !important;
+}
+```
+
+### 10.3 后续恢复方式
+
+1. 删除上面这段 CSS，或改为 `display: block;`
+2. 恢复后验证 hover、箭头三角、字体（18px）是否正常
+3. 若样式仍异常，优先检查 OSS `page169.cssx` 的 `Content-Type`（应为 `text/css`）
