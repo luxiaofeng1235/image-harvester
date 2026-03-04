@@ -1,0 +1,37 @@
+(function () {
+      function shouldRun() {
+        var b = document.body;
+        if (!b) return false;
+        return b.classList.contains('home') || b.classList.contains('page-id-839');
+      }
+
+      function mount() {
+        if (!shouldRun()) return;
+        if (document.getElementById('zr-home-top-banner')) return;
+
+        var header = document.querySelector('header.wp-block-template-part, header');
+        if (!header || !header.parentNode) return;
+
+        if (!document.getElementById('zr-home-top-banner-style')) {
+          var style = document.createElement('style');
+          style.id = 'zr-home-top-banner-style';
+          style.textContent =
+            '#zr-home-top-banner{width:100%;line-height:0;background:#fff;text-align:center;position:relative;z-index:2;}' +
+            '#zr-home-top-banner img{width:100%;max-width:1920px;height:auto;display:block;margin:0 auto;}';
+          document.head.appendChild(style);
+        }
+
+        var wrap = document.createElement('div');
+        wrap.id = 'zr-home-top-banner';
+        wrap.innerHTML =
+          '<img src="https://static.jsss999.com/upload/zrsite/index/common/zr_logo.png" alt="中热官网 Banner">';
+        header.parentNode.insertBefore(wrap, header);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', mount);
+      } else {
+        mount();
+        setTimeout(mount, 300);
+      }
+  })();
