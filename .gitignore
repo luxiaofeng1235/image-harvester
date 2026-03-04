@@ -10,3 +10,5 @@ __pycache__/
 /out
 /data
 .venv
+goods_excel/.env
+goods_excel/.env.*
