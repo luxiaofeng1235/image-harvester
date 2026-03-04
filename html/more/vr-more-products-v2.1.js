@@ -4,7 +4,7 @@
   var root = document.querySelector(".vr-more-page");
   if (!root) return;
 
-  var apiBase = root.getAttribute("data-api-base") || "https://zr.jsss999.com/wp-json/wp/v2/posts";
+  var apiBase = root.getAttribute("data-api-base") || "https://www.zgzonre.com/wp-json/wp/v2/posts";
   var categoryId = Number(root.getAttribute("data-category-id") || 66);
   var defaultPerPage = toPositiveInt(root.getAttribute("data-per-page"), 6, 1, 50);
   var defaultCover = root.getAttribute("data-default-cover") || "";
@@ -270,7 +270,7 @@
   }
 
   function fetchCategoryInfo() {
-    var url = "https://zr.jsss999.com/wp-json/wp/v2/categories/" + categoryId;
+    var url = "https://www.zgzonre.com/wp-json/wp/v2/categories/" + categoryId;
     fetch(url)
       .then(function (res) {
         if (!res.ok) return null;
