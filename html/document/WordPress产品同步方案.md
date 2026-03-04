@@ -2,7 +2,7 @@
 
 ## Context
 
-本地数据库导出了 75 条产品数据（`zgz_products_import.csv`），需要批量同步到线上 WordPress 站点（`https://zr.jsss999.com`），避免手动逐条发布文章。通过 WordPress REST API 实现自动化同步。
+本地数据库导出了 75 条产品数据（`zgz_products_import.csv`），需要批量同步到线上 WordPress 站点（`https://www.zgzonre.com`），避免手动逐条发布文章。通过 WordPress REST API 实现自动化同步。
 
 ## 数据源
 
@@ -106,7 +106,7 @@ CSV 字段：
 
 **配置项（脚本顶部）：**
 ```python
-WP_URL = 'https://zr.jsss999.com/wp-json/wp/v2'
+WP_URL = 'https://www.zgzonre.com/wp-json/wp/v2'
 WP_USER = 'jiujie'                    # WordPress 登录用户名
 WP_APP_PASSWORD = 'xxxx xxxx xxxx'    # Application Password
 CSV_FILE = 'zgz_products_import.csv'

@@ -235,11 +235,11 @@ category/
 
 ### 6.1 三个大分类文章列表接口（WordPress，已确认）
 1. 加热器（子分类 `42,43,44,45,46`）  
-   `https://zr.jsss999.com/wp-json/wp/v2/posts?categories=42,43,44,45,46&per_page=9&page=1&orderby=date&order=desc`
+   `https://www.zgzonre.com/wp-json/wp/v2/posts?categories=42,43,44,45,46&per_page=9&page=1&orderby=date&order=desc`
 2. 搅拌设备（子分类 `47,48`）  
-   `https://zr.jsss999.com/wp-json/wp/v2/posts?categories=47,48&per_page=9&page=1&orderby=date&order=desc`
+   `https://www.zgzonre.com/wp-json/wp/v2/posts?categories=47,48&per_page=9&page=1&orderby=date&order=desc`
 3. 水处理设备（子分类 `49,50,51`）  
-   `https://zr.jsss999.com/wp-json/wp/v2/posts?categories=49,50,51&per_page=9&page=1&orderby=date&order=desc`
+   `https://www.zgzonre.com/wp-json/wp/v2/posts?categories=49,50,51&per_page=9&page=1&orderby=date&order=desc`
 
 #### 6.1.1 单个子分类查询规则（点击子分类按钮时）
 1. 点击子分类时，`categories` 只传当前子分类的固定 `wpCategoryId`。
@@ -247,11 +247,11 @@ category/
 3. 禁止用中文名称拼接查询参数（例如“导热油加热器”），只用数字 ID。
 4. 示例：
    - 导热油加热器（`42`）：  
-     `https://zr.jsss999.com/wp-json/wp/v2/posts?categories=42&per_page=9&page=1&orderby=date&order=desc`
+     `https://www.zgzonre.com/wp-json/wp/v2/posts?categories=42&per_page=9&page=1&orderby=date&order=desc`
    - 搅拌罐（`47`）：  
-     `https://zr.jsss999.com/wp-json/wp/v2/posts?categories=47&per_page=9&page=1&orderby=date&order=desc`
+     `https://www.zgzonre.com/wp-json/wp/v2/posts?categories=47&per_page=9&page=1&orderby=date&order=desc`
    - 分集水器（`51`）：  
-     `https://zr.jsss999.com/wp-json/wp/v2/posts?categories=51&per_page=9&page=1&orderby=date&order=desc`
+     `https://www.zgzonre.com/wp-json/wp/v2/posts?categories=51&per_page=9&page=1&orderby=date&order=desc`
 
 分页规则：
 1. 每页固定 `per_page=9`。

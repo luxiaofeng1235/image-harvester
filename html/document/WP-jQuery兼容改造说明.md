@@ -100,7 +100,7 @@ https://static.ysjianzhan.cn/website/plugin/??unslider/js/init.js,new_navigation
 
 | 旧域名 | 新域名 |
 |--------|--------|
-| `https://www.zgzonre.com` | `https://zr.jsss999.com` |
+| `https://www.zgzonre.com` | `https://www.zgzonre.com` |
 
 涉及位置：
 - `p_rooturl` 配置
@@ -133,7 +133,7 @@ https://static.ysjianzhan.cn/website/plugin/??unslider/js/init.js,new_navigation
 - [ ] "更多产品"/"更多案例"按钮有圆角背景样式
 - [ ] 轮播图正常切换
 - [ ] 侧边栏悬浮菜单正常显示
-- [ ] 页面内链接跳转到 `zr.jsss999.com` 域名
+- [ ] 页面内链接跳转到 `www.zgzonre.com` 域名
 
 ## 十、后续维护注意
 
