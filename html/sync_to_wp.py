@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 from openpyxl import load_workbook
 
 # ============ 配置 ============
-WP_URL = "https://zr.jsss999.com/wp-json/wp/v2"
+WP_URL = "https://www.zgzonre.com/wp-json/wp/v2"
 WP_USER = "*"
 WP_APP_PASSWORD = "*"
 EXCEL_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "zgz_products_import.xlsx")
