@@ -12,3 +12,4 @@ __pycache__/
 .venv
 goods_excel/.env
 goods_excel/.env.*
+!goods_excel/.env.example
