@@ -44,7 +44,7 @@
   function getApiBase() {
     return (
       (refs.root && refs.root.getAttribute("data-api-base")) ||
-      "https://zr.jsss999.com/wp-json/wp/v2/posts"
+      "https://www.zgzonre.com/wp-json/wp/v2/posts"
     );
   }
 

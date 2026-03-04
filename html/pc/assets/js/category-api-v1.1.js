@@ -43,9 +43,9 @@
 
     if (!link) {
       if (slug) {
-        link = "https://zr.jsss999.com/index.php/" + slug + "/";
+        link = "https://www.zgzonre.com/index.php/" + slug + "/";
       } else if (id) {
-        link = "https://zr.jsss999.com/?p=" + id;
+        link = "https://www.zgzonre.com/?p=" + id;
       }
     }
 
