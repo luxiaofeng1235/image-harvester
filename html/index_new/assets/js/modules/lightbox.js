@@ -20,7 +20,7 @@ export function initLightbox(root) {
   let opener = null;
   let renderToken = 0;
   const preloaded = new Set();
-  const MIN_LOADING_MS = 220;
+  const MIN_LOADING_MS = 650;
 
   function setLoading(flag) {
     root.classList.toggle("is-loading", Boolean(flag));
@@ -98,8 +98,8 @@ export function initLightbox(root) {
     opener = sourceEl || document.activeElement;
     root.hidden = false;
     lockBody();
-    preloadBatch();
     render();
+    window.setTimeout(preloadBatch, 1200);
     if (dialog) {
       dialog.focus();
     }
