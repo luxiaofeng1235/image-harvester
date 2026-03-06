@@ -84,7 +84,7 @@ async function loadConfig(assetBase) {
     : defaultConfigUrl;
   const candidates = (typeof window.__ZR_HOME_CONFIG_URL__ === "string" && window.__ZR_HOME_CONFIG_URL__.trim())
     ? [configUrl]
-    : (flat ? [defaultConfigUrl, nestedConfigUrl] : [nestedConfigUrl, defaultConfigUrl]);
+    : (flat ? [defaultConfigUrl] : [nestedConfigUrl, defaultConfigUrl]);
   return fetchFirstJson(candidates);
 }
 
@@ -164,7 +164,7 @@ function renderFatalError(error) {
   box.style.border = "1px solid #f0caca";
   box.style.background = "#fff7f7";
   box.style.color = "#b42318";
-  box.textContent = "首页配置加载失败，请检查 index_new/assets/data/home.config.json";
+  box.textContent = "首页配置加载失败，请检查远程 home.config.json 路径";
   shell.prepend(box);
 }
 
