@@ -2,6 +2,28 @@ function normalizeBase(input) {
   return String(input || "").replace(/\/+$/, "");
 }
 
+function getAssetVersion() {
+  const raw = window.__ZR_HOME_ASSET_VERSION__;
+  if (raw === undefined || raw === null) {
+    return "";
+  }
+  return String(raw).trim();
+}
+
+function withVersion(url, version) {
+  if (!version) {
+    return url;
+  }
+  try {
+    const parsed = new URL(url, window.location.href);
+    parsed.searchParams.set("v", version);
+    return parsed.href;
+  } catch (error) {
+    const joiner = url.includes("?") ? "&" : "?";
+    return `${url}${joiner}v=${encodeURIComponent(version)}`;
+  }
+}
+
 function getAssetBase() {
   const customBase = window.__ZR_HOME_ASSET_BASE__;
   if (typeof customBase === "string" && customBase.trim()) {
@@ -40,9 +62,10 @@ async function fetchFirstJson(candidates) {
 
 async function loadDeps(assetBase) {
   const flat = Boolean(window.__ZR_HOME_FLAT_DIR__);
+  const version = getAssetVersion();
   const dep = (name) => {
-    const flatUrl = `${assetBase}/${name}.js`;
-    const nestedUrl = `${assetBase}/modules/${name}.js`;
+    const flatUrl = withVersion(`${assetBase}/${name}.js`, version);
+    const nestedUrl = withVersion(`${assetBase}/modules/${name}.js`, version);
     return flat ? [flatUrl, nestedUrl] : [nestedUrl, flatUrl];
   };
 
@@ -77,10 +100,11 @@ async function loadDeps(assetBase) {
 
 async function loadConfig(assetBase) {
   const flat = Boolean(window.__ZR_HOME_FLAT_DIR__);
-  const defaultConfigUrl = new URL("home.config.json", `${assetBase}/`).href;
-  const nestedConfigUrl = new URL("../data/home.config.json", `${assetBase}/`).href;
+  const version = getAssetVersion();
+  const defaultConfigUrl = withVersion(new URL("home.config.json", `${assetBase}/`).href, version);
+  const nestedConfigUrl = withVersion(new URL("../data/home.config.json", `${assetBase}/`).href, version);
   const configUrl = (typeof window.__ZR_HOME_CONFIG_URL__ === "string" && window.__ZR_HOME_CONFIG_URL__.trim())
-    ? window.__ZR_HOME_CONFIG_URL__.trim()
+    ? withVersion(window.__ZR_HOME_CONFIG_URL__.trim(), version)
     : defaultConfigUrl;
   const candidates = (typeof window.__ZR_HOME_CONFIG_URL__ === "string" && window.__ZR_HOME_CONFIG_URL__.trim())
     ? [configUrl]
