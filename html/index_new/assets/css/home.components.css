@@ -1,0 +1,160 @@
+.hero-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.hero-arrow:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.hero-arrow::before {
+  display: inline-block;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.hero-arrow-prev::before {
+  content: "‹";
+}
+
+.hero-arrow-next::before {
+  content: "›";
+}
+
+.hero-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 3;
+}
+
+.hero-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+}
+
+.hero-dot.is-active {
+  background: #ffffff;
+}
+
+.quick-case-link,
+.major-link,
+.featured-link {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.quick-case-link img,
+.major-link img,
+.featured-link img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.quick-case-label,
+.major-label,
+.featured-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: 10px 12px;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.quick-case-label {
+  top: 55%;
+  transform: translateY(-50%);
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.major-label,
+.featured-label {
+  bottom: 0;
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.55));
+}
+
+.quick-case-link:hover .quick-case-label,
+.major-link:hover .major-label,
+.featured-link:hover .featured-label {
+  opacity: 1;
+}
+
+.home-more-wrap {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.home-more-btn {
+  display: inline-block;
+  min-width: 150px;
+  padding: 14px 26px;
+  border: 1px solid #666;
+  color: #666;
+  font-size: 15px;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+}
+
+.home-more-btn:hover {
+  border-color: var(--home-primary);
+  color: #fff;
+  background: var(--home-primary);
+}
+
+.about-panel {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  text-align: center;
+  color: #fff;
+}
+
+.about-panel h3 {
+  font-size: 55px;
+  letter-spacing: 6px;
+  margin-bottom: 42px;
+}
+
+.about-paragraphs {
+  font-size: 36px;
+  line-height: 1.6;
+  margin-bottom: 48px;
+}
+
+.about-paragraphs p + p {
+  margin-top: 18px;
+}
+
+.about-closing {
+  font-size: 40px;
+  letter-spacing: 6px;
+}

@@ -1,0 +1,17 @@
+:root {
+  --home-page-width: 1500px;
+  --home-min-width: 1366px;
+  --home-bg: #ffffff;
+  --home-text: #5a5a5a;
+  --home-title: #111111;
+  --home-muted: #d9d9d9;
+  --home-primary: #3c78d8;
+  --home-shadow: 0 8px 24px rgba(20, 20, 20, 0.08);
+  --home-radius-md: 25px;
+  --home-radius-lg: 35px;
+  --home-gap-sm: 20px;
+  --home-gap-md: 24px;
+  --home-gap-lg: 32px;
+  --home-space-lg: 64px;
+  --home-space-xl: 80px;
+}
