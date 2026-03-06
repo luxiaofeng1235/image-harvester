@@ -8,6 +8,7 @@ export function initLightbox(root) {
 
   const dialog = root.querySelector(".lightbox-dialog");
   const image = root.querySelector("#lightbox-image");
+  const loading = root.querySelector("#lightbox-loading");
   const caption = root.querySelector("#lightbox-caption");
   const detailLink = root.querySelector("#lightbox-detail-link");
   const closeBtn = root.querySelector('[data-role="close"]');
@@ -17,14 +18,58 @@ export function initLightbox(root) {
   let items = [];
   let index = 0;
   let opener = null;
+  let renderToken = 0;
+  const preloaded = new Set();
+  const MIN_LOADING_MS = 220;
+
+  function setLoading(flag) {
+    root.classList.toggle("is-loading", Boolean(flag));
+    if (loading) {
+      loading.hidden = !flag;
+    }
+  }
+
+  function preload(url) {
+    if (!url || preloaded.has(url)) return;
+    const temp = new Image();
+    temp.src = url;
+    preloaded.add(url);
+  }
+
+  function preloadBatch() {
+    items.forEach((item) => preload(item.largeUrl || item.thumbUrl));
+  }
 
   function render() {
     if (!items.length) return;
+    const token = ++renderToken;
     const current = items[index];
-    image.src = current.largeUrl || current.thumbUrl;
+    const imgUrl = current.largeUrl || current.thumbUrl;
+    const loadingStart = Date.now();
+
+    setLoading(true);
     image.alt = current.name || "图片预览";
     caption.textContent = current.name || "";
     detailLink.href = current.detailUrl || "#";
+
+    const loader = new Image();
+    const done = () => {
+      if (token !== renderToken) return;
+      image.src = imgUrl;
+      const elapsed = Date.now() - loadingStart;
+      const wait = Math.max(0, MIN_LOADING_MS - elapsed);
+      window.setTimeout(() => {
+        if (token !== renderToken) return;
+        setLoading(false);
+      }, wait);
+    };
+    loader.onload = () => {
+      done();
+    };
+    loader.onerror = () => {
+      done();
+    };
+    loader.src = imgUrl;
   }
 
   function lockBody() {
@@ -37,6 +82,7 @@ export function initLightbox(root) {
 
   function close() {
     root.hidden = true;
+    setLoading(false);
     unlockBody();
     if (opener && typeof opener.focus === "function") {
       opener.focus();
@@ -50,6 +96,7 @@ export function initLightbox(root) {
     items = inputItems;
     index = Math.max(0, Math.min(startIndex || 0, inputItems.length - 1));
     opener = sourceEl || document.activeElement;
+    preloadBatch();
     render();
     root.hidden = false;
     lockBody();
