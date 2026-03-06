@@ -111,6 +111,16 @@
     "animationStepSeconds": 3,
     "items": [
       {
+        "name": "导热油加热器（撬装）",
+        "image": "https://static.jsss999.com/upload/zrsite/index/banner/home-jsanim-w98l-20260227v2.webp",
+        "link": "https://www.zgzonre.com/product?type=1&sub=42"
+      },
+      {
+        "name": "精密过滤器",
+        "image": "https://static.jsss999.com/upload/zrsite/index/banner/home-jsanim-gxq9-20260227v2.webp",
+        "link": "https://www.zgzonre.com/archives/387"
+      },
+      {
         "name": "风道加热器",
         "image": "https://static.jsss999.com/upload/zrsite/index/banner/home-jsanim-ey90-20260227v2.webp",
         "link": "https://www.zgzonre.com/product?type=1&sub=44"
@@ -121,24 +131,14 @@
         "link": "https://www.zgzonre.com/product?type=3"
       },
       {
-        "name": "精密过滤器",
-        "image": "https://static.jsss999.com/upload/zrsite/index/banner/home-jsanim-gxq9-20260227v2.webp",
-        "link": "https://www.zgzonre.com/archives/387"
-      },
-      {
-        "name": "管道加热器",
-        "image": "https://static.jsss999.com/upload/zrsite/index/gd02.jpg",
-        "link": "https://www.zgzonre.com/product?type=1&sub=43"
-      },
-      {
         "name": "烘道",
         "image": "https://static.jsss999.com/upload/zrsite/index/banner/home-jsanim-lvqe-20260227v2.webp",
         "link": "https://www.zgzonre.com/archives/405"
       },
       {
-        "name": "导热油加热器（撬装）",
-        "image": "https://static.jsss999.com/upload/zrsite/index/banner/home-jsanim-w98l-20260227v2.webp",
-        "link": "https://www.zgzonre.com/product?type=1&sub=42"
+        "name": "管道加热器",
+        "image": "https://static.jsss999.com/upload/zrsite/index/gd02.jpg",
+        "link": "https://www.zgzonre.com/product?type=1&sub=43"
       }
     ]
   },

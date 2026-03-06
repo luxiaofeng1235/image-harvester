@@ -116,17 +116,22 @@
 }
 
 .home-about {
-  margin-top: -32px;
+  margin-top: 14px;
   min-height: 0;
-  padding: 0 0 70px;
+  padding: 4px 0 70px;
+}
+
+.home-about-heading {
+  padding-top: 4px;
+  margin-bottom: 12px;
 }
 
 .home-title-block-about {
-  margin-bottom: 14px;
+  margin-bottom: 0;
 }
 
 .home-title-block-about .home-brand {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .home-title-block-about .home-brand,

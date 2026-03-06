@@ -179,6 +179,14 @@
   transform: translateY(-50%);
 }
 
+.featured-case-dark-bg .featured-link {
+  background: rgb(67, 67, 67);
+}
+
+#featured-cases-grid .featured-case-item:nth-child(4) .featured-link {
+  background: rgb(67, 67, 67);
+}
+
 .home-more-wrap {
   text-align: center;
   margin-top: 40px;

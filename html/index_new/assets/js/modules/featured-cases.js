@@ -22,11 +22,18 @@ export function initFeaturedCases(root, brandEl, titleCnEl, titleEnEl, config) {
   config.items.forEach((item, index) => {
     const li = document.createElement("li");
     li.className = `featured-case-item is-animating ${ANIMATION_CLASSES[index % ANIMATION_CLASSES.length]}`;
+    const isBasketCase = (item.name || "").includes("篮式除污器") || index === 3;
+    if (isBasketCase) {
+      li.classList.add("featured-case-dark-bg");
+    }
     li.style.animationDelay = `${index * stepSeconds}s`;
 
     const link = document.createElement("a");
     link.className = "featured-link";
     link.href = item.link || "#";
+    if (isBasketCase) {
+      link.style.backgroundColor = "rgb(67, 67, 67)";
+    }
 
     const img = document.createElement("img");
     img.src = item.image;
