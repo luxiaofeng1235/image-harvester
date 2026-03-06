@@ -12,8 +12,10 @@ export function initAboutSection(sectionEl, nodes, config) {
     closingEl
   } = nodes;
 
-  if (config.background) {
-    sectionEl.style.backgroundImage = `url(${config.background})`;
+  const panelEl = sectionEl.querySelector(".about-panel");
+
+  if (panelEl && config.background) {
+    panelEl.style.backgroundImage = `url(${config.background})`;
   }
 
   if (brandEl && config.brandTitle) brandEl.textContent = config.brandTitle;
