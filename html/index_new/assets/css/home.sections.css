@@ -121,6 +121,11 @@
   padding: 4px 0 70px;
 }
 
+.home-about-shell {
+  width: 100% !important;
+  max-width: none !important;
+}
+
 .home-about-heading {
   padding-top: 4px;
   margin-bottom: 12px;
@@ -149,5 +154,9 @@
     max-width: var(--home-page-width);
     transform-origin: top center;
     transform: scale(0.95);
+  }
+
+  .home-about-shell {
+    transform: none !important;
   }
 }
