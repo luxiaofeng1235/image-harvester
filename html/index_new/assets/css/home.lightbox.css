@@ -5,18 +5,21 @@
 .lightbox {
   position: fixed;
   inset: 0;
-  z-index: 2147483000;
+  z-index: 2147483647 !important;
+  isolation: isolate;
 }
 
 .lightbox-mask {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.62);
+  z-index: 0;
 }
 
 .lightbox-dialog {
   position: relative;
-  width: min(1220px, calc(100vw - 80px));
+  z-index: 1;
+  width: min(1220px, calc(100vw - 48px));
   margin: 24px auto;
   padding: 0;
   border-radius: 0;
@@ -29,8 +32,10 @@
 .lightbox-figure {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 12px;
   margin: 0;
   width: 100%;
   height: calc(100vh - 140px);
@@ -38,6 +43,7 @@
 }
 
 #lightbox-image {
+  display: block;
   width: auto;
   max-width: 100%;
   height: auto;
@@ -72,11 +78,12 @@
 }
 
 #lightbox-caption {
-  margin-top: 12px;
+  margin-top: 0;
   text-align: center;
   color: rgba(255, 255, 255, 0.95);
   font-size: 18px;
   font-weight: 600;
+  line-height: 1.35;
 }
 
 .lightbox-close {

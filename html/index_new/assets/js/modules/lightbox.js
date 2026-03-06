@@ -96,10 +96,10 @@ export function initLightbox(root) {
     items = inputItems;
     index = Math.max(0, Math.min(startIndex || 0, inputItems.length - 1));
     opener = sourceEl || document.activeElement;
-    preloadBatch();
-    render();
     root.hidden = false;
     lockBody();
+    preloadBatch();
+    render();
     if (dialog) {
       dialog.focus();
     }
