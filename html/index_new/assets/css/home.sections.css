@@ -116,9 +116,9 @@
 }
 
 .home-about {
-  margin-top: 8px;
+  margin-top: -32px;
   min-height: 0;
-  padding: 6px 0 70px;
+  padding: 0 0 70px;
 }
 
 .home-title-block-about {
