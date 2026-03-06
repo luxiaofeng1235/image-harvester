@@ -27,9 +27,9 @@ export function initHeroSlider(root, config) {
     slide.className = "hero-slide";
     slide.style.transitionDuration = `${transitionMs}ms`;
 
-    const link = document.createElement("a");
-    link.className = "hero-slide-link";
-    link.href = item.link || "#";
+    const media = document.createElement("div");
+    media.className = "hero-slide-link";
+    media.setAttribute("role", "img");
 
     const img = document.createElement("img");
     img.src = item.image;
@@ -41,8 +41,8 @@ export function initHeroSlider(root, config) {
       img.loading = "lazy";
     }
 
-    link.appendChild(img);
-    slide.appendChild(link);
+    media.appendChild(img);
+    slide.appendChild(media);
     track.appendChild(slide);
 
     const dot = document.createElement("button");

@@ -10,7 +10,6 @@ export function initLightbox(root) {
   const image = root.querySelector("#lightbox-image");
   const loading = root.querySelector("#lightbox-loading");
   const caption = root.querySelector("#lightbox-caption");
-  const detailLink = root.querySelector("#lightbox-detail-link");
   const closeBtn = root.querySelector('[data-role="close"]');
   const prevBtn = root.querySelector('[data-role="prev"]');
   const nextBtn = root.querySelector('[data-role="next"]');
@@ -50,7 +49,6 @@ export function initLightbox(root) {
     setLoading(true);
     image.alt = current.name || "图片预览";
     caption.textContent = current.name || "";
-    detailLink.href = current.detailUrl || "#";
 
     const loader = new Image();
     const done = () => {

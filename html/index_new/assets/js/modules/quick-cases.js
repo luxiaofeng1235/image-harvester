@@ -10,9 +10,10 @@ export function initQuickCases(root, quickCasesConfig, lightboxApi) {
     const li = document.createElement("li");
     li.className = "quick-case-item";
 
-    const link = document.createElement("a");
+    const link = document.createElement("button");
+    link.type = "button";
     link.className = "quick-case-link";
-    link.href = item.detailUrl || "#";
+    link.setAttribute("aria-label", item.name || "查看图片");
     link.dataset.index = String(index);
 
     const img = document.createElement("img");

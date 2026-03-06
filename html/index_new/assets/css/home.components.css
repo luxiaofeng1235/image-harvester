@@ -64,6 +64,13 @@
   border-radius: inherit;
 }
 
+.quick-case-link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
 .quick-case-link img,
 .major-link img,
 .featured-link img {
@@ -89,7 +96,7 @@
 }
 
 .quick-case-label {
-  top: 55%;
+  top: 50%;
   transform: translateY(-50%);
   font-size: 30px;
   font-weight: 700;
@@ -139,11 +146,16 @@
   transform: translateY(-50%);
 }
 
-.quick-case-link:hover .quick-case-label,
 .major-link:hover .major-label,
 .featured-link:hover .featured-label {
   opacity: 1;
   transform: translateY(0);
+}
+
+.quick-case-link:hover .quick-case-label,
+.quick-case-link:focus-visible .quick-case-label {
+  opacity: 1;
+  transform: translateY(-50%);
 }
 
 .major-link:hover::after,
