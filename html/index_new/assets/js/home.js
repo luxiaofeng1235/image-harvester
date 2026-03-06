@@ -1,21 +1,104 @@
-import { initHeroSlider } from "./modules/hero-slider.js";
-import { initLightbox } from "./modules/lightbox.js";
-import { initQuickCases } from "./modules/quick-cases.js";
-import { initMajorProjects } from "./modules/major-projects.js";
-import { initFeaturedCases } from "./modules/featured-cases.js";
-import { initAboutSection } from "./modules/about-section.js";
-import { initFloatingContactAdapter } from "./modules/floating-contact-adapter.js";
-
-async function loadConfig() {
-  const url = new URL("../data/home.config.json", import.meta.url);
-  const response = await fetch(url.href, { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(`Failed to load config: ${response.status}`);
-  }
-  return response.json();
+function normalizeBase(input) {
+  return String(input || "").replace(/\/+$/, "");
 }
 
-function initHome(config) {
+function getAssetBase() {
+  const customBase = window.__ZR_HOME_ASSET_BASE__;
+  if (typeof customBase === "string" && customBase.trim()) {
+    return normalizeBase(customBase.trim());
+  }
+  return normalizeBase(new URL(".", import.meta.url).href);
+}
+
+async function importFirst(candidates) {
+  let lastError = null;
+  for (const url of candidates) {
+    try {
+      return await import(url);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error("Failed to import module");
+}
+
+async function fetchFirstJson(candidates) {
+  let lastStatus = "";
+  for (const url of candidates) {
+    try {
+      const response = await fetch(url, { cache: "no-store" });
+      if (response.ok) {
+        return response.json();
+      }
+      lastStatus = `${response.status} (${url})`;
+    } catch (error) {
+      lastStatus = `${error} (${url})`;
+    }
+  }
+  throw new Error(`Failed to load config: ${lastStatus || "unknown"}`);
+}
+
+async function loadDeps(assetBase) {
+  const flat = Boolean(window.__ZR_HOME_FLAT_DIR__);
+  const dep = (name) => {
+    const flatUrl = `${assetBase}/${name}.js`;
+    const nestedUrl = `${assetBase}/modules/${name}.js`;
+    return flat ? [flatUrl, nestedUrl] : [nestedUrl, flatUrl];
+  };
+
+  const [
+    { initHeroSlider },
+    { initLightbox },
+    { initQuickCases },
+    { initMajorProjects },
+    { initFeaturedCases },
+    { initAboutSection },
+    { initFloatingContactAdapter }
+  ] = await Promise.all([
+    importFirst(dep("hero-slider")),
+    importFirst(dep("lightbox")),
+    importFirst(dep("quick-cases")),
+    importFirst(dep("major-projects")),
+    importFirst(dep("featured-cases")),
+    importFirst(dep("about-section")),
+    importFirst(dep("floating-contact-adapter"))
+  ]);
+
+  return {
+    initHeroSlider,
+    initLightbox,
+    initQuickCases,
+    initMajorProjects,
+    initFeaturedCases,
+    initAboutSection,
+    initFloatingContactAdapter
+  };
+}
+
+async function loadConfig(assetBase) {
+  const flat = Boolean(window.__ZR_HOME_FLAT_DIR__);
+  const defaultConfigUrl = new URL("home.config.json", `${assetBase}/`).href;
+  const nestedConfigUrl = new URL("../data/home.config.json", `${assetBase}/`).href;
+  const configUrl = (typeof window.__ZR_HOME_CONFIG_URL__ === "string" && window.__ZR_HOME_CONFIG_URL__.trim())
+    ? window.__ZR_HOME_CONFIG_URL__.trim()
+    : defaultConfigUrl;
+  const candidates = (typeof window.__ZR_HOME_CONFIG_URL__ === "string" && window.__ZR_HOME_CONFIG_URL__.trim())
+    ? [configUrl]
+    : (flat ? [defaultConfigUrl, nestedConfigUrl] : [nestedConfigUrl, defaultConfigUrl]);
+  return fetchFirstJson(candidates);
+}
+
+function initHome(config, deps) {
+  const {
+    initHeroSlider,
+    initLightbox,
+    initQuickCases,
+    initMajorProjects,
+    initFeaturedCases,
+    initAboutSection,
+    initFloatingContactAdapter
+  } = deps;
+
   if (config?.meta?.pageTitle) {
     document.title = config.meta.pageTitle;
   }
@@ -87,8 +170,10 @@ function renderFatalError(error) {
 
 (async function bootstrap() {
   try {
-    const config = await loadConfig();
-    initHome(config);
+    const assetBase = getAssetBase();
+    const deps = await loadDeps(assetBase);
+    const config = await loadConfig(assetBase);
+    initHome(config, deps);
   } catch (error) {
     renderFatalError(error);
   }
