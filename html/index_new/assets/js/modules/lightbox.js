@@ -137,12 +137,6 @@ export function initLightbox(root) {
     if (event.key === "Escape") {
       event.preventDefault();
       close();
-    } else if (event.key === "ArrowLeft") {
-      event.preventDefault();
-      prev();
-    } else if (event.key === "ArrowRight") {
-      event.preventDefault();
-      next();
     }
   });
 

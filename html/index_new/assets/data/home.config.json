@@ -8,7 +8,7 @@
     "transitionDuration": 500,
     "loop": true,
     "pauseOnHover": true,
-    "keyboard": true,
+    "keyboard": false,
     "slides": [
       {
         "image": "https://static.jsss999.com/upload/zrsite/index/banner/home-banner-guanzi-20260227v4.webp",
