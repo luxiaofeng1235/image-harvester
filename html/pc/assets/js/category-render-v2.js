@@ -46,9 +46,13 @@
   function renderHighlight(refs, payload) {
     refs.highlightTitle.textContent = payload.title || "产品系列";
     var brief = payload.brief || "";
+    var fitMode = payload.imageFit === "contain" ? "contain" : "cover";
     if (refs.highlightContent) {
       refs.highlightContent.classList.toggle("zr-cat-is-category-title", !!payload.isCategoryTitle);
       refs.highlightContent.classList.toggle("zr-cat-has-brief", !!brief);
+    }
+    if (refs.highlightImageWrap) {
+      refs.highlightImageWrap.classList.toggle("zr-cat-fit-contain", fitMode === "contain");
     }
     if (refs.highlightBrief) {
       refs.highlightBrief.textContent = brief;

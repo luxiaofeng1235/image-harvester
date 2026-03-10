@@ -20,6 +20,7 @@
     sceneTopImage: document.getElementById("zr-cat-scene-top-image"),
     mainTabs: document.getElementById("zr-cat-main-category-tabs"),
     subTabs: document.getElementById("zr-cat-sub-category-tabs"),
+    highlightImageWrap: document.querySelector(".zr-cat-highlight-image-wrap"),
     highlightContent: document.querySelector(".zr-cat-highlight-content"),
     highlightImage: document.getElementById("zr-cat-highlight-image"),
     highlightTitle: document.getElementById("zr-cat-highlight-title"),
@@ -240,12 +241,15 @@
       ? activeSub.imageUrl
       : (activeCategory.defaultImage || "");
 
+    var highlightImageFit = String(state.type) === "3" ? "contain" : "cover";
+
     global.CategoryRender.renderHighlight(refs, {
       title: highlightTitle,
       isCategoryTitle: isCategoryTitle,
       brief: highlightBrief,
       copy: highlightCopy,
-      imageUrl: highlightImage
+      imageUrl: highlightImage,
+      imageFit: highlightImageFit
     });
 
     renderFixedAssets();
