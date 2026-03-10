@@ -18,6 +18,14 @@ export function initHeroSlider(root, config) {
   const shouldLoop = Boolean(config.loop && slides.length > 1);
   const pauseOnHover = Boolean(config.pauseOnHover);
   const keyboard = Boolean(config.keyboard);
+  const isTypingTarget = (target) => {
+    return target instanceof HTMLElement && (
+      target.isContentEditable ||
+      target.tagName === "INPUT" ||
+      target.tagName === "TEXTAREA" ||
+      target.tagName === "SELECT"
+    );
+  };
 
   track.innerHTML = "";
   dotsWrap.innerHTML = "";
@@ -120,6 +128,12 @@ export function initHeroSlider(root, config) {
 
   if (keyboard) {
     document.addEventListener("keydown", (event) => {
+      if (event.defaultPrevented || isTypingTarget(event.target)) {
+        return;
+      }
+      if (document.querySelector(".lightbox:not([hidden])")) {
+        return;
+      }
       if (event.key === "ArrowLeft") {
         go(current - 1);
         restartAutoplay();

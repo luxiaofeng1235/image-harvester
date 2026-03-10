@@ -135,10 +135,13 @@ export function initLightbox(root) {
   document.addEventListener("keydown", (event) => {
     if (root.hidden) return;
     if (event.key === "Escape") {
+      event.preventDefault();
       close();
     } else if (event.key === "ArrowLeft") {
+      event.preventDefault();
       prev();
     } else if (event.key === "ArrowRight") {
+      event.preventDefault();
       next();
     }
   });
