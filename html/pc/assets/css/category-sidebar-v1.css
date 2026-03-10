@@ -1,0 +1,40 @@
+.wpsidebar-fkf.wpsidebar02 .fkf {
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.wpsidebar-fkf.wpsidebar02 .fkf > li {
+  list-style: none !important;
+}
+
+.wpsidebar-fkf.wpsidebar02 {
+  left: 18px !important;
+  right: auto !important;
+  z-index: 99999 !important;
+}
+
+.wpsidebar-fkf.wpsidebar02 .fkf-item-right {
+  right: auto;
+  left: 35px;
+  padding-right: 0;
+  padding-left: 25px;
+}
+
+.wpsidebar-fkf.wpsidebar02 .fkf-item-right-content .arrow,
+.wpsidebar-fkf.wpsidebar02 .right-content-ewm .arrow {
+  right: auto;
+  left: -15px;
+  transform: rotate(180deg);
+}
+
+.wpsidebar-fkf.wpsidebar02 .fkf-item-right-ewm {
+  top: initial;
+  bottom: -15px;
+}
+
+.wpsidebar-fkf.wpsidebar02,
+.wpsidebar-fkf.wpsidebar02 .fkf-item,
+.wpsidebar-fkf.wpsidebar02 .fkf-item img {
+  pointer-events: auto;
+}
