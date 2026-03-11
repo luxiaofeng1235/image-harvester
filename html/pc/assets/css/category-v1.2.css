@@ -132,7 +132,13 @@
   display: flex;
   flex-direction: column;
   min-height: 500px;
-  padding-top: 10px;
+  justify-content: center;
+  padding-top: 0;
+}
+
+.zr-cat-highlight-content.zr-cat-content-dense {
+  justify-content: flex-start;
+  padding-top: 6px;
 }
 
 #zr-cat-highlight-image {
@@ -174,7 +180,7 @@
 
 .zr-cat-highlight-content.zr-cat-has-brief #zr-cat-highlight-brief {
   margin-top: 0;
-  margin-bottom: 30px;
+  margin-bottom: 22px;
 }
 
 #zr-cat-highlight-brief + #zr-cat-highlight-copy {
@@ -195,13 +201,13 @@
 }
 
 .zr-cat-highlight-text-group {
-  margin-top: auto;
-  margin-bottom: auto;
-  min-height: 160px;
+  margin-top: 18px;
+  margin-bottom: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  transform: translateY(40px);
+  justify-content: flex-start;
+  transform: none;
 }
 
 .zr-cat-sub-category-section {

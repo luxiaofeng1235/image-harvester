@@ -1,6 +1,41 @@
 (function (global) {
   "use strict";
 
+  var highlightLayoutRaf = 0;
+  var highlightResizeBound = false;
+  var lastHighlightRefs = null;
+
+  function syncHighlightLayout(refs) {
+    if (!refs || !refs.highlightContent || !refs.highlightTitle || !refs.highlightCopy) return;
+
+    lastHighlightRefs = refs;
+
+    if (highlightLayoutRaf) {
+      cancelAnimationFrame(highlightLayoutRaf);
+    }
+
+    highlightLayoutRaf = requestAnimationFrame(function () {
+      var textGroup = refs.highlightCopy.parentNode;
+      var contentHeight = refs.highlightContent.clientHeight || 0;
+      var titleHeight = refs.highlightTitle.offsetHeight || 0;
+      var groupHeight = textGroup ? (textGroup.scrollHeight || textGroup.offsetHeight || 0) : 0;
+      var totalHeight = titleHeight + groupHeight + 36;
+      var isDense = groupHeight > 180 || (contentHeight > 0 && totalHeight > contentHeight * 0.58);
+
+      refs.highlightContent.classList.toggle("zr-cat-content-dense", isDense);
+      highlightLayoutRaf = 0;
+    });
+
+    if (!highlightResizeBound && typeof window !== "undefined") {
+      highlightResizeBound = true;
+      window.addEventListener("resize", function () {
+        if (lastHighlightRefs) {
+          syncHighlightLayout(lastHighlightRefs);
+        }
+      });
+    }
+  }
+
   function makeButton(className, text, active, onClick) {
     var btn = document.createElement("button");
     btn.type = "button";
@@ -67,6 +102,8 @@
       refs.highlightImage.removeAttribute("src");
       refs.highlightImage.alt = "";
     }
+
+    syncHighlightLayout(refs);
   }
 
   function renderSceneImages(container, scenes, labels) {
