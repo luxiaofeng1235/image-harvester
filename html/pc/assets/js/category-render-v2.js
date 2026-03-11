@@ -20,7 +20,9 @@
       var titleHeight = refs.highlightTitle.offsetHeight || 0;
       var groupHeight = textGroup ? (textGroup.scrollHeight || textGroup.offsetHeight || 0) : 0;
       var totalHeight = titleHeight + groupHeight + 36;
-      var isDense = groupHeight > 180 || (contentHeight > 0 && totalHeight > contentHeight * 0.58);
+      var freeSpace = contentHeight > 0 ? (contentHeight - totalHeight) : 0;
+      var denseThreshold = contentHeight > 0 ? Math.max(96, Math.round(contentHeight * 0.32)) : 96;
+      var isDense = contentHeight > 0 && freeSpace < denseThreshold;
 
       refs.highlightContent.classList.toggle("zr-cat-content-dense", isDense);
       highlightLayoutRaf = 0;
