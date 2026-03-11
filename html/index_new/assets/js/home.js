@@ -75,16 +75,14 @@ async function loadDeps(assetBase) {
     { initQuickCases },
     { initMajorProjects },
     { initFeaturedCases },
-    { initAboutSection },
-    { initFloatingContactAdapter }
+    { initAboutSection }
   ] = await Promise.all([
     importFirst(dep("hero-slider")),
     importFirst(dep("lightbox")),
     importFirst(dep("quick-cases")),
     importFirst(dep("major-projects")),
     importFirst(dep("featured-cases")),
-    importFirst(dep("about-section")),
-    importFirst(dep("floating-contact-adapter"))
+    importFirst(dep("about-section"))
   ]);
 
   return {
@@ -93,8 +91,7 @@ async function loadDeps(assetBase) {
     initQuickCases,
     initMajorProjects,
     initFeaturedCases,
-    initAboutSection,
-    initFloatingContactAdapter
+    initAboutSection
   };
 }
 
@@ -119,8 +116,7 @@ function initHome(config, deps) {
     initQuickCases,
     initMajorProjects,
     initFeaturedCases,
-    initAboutSection,
-    initFloatingContactAdapter
+    initAboutSection
   } = deps;
 
   if (config?.meta?.pageTitle) {
@@ -132,7 +128,6 @@ function initHome(config, deps) {
   const majorRoot = document.querySelector("#major-projects-grid");
   const featuredRoot = document.querySelector("#featured-cases-grid");
   const aboutSection = document.querySelector("#home-about");
-  const floatingMount = document.querySelector("#floating-contact-mount");
 
   const lightboxRoot = document.querySelector("#home-lightbox");
   const lightboxApi = initLightbox(lightboxRoot);
@@ -173,8 +168,6 @@ function initHome(config, deps) {
     },
     config.about || {}
   );
-
-  initFloatingContactAdapter(floatingMount);
 }
 
 function renderFatalError(error) {

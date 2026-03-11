@@ -144,10 +144,6 @@
   color: #1f2937;
 }
 
-.home-floating-contact {
-  min-height: 0;
-}
-
 @media (max-width: 1499px) {
   .home-shell {
     width: 100%;
