@@ -14,6 +14,17 @@
     return fallback || "";
   }
 
+  function buildDetailPageUrl(item) {
+    var id = item && item.id;
+    if (!id) {
+      return (item && item.link) || "#";
+    }
+
+    var detailUrl = new URL("detail.html", window.location.href);
+    detailUrl.searchParams.set("article", String(id));
+    return detailUrl.href;
+  }
+
   function renderCategoryLine(el, payload) {
     if (!el) return;
     el.innerHTML = "";
@@ -115,9 +126,7 @@
     items.forEach(function (item) {
       var card = document.createElement("a");
       card.className = "zr-article-recommend-card";
-      card.href = item.link || "#";
-      card.target = "_blank";
-      card.rel = "noopener noreferrer";
+      card.href = buildDetailPageUrl(item);
 
       var image = document.createElement("img");
       image.className = "zr-article-recommend-image";
