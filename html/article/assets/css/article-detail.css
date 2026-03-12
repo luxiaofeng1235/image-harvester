@@ -32,12 +32,14 @@
 }
 
 .zr-article-reading {
-  width: 920px;
+  width: 1200px;
   max-width: 100%;
   margin: 0 auto;
 }
 
 .zr-article-header {
+  display: flex;
+  flex-direction: column;
   margin-bottom: 22px;
 }
 
@@ -45,15 +47,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 116px;
-  height: 40px;
-  padding: 0 16px;
+  align-self: flex-end;
+  min-width: 132px;
+  height: 46px;
+  padding: 0 22px;
   border: 1px solid #d6deeb;
   border-radius: 999px;
   background: #ffffff;
   color: var(--zr-article-primary);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
+  letter-spacing: 0.08em;
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
@@ -125,7 +129,7 @@
   border: 1px solid var(--zr-article-border);
   border-radius: 20px;
   background: var(--zr-article-card-bg);
-  padding: 34px 38px 40px;
+  padding: 34px 34px 40px;
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.04);
 }
 
