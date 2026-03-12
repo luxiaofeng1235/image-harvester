@@ -3,6 +3,8 @@
 
   var MISSING_PARAM_REDIRECT_URL = "https://zgzonre.com/product";
   var MISSING_PARAM_REDIRECT_DELAY = 1600;
+  var DEFAULT_SHARED_CATEGORY_CONFIG_URL =
+    "https://static.jsss999.com/upload/zrsite/category/common/dynamic/home-category-runtime-config-v1.2.json";
   var missingParamRedirectTimer = null;
 
   var refs = {
@@ -27,6 +29,10 @@
       return refs.root.getAttribute("data-config-url");
     }
     return "./config/article-detail-runtime-config.json";
+  }
+
+  function getSharedCategoryConfigUrl() {
+    return DEFAULT_SHARED_CATEGORY_CONFIG_URL;
   }
 
   function readArticleIdFromQuery() {
@@ -96,6 +102,55 @@
       var joiner = baseUrl.indexOf("?") === -1 ? "?" : "&";
       return baseUrl + joiner + "sub=" + encodeURIComponent(String(subId));
     }
+  }
+
+  function buildMainCategoryUrl(baseUrl, type) {
+    if (!baseUrl || !type) {
+      return baseUrl || "";
+    }
+
+    try {
+      var parsed = new URL(baseUrl, window.location.href);
+      parsed.searchParams.set("type", String(type));
+      return parsed.href;
+    } catch (_error) {
+      var joiner = baseUrl.indexOf("?") === -1 ? "?" : "&";
+      return baseUrl + joiner + "type=" + encodeURIComponent(String(type));
+    }
+  }
+
+  function mapSharedMainCategoryGroups(sharedConfig, fallbackListUrl) {
+    var mainCategories = sharedConfig && Array.isArray(sharedConfig.mainCategories)
+      ? sharedConfig.mainCategories
+      : [];
+
+    return mainCategories
+      .map(function (item) {
+        var parentId = Number(item && item.parentId) || 0;
+        var type = item && item.type ? String(item.type) : "";
+        var categoryIds = Array.isArray(item && item.childCategoryIds)
+          ? item.childCategoryIds.map(function (id) {
+              return Number(id);
+            }).filter(function (id) {
+              return Number.isInteger(id) && id > 0;
+            })
+          : [];
+
+        if (!parentId || !type || !categoryIds.length) {
+          return null;
+        }
+
+        return {
+          id: parentId,
+          type: type,
+          name: item.displayName || item.label || "",
+          categoryIds: categoryIds,
+          fallbackUrl: buildMainCategoryUrl(fallbackListUrl || MISSING_PARAM_REDIRECT_URL, type)
+        };
+      })
+      .filter(function (item) {
+        return !!item;
+      });
   }
 
   function resolveCategoryState(postCategories, categories, config) {
@@ -213,6 +268,35 @@
     return response.json();
   }
 
+  async function loadSharedCategoryConfig() {
+    var configUrl = getSharedCategoryConfigUrl();
+    if (!configUrl) {
+      return null;
+    }
+
+    try {
+      var response = await fetch(configUrl, { cache: "default" });
+      if (!response.ok) {
+        throw new Error("Failed to load shared category config");
+      }
+      return response.json();
+    } catch (error) {
+      console.warn("Failed to load shared category config, fallback to local config.", error);
+      return null;
+    }
+  }
+
+  async function loadRuntimeConfig() {
+    var detailConfig = await loadConfig();
+    var sharedCategoryConfig = await loadSharedCategoryConfig();
+    detailConfig.mainCategoryGroups = mapSharedMainCategoryGroups(
+      sharedCategoryConfig,
+      detailConfig.fallbackListUrl
+    );
+
+    return detailConfig;
+  }
+
   async function bootstrap() {
     try {
       var articleId = readArticleIdFromQuery();
@@ -221,7 +305,7 @@
         return;
       }
 
-      var config = await loadConfig();
+      var config = await loadRuntimeConfig();
       var post = await global.ArticleDetailApi.fetchPost(config.apiBase, articleId);
       var postCategories = Array.isArray(post.categories) ? post.categories.map(Number) : [];
       var categories = await global.ArticleDetailApi.fetchCategories(config.apiBase, postCategories);
