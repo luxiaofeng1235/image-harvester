@@ -140,13 +140,27 @@
   async function requestJson(url) {
     var response = await fetch(url, { cache: "no-store" });
     if (!response.ok) {
-      throw new Error("Request failed: " + response.status + " " + url);
+      var error = new Error("Request failed: " + response.status + " " + url);
+      error.status = response.status;
+      error.url = url;
+      throw error;
     }
     return response.json();
   }
 
   function fetchPost(apiBase, articleId) {
-    return requestJson(buildUrl(apiBase, "posts/" + articleId + "?_embed=1"));
+    return requestJson(
+      buildUrl(apiBase, "posts?include=" + encodeURIComponent(String(articleId)) + "&_embed=1")
+    ).then(function (items) {
+      if (Array.isArray(items) && items[0]) {
+        return items[0];
+      }
+
+      var error = new Error("Post not found: " + articleId);
+      error.status = 404;
+      error.articleId = articleId;
+      throw error;
+    });
   }
 
   function fetchCategoryIndex(apiBase) {

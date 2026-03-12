@@ -11,7 +11,7 @@
   var DEFAULT_RECOMMENDATION_CANDIDATE_COUNT = 12;
   var DEFAULT_SHARED_CATEGORY_CONFIG_URL =
     "https://static.jsss999.com/upload/zrsite/category/common/dynamic/home-category-runtime-config-v1.2.json";
-  var missingParamRedirectTimer = null;
+  var redirectTimer = null;
 
   var refs = {
     root: document.querySelector(".zr-article-page"),
@@ -26,8 +26,10 @@
     postNav: document.getElementById("zr-article-post-nav"),
     recommendSection: document.getElementById("zr-article-recommend"),
     recommendGrid: document.getElementById("zr-article-recommend-grid"),
-    missingParamModal: document.getElementById("zr-article-missing-param-modal"),
-    missingParamAction: document.getElementById("zr-article-modal-action")
+    noticeModal: document.getElementById("zr-article-missing-param-modal"),
+    noticeAction: document.getElementById("zr-article-modal-action"),
+    noticeTitle: document.getElementById("zr-article-modal-title"),
+    noticeText: document.getElementById("zr-article-modal-text")
   };
 
   function getSharedCategoryConfigUrl() {
@@ -80,15 +82,23 @@
 
   function updateDocumentTitle(title) {
     var cleanTitle = String(title || "").trim();
-    if (!cleanTitle) return;
+    if (!cleanTitle) {
+      return;
+    }
     document.title = cleanTitle + " - 江苏中热机械设备有限公司";
   }
 
   function formatPublishedDate(input) {
-    if (!input) return "";
+    if (!input) {
+      return "";
+    }
+
     var normalized = String(input).trim().replace("T", " ");
     var match = normalized.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
-    if (!match) return normalized;
+    if (!match) {
+      return normalized;
+    }
+
     return (
       match[1] +
       "年" +
@@ -103,7 +113,10 @@
   }
 
   function buildSubCategoryUrl(baseUrl, subId) {
-    if (!baseUrl || !subId) return baseUrl || "";
+    if (!baseUrl || !subId) {
+      return baseUrl || "";
+    }
+
     try {
       var parsed = new URL(baseUrl, window.location.href);
       parsed.searchParams.set("sub", String(subId));
@@ -130,20 +143,23 @@
   }
 
   function mapSharedMainCategoryGroups(sharedConfig, fallbackListUrl) {
-    var mainCategories = sharedConfig && Array.isArray(sharedConfig.mainCategories)
-      ? sharedConfig.mainCategories
-      : [];
+    var mainCategories =
+      sharedConfig && Array.isArray(sharedConfig.mainCategories)
+        ? sharedConfig.mainCategories
+        : [];
 
     return mainCategories
       .map(function (item) {
         var parentId = Number(item && item.parentId) || 0;
         var type = item && item.type ? String(item.type) : "";
         var categoryIds = Array.isArray(item && item.childCategoryIds)
-          ? item.childCategoryIds.map(function (id) {
-              return Number(id);
-            }).filter(function (id) {
-              return Number.isInteger(id) && id > 0;
-            })
+          ? item.childCategoryIds
+              .map(function (id) {
+                return Number(id);
+              })
+              .filter(function (id) {
+                return Number.isInteger(id) && id > 0;
+              })
           : [];
 
         if (!parentId || !type || !categoryIds.length) {
@@ -155,7 +171,10 @@
           type: type,
           name: item.displayName || item.label || "",
           categoryIds: categoryIds,
-          fallbackUrl: buildMainCategoryUrl(fallbackListUrl || MISSING_PARAM_REDIRECT_URL, type)
+          fallbackUrl: buildMainCategoryUrl(
+            fallbackListUrl || MISSING_PARAM_REDIRECT_URL,
+            type
+          )
         };
       })
       .filter(function (item) {
@@ -164,28 +183,32 @@
   }
 
   function resolveCategoryState(postCategories, categories, config) {
-    var childCategory = categories.find(function (item) {
-      return Number(item.parent) > 0;
-    }) || null;
+    var childCategory =
+      categories.find(function (item) {
+        return Number(item.parent) > 0;
+      }) || null;
 
-    var parentCategory = categories.find(function (item) {
-      return Number(item.parent) === 0;
-    }) || null;
+    var parentCategory =
+      categories.find(function (item) {
+        return Number(item.parent) === 0;
+      }) || null;
 
     if (!parentCategory && childCategory) {
-      parentCategory = categories.find(function (item) {
-        return Number(item.id) === Number(childCategory.parent);
-      }) || null;
+      parentCategory =
+        categories.find(function (item) {
+          return Number(item.id) === Number(childCategory.parent);
+        }) || null;
     }
 
-    var group = (config.mainCategoryGroups || []).find(function (item) {
-      return (
-        Number(item.id) === Number(parentCategory && parentCategory.id) ||
-        item.categoryIds.some(function (id) {
-          return postCategories.indexOf(Number(id)) !== -1;
-        })
-      );
-    }) || null;
+    var group =
+      (config.mainCategoryGroups || []).find(function (item) {
+        return (
+          Number(item.id) === Number(parentCategory && parentCategory.id) ||
+          item.categoryIds.some(function (id) {
+            return postCategories.indexOf(Number(id)) !== -1;
+          })
+        );
+      }) || null;
 
     return {
       firstCategory: categories[0] || null,
@@ -193,7 +216,8 @@
       parentCategory: parentCategory,
       mainGroup: group,
       parentCategoryUrl: group ? group.fallbackUrl : "",
-      childCategoryUrl: group && childCategory ? buildSubCategoryUrl(group.fallbackUrl, childCategory.id) : ""
+      childCategoryUrl:
+        group && childCategory ? buildSubCategoryUrl(group.fallbackUrl, childCategory.id) : ""
     };
   }
 
@@ -217,7 +241,10 @@
   }
 
   function bindBackButton(fallbackUrl) {
-    if (!refs.backButton) return;
+    if (!refs.backButton) {
+      return;
+    }
+
     refs.backButton.addEventListener("click", function () {
       if (window.history.length > 1) {
         window.history.back();
@@ -230,44 +257,58 @@
   function showError(message) {
     refs.loading.hidden = true;
     refs.body.hidden = true;
+    refs.postNav.hidden = true;
     refs.recommendSection.hidden = true;
     refs.error.hidden = false;
     refs.error.textContent = message;
   }
 
-  function redirectToMissingParamFallback() {
-    if (missingParamRedirectTimer) {
-      global.clearTimeout(missingParamRedirectTimer);
-      missingParamRedirectTimer = null;
+  function redirectToFallback() {
+    if (redirectTimer) {
+      global.clearTimeout(redirectTimer);
+      redirectTimer = null;
     }
 
     global.location.replace(MISSING_PARAM_REDIRECT_URL);
   }
 
-  function showMissingParamModal() {
+  function showNoticeModal(title, text) {
     refs.loading.hidden = true;
     refs.body.hidden = true;
     refs.postNav.hidden = true;
     refs.recommendSection.hidden = true;
     refs.error.hidden = true;
 
-    if (!refs.missingParamModal) {
-      redirectToMissingParamFallback();
+    if (!refs.noticeModal) {
+      redirectToFallback();
       return;
     }
 
-    if (refs.missingParamAction) {
-      refs.missingParamAction.onclick = function (event) {
+    if (refs.noticeTitle) {
+      refs.noticeTitle.textContent = title || "提示";
+    }
+
+    if (refs.noticeText) {
+      refs.noticeText.textContent = text || "";
+    }
+
+    if (refs.noticeAction) {
+      refs.noticeAction.onclick = function (event) {
         event.preventDefault();
-        redirectToMissingParamFallback();
+        redirectToFallback();
       };
     }
 
-    refs.missingParamModal.hidden = false;
-    missingParamRedirectTimer = global.setTimeout(
-      redirectToMissingParamFallback,
-      MISSING_PARAM_REDIRECT_DELAY
-    );
+    refs.noticeModal.hidden = false;
+    redirectTimer = global.setTimeout(redirectToFallback, MISSING_PARAM_REDIRECT_DELAY);
+  }
+
+  function showInvalidParamModal() {
+    showNoticeModal("参数缺失", "未检测到有效的文章 ID，页面将自动跳转到产品列表。");
+  }
+
+  function showArticleNotFoundModal() {
+    showNoticeModal("文章资源不存在", "未找到对应文章内容，页面将自动跳转到产品列表。");
   }
 
   async function loadSharedCategoryConfig() {
@@ -283,7 +324,7 @@
       }
       return response.json();
     } catch (error) {
-      console.warn("Failed to load shared category config, fallback to local config.", error);
+      console.warn("Failed to load shared category config.", error);
       return null;
     }
   }
@@ -295,15 +336,56 @@
       sharedCategoryConfig,
       detailConfig.fallbackListUrl
     );
-
     return detailConfig;
+  }
+
+  async function loadRecommendations(config, state, postCategories, articleId) {
+    var recommendationIds = state.mainGroup ? state.mainGroup.categoryIds : postCategories;
+    if (!recommendationIds.length) {
+      global.ArticleDetailRender.renderRecommendations(
+        refs.recommendSection,
+        refs.recommendGrid,
+        [],
+        config.defaultCover
+      );
+      return;
+    }
+
+    try {
+      var recommendationCandidates = await global.ArticleDetailApi.fetchPostsByCategories(
+        config.apiBase,
+        recommendationIds,
+        articleId,
+        config.recommendationCandidateCount || DEFAULT_RECOMMENDATION_CANDIDATE_COUNT
+      );
+
+      var recommendations = shuffle(recommendationCandidates).slice(
+        0,
+        config.recommendationDisplayCount || DEFAULT_RECOMMENDATION_DISPLAY_COUNT
+      );
+
+      global.ArticleDetailRender.renderRecommendations(
+        refs.recommendSection,
+        refs.recommendGrid,
+        recommendations,
+        config.defaultCover
+      );
+    } catch (error) {
+      console.warn("Failed to load recommendations.", error);
+      global.ArticleDetailRender.renderRecommendations(
+        refs.recommendSection,
+        refs.recommendGrid,
+        [],
+        config.defaultCover
+      );
+    }
   }
 
   async function bootstrap() {
     try {
       var articleId = readArticleIdFromQuery();
       if (!articleId) {
-        showMissingParamModal();
+        showInvalidParamModal();
         return;
       }
 
@@ -315,34 +397,32 @@
       var fallbackUrl = (state.mainGroup && state.mainGroup.fallbackUrl) || config.fallbackListUrl;
 
       bindBackButton(fallbackUrl);
+
       var articleTitle = decodeHtmlText(post.title && post.title.rendered);
       updateDocumentTitle(articleTitle);
       global.ArticleDetailRender.setText(refs.title, articleTitle);
       global.ArticleDetailRender.renderCategoryLine(refs.category, state);
-      global.ArticleDetailRender.setText(refs.date, "发布日期：" + formatPublishedDate(post.date));
-      global.ArticleDetailRender.renderContent(refs.content, post.content && post.content.rendered);
+      global.ArticleDetailRender.setText(
+        refs.date,
+        "发布日期：" + formatPublishedDate(post.date)
+      );
+      global.ArticleDetailRender.renderContent(
+        refs.content,
+        post.content && post.content.rendered
+      );
       global.ArticleDetailRender.renderPostNavigation(refs.postNav, readPostNavigation());
 
       refs.loading.hidden = true;
       refs.error.hidden = true;
       refs.body.hidden = false;
 
-      var recommendationIds = state.mainGroup ? state.mainGroup.categoryIds : postCategories;
-      var recommendationCandidates = await global.ArticleDetailApi.fetchPostsByCategories(
-        config.apiBase,
-        recommendationIds,
-        articleId,
-        config.recommendationCandidateCount || 12
-      );
-      var recommendations = shuffle(recommendationCandidates).slice(0, config.recommendationDisplayCount || 6);
-      global.ArticleDetailRender.renderRecommendations(
-        refs.recommendSection,
-        refs.recommendGrid,
-        recommendations,
-        config.defaultCover
-      );
+      await loadRecommendations(config, state, postCategories, articleId);
     } catch (error) {
-      showError("文章详情加载失败，请检查 article_id 和接口配置。");
+      if (error && Number(error.status) === 404) {
+        showArticleNotFoundModal();
+      } else {
+        showError("文章详情加载失败，请检查 article_id 和接口配置。");
+      }
       console.error(error);
     }
   }
