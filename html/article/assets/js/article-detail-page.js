@@ -3,6 +3,7 @@
 
   var MISSING_PARAM_REDIRECT_URL = "https://zgzonre.com/product";
   var MISSING_PARAM_REDIRECT_DELAY = 1600;
+  var DEFAULT_ARTICLE_ID = 395;
   var DEFAULT_API_BASE = "https://www.zgzonre.com/wp-json/wp/v2/";
   var DEFAULT_FALLBACK_LIST_URL = "https://www.zgzonre.com/product";
   var DEFAULT_COVER_IMAGE = "https://www.zgzonre.com/wp-content/uploads/2026/03/wysm.png";
@@ -53,7 +54,7 @@
     }
 
     if (raw === null || !String(raw).trim()) {
-      return null;
+      return DEFAULT_ARTICLE_ID;
     }
 
     var id = Number(String(raw).trim());
