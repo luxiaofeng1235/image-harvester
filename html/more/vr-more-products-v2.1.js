@@ -8,6 +8,7 @@
   var categoryId = Number(root.getAttribute("data-category-id") || 66);
   var defaultPerPage = toPositiveInt(root.getAttribute("data-per-page"), 6, 1, 50);
   var defaultCover = root.getAttribute("data-default-cover") || "";
+  var detailPageBase = "https://www.zgzonre.com/detail-base";
   var initialQuery = parseInitialQuery();
 
   var els = {
@@ -145,6 +146,15 @@
     return match && match[1] ? match[1] : "";
   }
 
+  function buildDetailUrl(post) {
+    var articleId = Number(post && post.id);
+    if (!Number.isInteger(articleId) || articleId <= 0) {
+      return post && post.link ? post.link : "#";
+    }
+
+    return detailPageBase + "?article_id=" + articleId;
+  }
+
   function showState(name, errorText) {
     els.loading.hidden = name !== "loading";
     els.error.hidden = name !== "error";
@@ -162,7 +172,7 @@
     items.forEach(function (post) {
       var a = document.createElement("a");
       a.className = "vr-card";
-      a.href = post.link;
+      a.href = buildDetailUrl(post);
       a.target = "_self";
       a.rel = "noopener";
 
