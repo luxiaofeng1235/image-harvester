@@ -2,7 +2,7 @@
   "use strict";
 
   var MISSING_PARAM_REDIRECT_URL = "https://zgzonre.com/product";
-  var MISSING_PARAM_REDIRECT_DELAY = 1600;
+  var MISSING_PARAM_REDIRECT_DELAY = 3000;
   var DEFAULT_ARTICLE_ID = 395;
   var DEFAULT_API_BASE = "https://www.zgzonre.com/wp-json/wp/v2/";
   var DEFAULT_FALLBACK_LIST_URL = "https://www.zgzonre.com/product";
@@ -402,10 +402,7 @@
       updateDocumentTitle(articleTitle);
       global.ArticleDetailRender.setText(refs.title, articleTitle);
       global.ArticleDetailRender.renderCategoryLine(refs.category, state);
-      global.ArticleDetailRender.setText(
-        refs.date,
-        "发布日期：" + formatPublishedDate(post.date)
-      );
+      global.ArticleDetailRender.setText(refs.date, "发布日期：" + formatPublishedDate(post.date));
       global.ArticleDetailRender.renderContent(
         refs.content,
         post.content && post.content.rendered
@@ -420,9 +417,10 @@
     } catch (error) {
       if (error && Number(error.status) === 404) {
         showArticleNotFoundModal();
-      } else {
-        showError("文章详情加载失败，请检查 article_id 和接口配置。");
+        return;
       }
+
+      showError("文章详情加载失败，请检查 article_id 和接口配置。");
       console.error(error);
     }
   }
