@@ -30,31 +30,47 @@
     el.innerHTML = "";
 
     var prefix = document.createElement("span");
-    prefix.textContent = "分类：";
+    prefix.className = "zr-article-category-label";
+    prefix.textContent = "分类";
     el.appendChild(prefix);
 
-    function appendLink(name, href) {
-      if (!name) return;
-      var link = document.createElement("a");
-      link.className = "zr-article-category-link";
-      link.href = href || "#";
-      link.textContent = name;
-      el.appendChild(link);
+    var trail = document.createElement("span");
+    trail.className = "zr-article-category-trail";
+    el.appendChild(trail);
+
+    function appendSeparator() {
+      var separator = document.createElement("span");
+      separator.className = "zr-article-category-separator";
+      separator.setAttribute("aria-hidden", "true");
+      separator.textContent = ">";
+      trail.appendChild(separator);
     }
 
+    function appendLink(name, href, isCurrent) {
+      if (!name) return;
+      var link = document.createElement("a");
+      link.className = "zr-article-category-link" + (isCurrent ? " is-current" : "");
+      link.href = href || "#";
+      link.textContent = name;
+      trail.appendChild(link);
+    }
+
+    var hasParent = payload.parentCategory && payload.parentCategory.name;
+    var hasChild = payload.childCategory && payload.childCategory.name;
+
     if (payload.parentCategory && payload.parentCategory.name) {
-      appendLink(payload.parentCategory.name, payload.parentCategoryUrl);
+      appendLink(payload.parentCategory.name, payload.parentCategoryUrl, !hasChild);
     }
 
     if (payload.childCategory && payload.childCategory.name) {
-      if (el.childNodes.length > 1) {
-        el.appendChild(document.createTextNode(" / "));
+      if (trail.childNodes.length > 0) {
+        appendSeparator();
       }
-      appendLink(payload.childCategory.name, payload.childCategoryUrl);
+      appendLink(payload.childCategory.name, payload.childCategoryUrl, true);
     }
 
-    if (el.childNodes.length === 1 && payload.firstCategory && payload.firstCategory.name) {
-      appendLink(payload.firstCategory.name, payload.firstCategoryUrl || "");
+    if (!hasParent && !hasChild && payload.firstCategory && payload.firstCategory.name) {
+      appendLink(payload.firstCategory.name, payload.firstCategoryUrl || "", true);
     }
   }
 
