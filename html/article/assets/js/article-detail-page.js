@@ -6,6 +6,9 @@
   var DEFAULT_ARTICLE_ID = 395;
   var DEFAULT_API_BASE = "https://www.zgzonre.com/wp-json/wp/v2/";
   var DEFAULT_FALLBACK_LIST_URL = "https://www.zgzonre.com/product";
+  var DEFAULT_VR_FALLBACK_LIST_URL = "https://www.zgzonre.com/index-more";
+  var VR_ROOT_CATEGORY_ID = 66;
+  var VR_ROOT_CATEGORY_NAME = "VR展示";
   var DEFAULT_COVER_IMAGE = "https://www.zgzonre.com/wp-content/uploads/2026/03/wysm.png";
   var DEFAULT_RECOMMENDATION_DISPLAY_COUNT = 6;
   var DEFAULT_RECOMMENDATION_CANDIDATE_COUNT = 12;
@@ -40,6 +43,9 @@
     return {
       apiBase: DEFAULT_API_BASE,
       fallbackListUrl: DEFAULT_FALLBACK_LIST_URL,
+      vrFallbackListUrl: DEFAULT_VR_FALLBACK_LIST_URL,
+      vrRootCategoryId: VR_ROOT_CATEGORY_ID,
+      vrRootCategoryName: VR_ROOT_CATEGORY_NAME,
       defaultCover: DEFAULT_COVER_IMAGE,
       recommendationDisplayCount: DEFAULT_RECOMMENDATION_DISPLAY_COUNT,
       recommendationCandidateCount: DEFAULT_RECOMMENDATION_CANDIDATE_COUNT,
@@ -228,6 +234,35 @@
   }
 
   function resolveCategoryState(postCategories, categories, config) {
+    var vrRootCategoryId = Number(config && config.vrRootCategoryId) || 0;
+    if (vrRootCategoryId && postCategories.indexOf(vrRootCategoryId) !== -1) {
+      var vrRootCategory =
+        categories.find(function (item) {
+          return Number(item.id) === vrRootCategoryId;
+        }) || {
+          id: vrRootCategoryId,
+          name: (config && config.vrRootCategoryName) || VR_ROOT_CATEGORY_NAME,
+          parent: 0,
+          slug: "vr",
+          count: 0
+        };
+
+      return {
+        firstCategory: vrRootCategory,
+        childCategory: null,
+        parentCategory: vrRootCategory,
+        mainGroup: {
+          id: vrRootCategoryId,
+          type: "vr",
+          name: vrRootCategory.name || ((config && config.vrRootCategoryName) || VR_ROOT_CATEGORY_NAME),
+          categoryIds: [vrRootCategoryId],
+          fallbackUrl: (config && config.vrFallbackListUrl) || DEFAULT_VR_FALLBACK_LIST_URL
+        },
+        parentCategoryUrl: (config && config.vrFallbackListUrl) || DEFAULT_VR_FALLBACK_LIST_URL,
+        childCategoryUrl: ""
+      };
+    }
+
     var childCategory =
       categories.find(function (item) {
         return Number(item.parent) > 0;
