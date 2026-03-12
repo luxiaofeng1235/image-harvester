@@ -17,7 +17,14 @@
         </div>
       </header>
 
-      <div id="zr-article-loading" class="zr-article-state">正在加载文章详情...</div>
+      <div id="zr-article-loading" class="zr-article-loading-mask" role="status" aria-live="polite">
+        <div class="zr-article-loading-panel">
+          <svg class="zr-article-loading-spinner" viewBox="0 0 50 50" aria-hidden="true">
+            <circle class="zr-article-loading-path" cx="25" cy="25" r="20" fill="none"></circle>
+          </svg>
+          <p class="zr-article-loading-text">正在加载文章详情...</p>
+        </div>
+      </div>
       <div id="zr-article-error" class="zr-article-state zr-article-state-error" hidden></div>
 
       <article id="zr-article-body" class="zr-article-body" hidden>
