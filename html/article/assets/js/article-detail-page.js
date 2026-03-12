@@ -47,20 +47,65 @@
     };
   }
 
-  function readArticleIdFromQuery() {
-    var params = new URLSearchParams(window.location.search || "");
-    var raw = params.get("article_id");
+  function hasQueryValue(value) {
+    return value !== null && value !== undefined && String(value).trim() !== "";
+  }
 
-    if (raw === null || !String(raw).trim()) {
-      raw = params.get("article");
+  function parseArticleId(value) {
+    var id = Number(String(value || "").trim());
+    return Number.isInteger(id) && id > 0 ? id : null;
+  }
+
+  function getArticleIdFromParams(params) {
+    if (!params) {
+      return "";
     }
 
-    if (raw === null || !String(raw).trim()) {
+    var raw = params.get("article_id");
+    if (hasQueryValue(raw)) {
+      return raw;
+    }
+
+    raw = params.get("article");
+    return hasQueryValue(raw) ? raw : "";
+  }
+
+  function decodeQueryValue(value) {
+    var normalized = String(value || "").replace(/\+/g, "%20");
+    try {
+      return decodeURIComponent(normalized);
+    } catch (_error) {
+      return String(value || "");
+    }
+  }
+
+  function getArticleIdFromHref(input) {
+    var match = String(input || "").match(/[?&#]+(?:article_id|article)=([^&#?]+)/i);
+    return match ? decodeQueryValue(match[1]) : "";
+  }
+
+  function readArticleIdFromQuery() {
+    var raw = getArticleIdFromParams(new URLSearchParams(window.location.search || ""));
+
+    if (!hasQueryValue(raw)) {
+      raw = getArticleIdFromHref(window.location.href);
+    }
+
+    if (!hasQueryValue(raw)) {
+      raw = getArticleIdFromParams(
+        new URLSearchParams(String(window.location.hash || "").replace(/^#\??/, ""))
+      );
+    }
+
+    if (!hasQueryValue(raw)) {
+      raw = getArticleIdFromHref(window.location.hash || "");
+    }
+
+    if (!hasQueryValue(raw)) {
       return DEFAULT_ARTICLE_ID;
     }
 
-    var id = Number(String(raw).trim());
-    return Number.isInteger(id) && id > 0 ? id : null;
+    return parseArticleId(raw);
   }
 
   function shuffle(list) {

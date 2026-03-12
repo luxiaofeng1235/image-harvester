@@ -20,8 +20,10 @@
       return (item && item.link) || "#";
     }
 
-    var detailUrl = new URL("detail.html", window.location.href);
-    detailUrl.searchParams.set("article", String(id));
+    var detailUrl = new URL(window.location.href);
+    detailUrl.searchParams.delete("article");
+    detailUrl.searchParams.delete("article_id");
+    detailUrl.searchParams.set("article_id", String(id));
     return detailUrl.href;
   }
 
