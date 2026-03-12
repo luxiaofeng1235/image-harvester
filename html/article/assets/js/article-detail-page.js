@@ -62,6 +62,12 @@
     return box.textContent || "";
   }
 
+  function updateDocumentTitle(title) {
+    var cleanTitle = String(title || "").trim();
+    if (!cleanTitle) return;
+    document.title = cleanTitle + " - 江苏中热机械设备有限公司";
+  }
+
   function formatPublishedDate(input) {
     if (!input) return "";
     var normalized = String(input).trim().replace("T", " ");
@@ -223,7 +229,9 @@
       var fallbackUrl = (state.mainGroup && state.mainGroup.fallbackUrl) || config.fallbackListUrl;
 
       bindBackButton(fallbackUrl);
-      global.ArticleDetailRender.setText(refs.title, decodeHtmlText(post.title && post.title.rendered));
+      var articleTitle = decodeHtmlText(post.title && post.title.rendered);
+      updateDocumentTitle(articleTitle);
+      global.ArticleDetailRender.setText(refs.title, articleTitle);
       global.ArticleDetailRender.renderCategoryLine(refs.category, state);
       global.ArticleDetailRender.setText(refs.date, "发布日期：" + formatPublishedDate(post.date));
       global.ArticleDetailRender.renderContent(refs.content, post.content && post.content.rendered);
