@@ -1,28 +1,95 @@
 (function (global) {
   "use strict";
 
-  var CATEGORY_CACHE_PREFIX = "zr:article-detail:categories:";
+  var CATEGORY_CACHE_PREFIX = "zr:article-detail:category-index:";
   var CATEGORY_CACHE_TTL = 60 * 60 * 1000;
 
   function buildUrl(base, path) {
     return new URL(path.replace(/^\//, ""), base.replace(/\/+$/, "") + "/").href;
   }
 
-  function normalizeCategoryIds(categoryIds) {
+  function sanitizeCategoryIds(categoryIds) {
+    var seen = {};
+
     return (categoryIds || [])
       .map(function (id) {
         return Number(id);
       })
       .filter(function (id) {
-        return Number.isInteger(id) && id > 0;
-      })
-      .sort(function (a, b) {
-        return a - b;
+        if (!Number.isInteger(id) || id <= 0 || seen[id]) {
+          return false;
+        }
+        seen[id] = true;
+        return true;
       });
   }
 
-  function buildCategoryCacheKey(apiBase, categoryIds) {
-    return CATEGORY_CACHE_PREFIX + apiBase + "::" + normalizeCategoryIds(categoryIds).join(",");
+  function buildCategoryCacheKey(apiBase) {
+    return CATEGORY_CACHE_PREFIX + apiBase + "::page-1";
+  }
+
+  function simplifyCategory(item) {
+    return {
+      id: Number(item && item.id) || 0,
+      name: item && item.name ? String(item.name) : "",
+      parent: Number(item && item.parent) || 0,
+      slug: item && item.slug ? String(item.slug) : "",
+      count: Number(item && item.count) || 0
+    };
+  }
+
+  function buildCategoryIndex(items) {
+    var categories = Array.isArray(items) ? items.map(simplifyCategory).filter(function (item) {
+      return item.id > 0 && item.name;
+    }) : [];
+
+    var topLevelIdMap = {};
+    categories.forEach(function (item) {
+      if (item.parent === 0) {
+        topLevelIdMap[item.id] = true;
+      }
+    });
+
+    return categories.filter(function (item) {
+      return item.parent === 0 || topLevelIdMap[item.parent];
+    });
+  }
+
+  function pickCategoriesFromIndex(items, categoryIds) {
+    var requestedIds = sanitizeCategoryIds(categoryIds);
+    if (!requestedIds.length) {
+      return [];
+    }
+
+    var categoryMap = {};
+    items.forEach(function (item) {
+      categoryMap[item.id] = item;
+    });
+
+    var selected = [];
+    var selectedIdMap = {};
+
+    function appendCategory(id) {
+      var numericId = Number(id) || 0;
+      if (!numericId || selectedIdMap[numericId] || !categoryMap[numericId]) {
+        return;
+      }
+      selectedIdMap[numericId] = true;
+      selected.push(categoryMap[numericId]);
+    }
+
+    requestedIds.forEach(function (id) {
+      appendCategory(id);
+    });
+
+    requestedIds.forEach(function (id) {
+      var item = categoryMap[id];
+      if (item && item.parent > 0) {
+        appendCategory(item.parent);
+      }
+    });
+
+    return selected;
   }
 
   function readCategoryCache(cacheKey) {
@@ -82,31 +149,35 @@
     return requestJson(buildUrl(apiBase, "posts/" + articleId + "?_embed=1"));
   }
 
-  function fetchCategories(apiBase, categoryIds) {
-    var normalizedIds = normalizeCategoryIds(categoryIds);
-    if (!normalizedIds.length) {
-      return Promise.resolve([]);
-    }
-
-    var cacheKey = buildCategoryCacheKey(apiBase, normalizedIds);
+  function fetchCategoryIndex(apiBase) {
+    var cacheKey = buildCategoryCacheKey(apiBase);
     var cacheEntry = readCategoryCache(cacheKey);
     if (cacheEntry && !cacheEntry.isExpired) {
       return Promise.resolve(cacheEntry.data);
     }
 
     return requestJson(
-      buildUrl(
-        apiBase,
-        "categories?include=" + normalizedIds.join(",") + "&per_page=100&_fields=id,name,parent,slug"
-      )
+      buildUrl(apiBase, "categories?per_page=100&page=1&_fields=id,name,parent,slug,count")
     ).then(function (data) {
-      writeCategoryCache(cacheKey, data);
-      return data;
+      var categoryIndex = buildCategoryIndex(data);
+      writeCategoryCache(cacheKey, categoryIndex);
+      return categoryIndex;
     }).catch(function (error) {
       if (cacheEntry && Array.isArray(cacheEntry.data)) {
         return cacheEntry.data;
       }
       throw error;
+    });
+  }
+
+  function fetchCategories(apiBase, categoryIds) {
+    var requestedIds = sanitizeCategoryIds(categoryIds);
+    if (!requestedIds.length) {
+      return Promise.resolve([]);
+    }
+
+    return fetchCategoryIndex(apiBase).then(function (categoryIndex) {
+      return pickCategoriesFromIndex(categoryIndex, requestedIds);
     });
   }
 
