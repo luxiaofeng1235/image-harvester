@@ -1,4 +1,4 @@
-:root {
+.zr-article-app {
   --zr-article-page-bg: #f3f4f6;
   --zr-article-card-bg: #ffffff;
   --zr-article-border: #e5e7eb;
@@ -6,6 +6,29 @@
   --zr-article-subtle: #4b5563;
   --zr-article-primary: #2f6eb5;
   --zr-article-primary-strong: #285d96;
+  display: block;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: var(--zr-article-text);
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  isolation: isolate;
+}
+
+.zr-article-app,
+.zr-article-app * {
+  box-sizing: border-box;
+}
+
+.zr-article-app :where(button, input, select, textarea) {
+  font: inherit;
+}
+
+.zr-article-app > .zr-article-page,
+.zr-article-app > .zr-article-modal {
+  max-width: none !important;
+  margin: 0 !important;
 }
 
 .zr-article-page {
@@ -14,10 +37,6 @@
   background: var(--zr-article-page-bg);
   color: var(--zr-article-text);
   font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-}
-
-.zr-article-page * {
-  box-sizing: border-box;
 }
 
 .zr-article-page a {
@@ -119,14 +138,14 @@
   color: var(--zr-article-subtle);
 }
 
-.zr-article-loading-mask[hidden] {
+.zr-article-app .zr-article-loading-mask[hidden] {
   display: none !important;
 }
 
-.zr-article-loading-mask {
+.zr-article-app .zr-article-loading-mask {
   position: fixed;
   inset: 0;
-  z-index: 9000;
+  z-index: 110000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -334,14 +353,14 @@
   -webkit-line-clamp: 2;
 }
 
-.zr-article-modal[hidden] {
+.zr-article-app .zr-article-modal[hidden] {
   display: none !important;
 }
 
-.zr-article-modal {
+.zr-article-app .zr-article-modal {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 110001;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -481,24 +500,24 @@
 }
 
 @media (max-width: 640px) {
-  .zr-article-modal {
+  .zr-article-app .zr-article-modal {
     padding: 18px;
   }
 
-  .zr-article-modal-card {
+  .zr-article-app .zr-article-modal-card {
     padding: 26px 20px 22px;
     border-radius: 20px;
   }
 
-  .zr-article-modal-title {
+  .zr-article-app .zr-article-modal-title {
     font-size: 24px;
   }
 
-  .zr-article-modal-text {
+  .zr-article-app .zr-article-modal-text {
     font-size: 15px;
   }
 
-  .zr-article-modal-button {
+  .zr-article-app .zr-article-modal-button {
     width: 100%;
   }
 }

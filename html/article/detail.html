@@ -2,73 +2,75 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="stylesheet" href="https://static.jsss999.com/upload/zrsite/article/detail/article-detail.css" />
 
-<main
-  class="zr-article-page"
-  data-config-url="https://static.jsss999.com/upload/zrsite/article/detail/article-detail-runtime-config.json"
->
-  <section class="zr-article-shell">
-    <div class="zr-article-reading">
-      <header class="zr-article-header">
-        <button id="zr-article-back" class="zr-article-back" type="button">返回</button>
-        <h1 id="zr-article-title" class="zr-article-title">加载中...</h1>
-        <div class="zr-article-meta">
-          <p id="zr-article-category" class="zr-article-category">分类：</p>
-          <p id="zr-article-date" class="zr-article-date">发布日期：</p>
+<div class="zr-article-app">
+  <main
+    class="zr-article-page"
+    data-config-url="https://static.jsss999.com/upload/zrsite/article/detail/article-detail-runtime-config.json"
+  >
+    <section class="zr-article-shell">
+      <div class="zr-article-reading">
+        <header class="zr-article-header">
+          <button id="zr-article-back" class="zr-article-back" type="button">返回</button>
+          <h1 id="zr-article-title" class="zr-article-title">加载中...</h1>
+          <div class="zr-article-meta">
+            <p id="zr-article-category" class="zr-article-category">分类：</p>
+            <p id="zr-article-date" class="zr-article-date">发布日期：</p>
+          </div>
+        </header>
+
+        <div id="zr-article-loading" class="zr-article-loading-mask" role="status" aria-live="polite">
+          <div class="zr-article-loading-panel">
+            <svg class="zr-article-loading-spinner" viewBox="0 0 50 50" aria-hidden="true">
+              <circle class="zr-article-loading-path" cx="25" cy="25" r="20" fill="none"></circle>
+            </svg>
+            <p class="zr-article-loading-text">正在加载文章详情...</p>
+          </div>
         </div>
-      </header>
+        <div id="zr-article-error" class="zr-article-state zr-article-state-error" hidden></div>
 
-      <div id="zr-article-loading" class="zr-article-loading-mask" role="status" aria-live="polite">
-        <div class="zr-article-loading-panel">
-          <svg class="zr-article-loading-spinner" viewBox="0 0 50 50" aria-hidden="true">
-            <circle class="zr-article-loading-path" cx="25" cy="25" r="20" fill="none"></circle>
-          </svg>
-          <p class="zr-article-loading-text">正在加载文章详情...</p>
+        <article id="zr-article-body" class="zr-article-body" hidden>
+          <div id="zr-article-content" class="zr-article-content"></div>
+        </article>
+
+        <nav id="zr-article-post-nav" class="zr-article-post-nav" aria-label="文章导航" hidden></nav>
+      </div>
+    </section>
+
+    <section id="zr-article-recommend" class="zr-article-recommend" hidden>
+      <div class="zr-article-shell">
+        <div class="zr-article-recommend-head">
+          <h2>推荐产品</h2>
         </div>
+        <div id="zr-article-recommend-grid" class="zr-article-recommend-grid"></div>
       </div>
-      <div id="zr-article-error" class="zr-article-state zr-article-state-error" hidden></div>
+    </section>
+  </main>
 
-      <article id="zr-article-body" class="zr-article-body" hidden>
-        <div id="zr-article-content" class="zr-article-content"></div>
-      </article>
-
-      <nav id="zr-article-post-nav" class="zr-article-post-nav" aria-label="文章导航" hidden></nav>
-    </div>
-  </section>
-
-  <section id="zr-article-recommend" class="zr-article-recommend" hidden>
-    <div class="zr-article-shell">
-      <div class="zr-article-recommend-head">
-        <h2>推荐产品</h2>
+  <div
+    id="zr-article-missing-param-modal"
+    class="zr-article-modal"
+    hidden
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="zr-article-modal-title"
+    aria-describedby="zr-article-modal-text"
+  >
+    <div class="zr-article-modal-backdrop"></div>
+    <div class="zr-article-modal-card">
+      <div class="zr-article-modal-mark">!</div>
+      <h2 id="zr-article-modal-title" class="zr-article-modal-title">参数缺失</h2>
+      <p id="zr-article-modal-text" class="zr-article-modal-text">
+        未检测到文章 ID，页面将自动跳转到产品列表。
+      </p>
+      <div class="zr-article-modal-actions">
+        <button
+          id="zr-article-modal-action"
+          class="zr-article-modal-button"
+          type="button"
+        >
+          确定
+        </button>
       </div>
-      <div id="zr-article-recommend-grid" class="zr-article-recommend-grid"></div>
-    </div>
-  </section>
-</main>
-
-<div
-  id="zr-article-missing-param-modal"
-  class="zr-article-modal"
-  hidden
-  role="alertdialog"
-  aria-modal="true"
-  aria-labelledby="zr-article-modal-title"
-  aria-describedby="zr-article-modal-text"
->
-  <div class="zr-article-modal-backdrop"></div>
-  <div class="zr-article-modal-card">
-    <div class="zr-article-modal-mark">!</div>
-    <h2 id="zr-article-modal-title" class="zr-article-modal-title">参数缺失</h2>
-    <p id="zr-article-modal-text" class="zr-article-modal-text">
-      未检测到文章 ID，页面将自动跳转到产品列表。
-    </p>
-    <div class="zr-article-modal-actions">
-      <button
-        id="zr-article-modal-action"
-        class="zr-article-modal-button"
-        type="button"
-      >
-        确定
-      </button>
     </div>
   </div>
 </div>
