@@ -453,17 +453,17 @@
 }
 
 .zr-article-recommend-body {
-  padding: 12px 12px 14px;
+  padding: 10px 10px 10px;
 }
 
 .zr-article-recommend-title {
   display: -webkit-box;
   overflow: hidden;
-  min-height: 44px;
+  min-height: 0;
   color: var(--zr-article-text);
   font-size: 14px;
   font-weight: 600;
-  line-height: 1.55;
+  line-height: 1.45;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
