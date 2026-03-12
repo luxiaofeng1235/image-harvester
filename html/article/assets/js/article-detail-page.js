@@ -3,6 +3,11 @@
 
   var MISSING_PARAM_REDIRECT_URL = "https://zgzonre.com/product";
   var MISSING_PARAM_REDIRECT_DELAY = 1600;
+  var DEFAULT_API_BASE = "https://www.zgzonre.com/wp-json/wp/v2/";
+  var DEFAULT_FALLBACK_LIST_URL = "https://www.zgzonre.com/product";
+  var DEFAULT_COVER_IMAGE = "https://www.zgzonre.com/wp-content/uploads/2026/03/wysm.png";
+  var DEFAULT_RECOMMENDATION_DISPLAY_COUNT = 6;
+  var DEFAULT_RECOMMENDATION_CANDIDATE_COUNT = 12;
   var DEFAULT_SHARED_CATEGORY_CONFIG_URL =
     "https://static.jsss999.com/upload/zrsite/category/common/dynamic/home-category-runtime-config-v1.2.json";
   var missingParamRedirectTimer = null;
@@ -24,15 +29,19 @@
     missingParamAction: document.getElementById("zr-article-modal-action")
   };
 
-  function getConfigUrl() {
-    if (refs.root && refs.root.getAttribute("data-config-url")) {
-      return refs.root.getAttribute("data-config-url");
-    }
-    return "./config/article-detail-runtime-config.json";
-  }
-
   function getSharedCategoryConfigUrl() {
     return DEFAULT_SHARED_CATEGORY_CONFIG_URL;
+  }
+
+  function createRuntimeConfig() {
+    return {
+      apiBase: DEFAULT_API_BASE,
+      fallbackListUrl: DEFAULT_FALLBACK_LIST_URL,
+      defaultCover: DEFAULT_COVER_IMAGE,
+      recommendationDisplayCount: DEFAULT_RECOMMENDATION_DISPLAY_COUNT,
+      recommendationCandidateCount: DEFAULT_RECOMMENDATION_CANDIDATE_COUNT,
+      mainCategoryGroups: []
+    };
   }
 
   function readArticleIdFromQuery() {
@@ -260,14 +269,6 @@
     );
   }
 
-  async function loadConfig() {
-    var response = await fetch(getConfigUrl(), { cache: "no-store" });
-    if (!response.ok) {
-      throw new Error("Failed to load config");
-    }
-    return response.json();
-  }
-
   async function loadSharedCategoryConfig() {
     var configUrl = getSharedCategoryConfigUrl();
     if (!configUrl) {
@@ -287,7 +288,7 @@
   }
 
   async function loadRuntimeConfig() {
-    var detailConfig = await loadConfig();
+    var detailConfig = createRuntimeConfig();
     var sharedCategoryConfig = await loadSharedCategoryConfig();
     detailConfig.mainCategoryGroups = mapSharedMainCategoryGroups(
       sharedCategoryConfig,
