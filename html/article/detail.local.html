@@ -1,0 +1,40 @@
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="./assets/css/article-detail.css" />
+
+<main
+  class="zr-article-page"
+  data-config-url="./config/article-detail-runtime-config.json"
+>
+  <section class="zr-article-shell">
+    <div class="zr-article-reading">
+      <header class="zr-article-header">
+        <button id="zr-article-back" class="zr-article-back" type="button">返回上一页</button>
+        <h1 id="zr-article-title" class="zr-article-title">加载中...</h1>
+        <p id="zr-article-category" class="zr-article-category">分类：</p>
+      </header>
+
+      <div id="zr-article-loading" class="zr-article-state">正在加载文章详情...</div>
+      <div id="zr-article-error" class="zr-article-state zr-article-state-error" hidden></div>
+
+      <article id="zr-article-body" class="zr-article-body" hidden>
+        <div id="zr-article-content" class="zr-article-content"></div>
+      </article>
+
+      <nav id="zr-article-post-nav" class="zr-article-post-nav" aria-label="文章导航" hidden></nav>
+    </div>
+  </section>
+
+  <section id="zr-article-recommend" class="zr-article-recommend" hidden>
+    <div class="zr-article-shell">
+      <div class="zr-article-recommend-head">
+        <h2>推荐产品</h2>
+      </div>
+      <div id="zr-article-recommend-grid" class="zr-article-recommend-grid"></div>
+    </div>
+  </section>
+</main>
+
+<script src="./assets/js/article-detail-api.js"></script>
+<script src="./assets/js/article-detail-render.js"></script>
+<script src="./assets/js/article-detail-page.js"></script>
