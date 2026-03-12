@@ -58,9 +58,47 @@
     }
   }
 
+  function findFirstMeaningfulTextNode(root) {
+    if (!root) return null;
+
+    for (var i = 0; i < root.childNodes.length; i++) {
+      var node = root.childNodes[i];
+      if (node.nodeType === Node.TEXT_NODE && /\S/.test(node.nodeValue || "")) {
+        return node;
+      }
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        var textNode = findFirstMeaningfulTextNode(node);
+        if (textNode) {
+          return textNode;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function sanitizeLeadingQuestionMarks(html) {
+    if (!html) {
+      return "<p>暂无内容。</p>";
+    }
+
+    var container = document.createElement("div");
+    container.innerHTML = html;
+
+    var firstTextNode = findFirstMeaningfulTextNode(container);
+    if (firstTextNode) {
+      firstTextNode.nodeValue = (firstTextNode.nodeValue || "").replace(
+        /^[\s\u00a0\uFEFF]*(?:[?？]\s*){1,2}/,
+        ""
+      );
+    }
+
+    return container.innerHTML;
+  }
+
   function renderContent(el, html) {
     if (!el) return;
-    el.innerHTML = html || "<p>暂无内容。</p>";
+    el.innerHTML = sanitizeLeadingQuestionMarks(html);
   }
 
   function renderPostNavigation(el, payload) {
