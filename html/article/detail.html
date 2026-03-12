@@ -38,6 +38,34 @@
   </section>
 </main>
 
+<div
+  id="zr-article-missing-param-modal"
+  class="zr-article-modal"
+  hidden
+  role="alertdialog"
+  aria-modal="true"
+  aria-labelledby="zr-article-modal-title"
+  aria-describedby="zr-article-modal-text"
+>
+  <div class="zr-article-modal-backdrop"></div>
+  <div class="zr-article-modal-card">
+    <div class="zr-article-modal-mark">!</div>
+    <h2 id="zr-article-modal-title" class="zr-article-modal-title">参数缺失</h2>
+    <p id="zr-article-modal-text" class="zr-article-modal-text">
+      未检测到文章 ID，页面将自动跳转到产品列表。
+    </p>
+    <div class="zr-article-modal-actions">
+      <button
+        id="zr-article-modal-action"
+        class="zr-article-modal-button"
+        type="button"
+      >
+        确定
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="https://static.jsss999.com/upload/zrsite/article/detail/article-detail-api.js"></script>
 <script src="https://static.jsss999.com/upload/zrsite/article/detail/article-detail-render.js"></script>
 <script src="https://static.jsss999.com/upload/zrsite/article/detail/article-detail-page.js"></script>

@@ -1,6 +1,10 @@
 (function (global) {
   "use strict";
 
+  var MISSING_PARAM_REDIRECT_URL = "https://zgzonre.com/product";
+  var MISSING_PARAM_REDIRECT_DELAY = 1600;
+  var missingParamRedirectTimer = null;
+
   var refs = {
     root: document.querySelector(".zr-article-page"),
     backButton: document.getElementById("zr-article-back"),
@@ -13,7 +17,9 @@
     content: document.getElementById("zr-article-content"),
     postNav: document.getElementById("zr-article-post-nav"),
     recommendSection: document.getElementById("zr-article-recommend"),
-    recommendGrid: document.getElementById("zr-article-recommend-grid")
+    recommendGrid: document.getElementById("zr-article-recommend-grid"),
+    missingParamModal: document.getElementById("zr-article-missing-param-modal"),
+    missingParamAction: document.getElementById("zr-article-modal-action")
   };
 
   function getConfigUrl() {
@@ -23,11 +29,20 @@
     return "./config/article-detail-runtime-config.json";
   }
 
-  function readArticleId(config) {
+  function readArticleIdFromQuery() {
     var params = new URLSearchParams(window.location.search || "");
-    var raw = params.get("article_id") || params.get("article");
-    var id = Number(raw || config.defaultArticleId || 361);
-    return Number.isInteger(id) && id > 0 ? id : 361;
+    var raw = params.get("article_id");
+
+    if (raw === null || !String(raw).trim()) {
+      raw = params.get("article");
+    }
+
+    if (raw === null || !String(raw).trim()) {
+      return null;
+    }
+
+    var id = Number(String(raw).trim());
+    return Number.isInteger(id) && id > 0 ? id : null;
   }
 
   function shuffle(list) {
@@ -149,6 +164,41 @@
     refs.error.textContent = message;
   }
 
+  function redirectToMissingParamFallback() {
+    if (missingParamRedirectTimer) {
+      global.clearTimeout(missingParamRedirectTimer);
+      missingParamRedirectTimer = null;
+    }
+
+    global.location.replace(MISSING_PARAM_REDIRECT_URL);
+  }
+
+  function showMissingParamModal() {
+    refs.loading.hidden = true;
+    refs.body.hidden = true;
+    refs.postNav.hidden = true;
+    refs.recommendSection.hidden = true;
+    refs.error.hidden = true;
+
+    if (!refs.missingParamModal) {
+      redirectToMissingParamFallback();
+      return;
+    }
+
+    if (refs.missingParamAction) {
+      refs.missingParamAction.onclick = function (event) {
+        event.preventDefault();
+        redirectToMissingParamFallback();
+      };
+    }
+
+    refs.missingParamModal.hidden = false;
+    missingParamRedirectTimer = global.setTimeout(
+      redirectToMissingParamFallback,
+      MISSING_PARAM_REDIRECT_DELAY
+    );
+  }
+
   async function loadConfig() {
     var response = await fetch(getConfigUrl(), { cache: "no-store" });
     if (!response.ok) {
@@ -159,8 +209,13 @@
 
   async function bootstrap() {
     try {
+      var articleId = readArticleIdFromQuery();
+      if (!articleId) {
+        showMissingParamModal();
+        return;
+      }
+
       var config = await loadConfig();
-      var articleId = readArticleId(config);
       var post = await global.ArticleDetailApi.fetchPost(config.apiBase, articleId);
       var postCategories = Array.isArray(post.categories) ? post.categories.map(Number) : [];
       var categories = await global.ArticleDetailApi.fetchCategories(config.apiBase, postCategories);
