@@ -48,6 +48,10 @@ IMAGE_P_ONLY_RE = re.compile(
     r"^\s*<p\b[^>]*>\s*(?:<a\b[^>]*>\s*)?<img\b[\s\S]*?(?:</a>\s*)?</p>\s*$",
     re.I,
 )
+WP_HTML_BLOCK_RE = re.compile(
+    r"^\s*(?P<open><!--\s*wp:html\s*-->)\s*(?P<body>[\s\S]*?)\s*(?P<close><!--\s*/wp:html\s*-->)\s*$",
+    re.I,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -154,6 +158,27 @@ def reorder_content(html: str) -> Tuple[str, Dict[str, object]]:
     if not html.strip():
         return html, {"matched": False, "reason": "empty"}
 
+    wrapper_match = WP_HTML_BLOCK_RE.match(html)
+    if wrapper_match:
+        inner_html = wrapper_match.group("body")
+        reordered_inner, meta = reorder_content(inner_html)
+        if reordered_inner == inner_html:
+            return html, meta
+
+        wrapped = (
+            wrapper_match.group("open").strip()
+            + "\n"
+            + reordered_inner.strip()
+            + "\n"
+            + wrapper_match.group("close").strip()
+        )
+        wrapped_meta = dict(meta)
+        wrapped_meta["wrapper"] = "wp:html"
+        return wrapped, wrapped_meta
+
+    if re.match(r"^\s*<p\b[^>]*>\s*(?:<a\b[^>]*>\s*)?<img\b", html, flags=re.I):
+        return html, {"matched": False, "reason": "already_image_first"}
+
     for pattern_name, pattern in (("artview_div", ARTVIEW_DIV_PATTERN), ("text_p", TEXT_P_PATTERN)):
         match = pattern.match(html)
         if not match:
@@ -162,6 +187,10 @@ def reorder_content(html: str) -> Tuple[str, Dict[str, object]]:
         intro = match.group("intro")
         images = match.group("images")
         rest = match.group("rest")
+
+        if pattern_name == "text_p" and IMAGE_P_ONLY_RE.match(intro):
+            return html, {"matched": False, "reason": "already_image_first"}
+
         image_count = count_leading_images(images)
         if image_count <= 0:
             return html, {"matched": False, "reason": "no_image_blocks"}
@@ -175,9 +204,6 @@ def reorder_content(html: str) -> Tuple[str, Dict[str, object]]:
             "pattern": pattern_name,
             "image_count": image_count,
         }
-
-    if re.match(r"^\s*<p\b[^>]*>\s*(?:<a\b[^>]*>\s*)?<img\b", html, flags=re.I):
-        return html, {"matched": False, "reason": "already_image_first"}
 
     return html, {"matched": False, "reason": "unsupported_structure"}
 
