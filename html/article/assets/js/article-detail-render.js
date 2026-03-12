@@ -48,6 +48,7 @@
 
     function appendLink(name, href, isCurrent) {
       if (!name) return;
+
       var link = document.createElement("a");
       link.className = "zr-article-category-link" + (isCurrent ? " is-current" : "");
       link.href = href || "#";
@@ -58,11 +59,11 @@
     var hasParent = payload.parentCategory && payload.parentCategory.name;
     var hasChild = payload.childCategory && payload.childCategory.name;
 
-    if (payload.parentCategory && payload.parentCategory.name) {
+    if (hasParent) {
       appendLink(payload.parentCategory.name, payload.parentCategoryUrl, !hasChild);
     }
 
-    if (payload.childCategory && payload.childCategory.name) {
+    if (hasChild) {
       if (trail.childNodes.length > 0) {
         appendSeparator();
       }
@@ -74,23 +75,46 @@
     }
   }
 
-  function findFirstMeaningfulTextNode(root) {
-    if (!root) return null;
+  function collectTextNodes(root) {
+    if (!root) return [];
 
-    for (var i = 0; i < root.childNodes.length; i++) {
-      var node = root.childNodes[i];
-      if (node.nodeType === Node.TEXT_NODE && /\S/.test(node.nodeValue || "")) {
-        return node;
-      }
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        var textNode = findFirstMeaningfulTextNode(node);
-        if (textNode) {
-          return textNode;
-        }
-      }
+    var nodes = [];
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    var current = walker.nextNode();
+
+    while (current) {
+      nodes.push(current);
+      current = walker.nextNode();
     }
 
-    return null;
+    return nodes;
+  }
+
+  function sanitizeQuestionMarkArtifacts(text, options) {
+    var value = String(text || "");
+    if (!value) {
+      return "";
+    }
+
+    if (options && options.trimLeading) {
+      value = value.replace(/^[\s\u00a0\uFEFF]*(?:[?？]\s*)+/, "");
+    }
+
+    value = value.replace(
+      /(^|[\s\u00a0])(?:[?？]\s*){2,}(?=[\u4e00-\u9fffA-Za-z0-9])/g,
+      "$1"
+    );
+    value = value.replace(
+      /([\u4e00-\u9fffA-Za-z0-9])\s+[?？]\s+(?=[\u4e00-\u9fffA-Za-z0-9])/g,
+      "$1 "
+    );
+    value = value.replace(/(?:^|[\r\n])([\s\u00a0]*)(?:[?？]\s*)+(?=[^\s])/g, "$1");
+
+    if (/^[\s\u00a0\uFEFF?？]+$/.test(value)) {
+      return "";
+    }
+
+    return value;
   }
 
   function sanitizeLeadingQuestionMarks(html) {
@@ -101,13 +125,20 @@
     var container = document.createElement("div");
     container.innerHTML = html;
 
-    var firstTextNode = findFirstMeaningfulTextNode(container);
-    if (firstTextNode) {
-      firstTextNode.nodeValue = (firstTextNode.nodeValue || "").replace(
-        /^[\s\u00a0\uFEFF]*(?:[?？]\s*){1,2}/,
-        ""
-      );
-    }
+    var textNodes = collectTextNodes(container);
+    var hasMeaningfulText = false;
+
+    textNodes.forEach(function (node) {
+      var nextValue = sanitizeQuestionMarkArtifacts(node.nodeValue, {
+        trimLeading: !hasMeaningfulText
+      });
+
+      node.nodeValue = nextValue;
+
+      if (!hasMeaningfulText && /[^\s\u00a0\uFEFF]/.test(nextValue || "")) {
+        hasMeaningfulText = true;
+      }
+    });
 
     return container.innerHTML;
   }
@@ -119,8 +150,10 @@
 
   function renderPostNavigation(el, payload) {
     if (!el) return;
+
     var prev = payload.previousPost;
     var next = payload.nextPost;
+
     if (!prev && !next) {
       el.hidden = true;
       el.innerHTML = "";
@@ -186,7 +219,10 @@
       image.className = "zr-article-recommend-image";
       image.loading = "lazy";
       image.src = getFeaturedImage(item, fallbackImage);
-      image.alt = item.title && item.title.rendered ? item.title.rendered.replace(/<[^>]+>/g, "") : "推荐产品";
+      image.alt =
+        item.title && item.title.rendered
+          ? item.title.rendered.replace(/<[^>]+>/g, "")
+          : "推荐产品";
 
       var body = document.createElement("div");
       body.className = "zr-article-recommend-body";
