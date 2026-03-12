@@ -407,6 +407,16 @@
         refs.content,
         post.content && post.content.rendered
       );
+      if (
+        global.ArticleDetailGallery &&
+        typeof global.ArticleDetailGallery.enhance === "function"
+      ) {
+        try {
+          global.ArticleDetailGallery.enhance(refs.content);
+        } catch (galleryError) {
+          console.warn("Failed to build article gallery.", galleryError);
+        }
+      }
       global.ArticleDetailRender.renderPostNavigation(refs.postNav, readPostNavigation());
 
       refs.loading.hidden = true;
