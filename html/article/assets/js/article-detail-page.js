@@ -6,6 +6,7 @@
     backButton: document.getElementById("zr-article-back"),
     title: document.getElementById("zr-article-title"),
     category: document.getElementById("zr-article-category"),
+    date: document.getElementById("zr-article-date"),
     loading: document.getElementById("zr-article-loading"),
     error: document.getElementById("zr-article-error"),
     body: document.getElementById("zr-article-body"),
@@ -44,6 +45,24 @@
     var box = document.createElement("div");
     box.innerHTML = input || "";
     return box.textContent || "";
+  }
+
+  function formatPublishedDate(input) {
+    if (!input) return "";
+    var normalized = String(input).trim().replace("T", " ");
+    var match = normalized.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+    if (!match) return normalized;
+    return (
+      match[1] +
+      "年" +
+      String(Number(match[2])) +
+      "月" +
+      String(Number(match[3])) +
+      "日 " +
+      match[4] +
+      ":" +
+      match[5]
+    );
   }
 
   function buildSubCategoryUrl(baseUrl, subId) {
@@ -151,6 +170,7 @@
       bindBackButton(fallbackUrl);
       global.ArticleDetailRender.setText(refs.title, decodeHtmlText(post.title && post.title.rendered));
       global.ArticleDetailRender.renderCategoryLine(refs.category, state);
+      global.ArticleDetailRender.setText(refs.date, "发布日期：" + formatPublishedDate(post.date));
       global.ArticleDetailRender.renderContent(refs.content, post.content && post.content.rendered);
       global.ArticleDetailRender.renderPostNavigation(refs.postNav, readPostNavigation());
 
