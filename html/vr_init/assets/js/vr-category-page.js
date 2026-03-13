@@ -196,15 +196,6 @@
       [{ id: rootId, name: rootName }],
       rootId,
       function () {
-        if (state.rootExpanded || state.secondId || state.thirdId) {
-          state.rootExpanded = false;
-          state.secondId = null;
-          state.thirdId = null;
-          state.page = 1;
-          loadProducts({ syncHistory: true, replaceHistory: false });
-          return;
-        }
-
         state.rootExpanded = true;
         state.secondId = null;
         state.thirdId = null;
