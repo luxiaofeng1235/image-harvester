@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="https://static.jsss999.com/upload/zrsite/category/common/dynamic/category-v1.2.css?v=20260313-loading-2" />
+<link rel="stylesheet" href="https://static.jsss999.com/upload/zrsite/category/common/dynamic/category-v1.2.css?v=20260313-loading-4" />
 <link rel="stylesheet" href="https://static.ysjianzhan.cn/website/plugin/sidebar/css/sidebar.css?v=16860282" />
 <link rel="stylesheet" href="https://static.jsss999.com/upload/zrsite/slider/category-sidebar-v1.css" />
 
@@ -8,6 +8,14 @@
   data-config-url="https://static.jsss999.com/upload/zrsite/category/common/dynamic/home-category-runtime-config-v1.2.json"
   data-api-base="https://www.zgzonre.com/wp-json/wp/v2/posts"
 >
+  <div id="zr-cat-global-loading" class="zr-cat-global-loading" role="status" aria-live="polite">
+    <div class="zr-cat-global-loading-panel">
+      <svg class="zr-cat-global-loading-spinner" viewBox="0 0 50 50" aria-hidden="true">
+        <circle class="zr-cat-global-loading-path" cx="25" cy="25" r="20" fill="none"></circle>
+      </svg>
+      <p class="zr-cat-global-loading-text">正在加载分类页面...</p>
+    </div>
+  </div>
   <div class="zr-cat-main">
     <div class="zr-cat-top-hero-strip" aria-label="顶部背景图">
       <div id="zr-cat-top-hero-bg" class="zr-cat-top-hero-bg"></div>
@@ -26,7 +34,7 @@
           <h1 id="zr-cat-highlight-title">产品系列</h1>
           <div class="zr-cat-highlight-text-group">
             <p id="zr-cat-highlight-brief" hidden></p>
-            <p id="zr-cat-highlight-copy">加载中...</p>
+            <p id="zr-cat-highlight-copy"></p>
           </div>
         </div>
       </div>
@@ -42,14 +50,7 @@
         <p id="zr-cat-result-meta" class="zr-cat-result-meta"></p>
       </div>
 
-      <div id="zr-cat-loading-state" class="zr-cat-loading-mask" role="status" aria-live="polite" hidden>
-        <div class="zr-cat-loading-panel">
-          <svg class="zr-cat-loading-spinner" viewBox="0 0 50 50" aria-hidden="true">
-            <circle class="zr-cat-loading-path" cx="25" cy="25" r="20" fill="none"></circle>
-          </svg>
-          <p class="zr-cat-loading-text">正在加载产品数据...</p>
-        </div>
-      </div>
+      <div id="zr-cat-loading-state" hidden></div>
       <div id="zr-cat-error-state" class="zr-cat-state-card zr-cat-state-error" hidden></div>
       <div id="zr-cat-empty-state" class="zr-cat-state-card" hidden>当前分类暂无文章。</div>
 
@@ -69,6 +70,6 @@
 </div>
 
 <script src="https://static.jsss999.com/upload/zrsite/category/common/dynamic/category-api-v2.js?v=20260313-detail-base-2"></script>
-<script src="https://static.jsss999.com/upload/zrsite/category/common/dynamic/category-render-v2.js?v=20260313-loading-2"></script>
-<script src="https://static.jsss999.com/upload/zrsite/category/common/dynamic/category-page-v2.js?v=20260313-loading-1"></script>
+<script src="https://static.jsss999.com/upload/zrsite/category/common/dynamic/category-render-v2.js?v=20260313-loading-4"></script>
+<script src="https://static.jsss999.com/upload/zrsite/category/common/dynamic/category-page-v2.js?v=20260313-loading-4"></script>
 <script src="https://static.jsss999.com/upload/zrsite/slider/category-sidebar-v1.js"></script>

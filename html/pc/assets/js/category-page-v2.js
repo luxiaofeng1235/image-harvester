@@ -10,12 +10,14 @@
     total: 0,
     totalPages: 0,
     controller: null,
+    hasLoadedOnce: false,
     scenesRendered: false,
     topHeroRendered: false
   };
 
   var refs = {
     root: document.querySelector(".zr-cat-page"),
+    globalLoading: document.getElementById("zr-cat-global-loading"),
     topHeroBg: document.getElementById("zr-cat-top-hero-bg"),
     sceneTopImage: document.getElementById("zr-cat-scene-top-image"),
     mainTabs: document.getElementById("zr-cat-main-category-tabs"),
@@ -193,6 +195,11 @@
     }
   }
 
+  function setGlobalLoading(visible) {
+    if (!refs.globalLoading) return;
+    refs.globalLoading.hidden = !visible;
+  }
+
   function renderStaticBlocks() {
     var categories = (state.config.categories || []).slice().sort(function (a, b) {
       return Number(a.type || 0) - Number(b.type || 0);
@@ -272,6 +279,7 @@
     state.controller = new AbortController();
     var signal = state.controller.signal;
 
+    setGlobalLoading(!state.hasLoadedOnce);
     global.CategoryRender.renderStatus(refs, {
       loading: true,
       error: "",
@@ -333,6 +341,8 @@
         error: "",
         empty: list.length === 0
       });
+      state.hasLoadedOnce = true;
+      setGlobalLoading(false);
     } catch (err) {
       if (err && err.name === "AbortError") return;
 
@@ -348,6 +358,7 @@
         error: (err && err.message) || "产品数据加载失败，请稍后重试。",
         empty: false
       });
+      setGlobalLoading(false);
     }
   }
 
@@ -373,6 +384,7 @@
       bindPopState();
       loadProducts({ syncHistory: true, replaceHistory: true });
     } catch (err) {
+      setGlobalLoading(false);
       refs.loadingState.hidden = true;
       refs.errorState.hidden = false;
       refs.errorState.textContent = (err && err.message) || "初始化失败，请检查配置文件。";

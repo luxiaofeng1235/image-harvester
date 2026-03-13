@@ -271,9 +271,8 @@
     var error = payload.error || "";
     var empty = !!payload.empty;
     var hasExistingCards = !!(refs.productGrid && refs.productGrid.children && refs.productGrid.children.length);
-    var showBlockingLoading = loading && !hasExistingCards;
 
-    refs.loadingState.hidden = !showBlockingLoading;
+    refs.loadingState.hidden = true;
 
     if (error) {
       refs.errorState.hidden = false;
