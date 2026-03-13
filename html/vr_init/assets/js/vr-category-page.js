@@ -56,10 +56,11 @@
   }
 
   function getDetailBase() {
-    return (
-      (refs.root && refs.root.getAttribute("data-detail-base")) ||
-      "../article/detail.local.html"
-    );
+    var configured = refs.root && refs.root.getAttribute("data-detail-base");
+    if (configured && String(configured).trim()) {
+      return String(configured).trim();
+    }
+    return "https://www.zgzonre.com/detail-base";
   }
 
   function getRootCategoryId() {
