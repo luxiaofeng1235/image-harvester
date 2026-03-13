@@ -193,6 +193,124 @@
     }
   }
 
+  function buildCategoryMap(categories) {
+    var categoryMap = {};
+    (categories || []).forEach(function (item) {
+      var id = Number(item && item.id) || 0;
+      if (id > 0) {
+        categoryMap[id] = item;
+      }
+    });
+    return categoryMap;
+  }
+
+  function getCategoryDepth(category, categoryMap) {
+    var depth = 0;
+    var current = category;
+    var visited = {};
+
+    while (current && !visited[current.id]) {
+      visited[current.id] = true;
+      depth += 1;
+
+      var parentId = Number(current.parent) || 0;
+      if (!parentId) {
+        break;
+      }
+
+      current = categoryMap[parentId] || null;
+    }
+
+    return depth;
+  }
+
+  function findPrimaryCategory(postCategories, categories, categoryMap) {
+    var requestedIndexMap = {};
+    (postCategories || []).forEach(function (id, index) {
+      var numericId = Number(id) || 0;
+      if (numericId > 0 && requestedIndexMap[numericId] === undefined) {
+        requestedIndexMap[numericId] = index;
+      }
+    });
+
+    var selected = null;
+    var selectedDepth = -1;
+    var selectedIndex = Number.MAX_SAFE_INTEGER;
+
+    (categories || []).forEach(function (item) {
+      var itemId = Number(item && item.id) || 0;
+      if (requestedIndexMap[itemId] === undefined) {
+        return;
+      }
+
+      var depth = getCategoryDepth(item, categoryMap);
+      var itemIndex = requestedIndexMap[itemId];
+
+      if (
+        depth > selectedDepth ||
+        (depth === selectedDepth && itemIndex < selectedIndex)
+      ) {
+        selected = item;
+        selectedDepth = depth;
+        selectedIndex = itemIndex;
+      }
+    });
+
+    return selected || (categories && categories[0]) || null;
+  }
+
+  function buildCategoryTrail(targetCategory, categoryMap) {
+    if (!targetCategory) {
+      return [];
+    }
+
+    var trail = [];
+    var current = targetCategory;
+    var visited = {};
+
+    while (current && !visited[current.id]) {
+      visited[current.id] = true;
+      trail.unshift(current);
+
+      var parentId = Number(current.parent) || 0;
+      if (!parentId) {
+        break;
+      }
+
+      current = categoryMap[parentId] || null;
+    }
+
+    return trail;
+  }
+
+  function buildCategoryTrailItems(trail, mainGroup, config) {
+    if (!Array.isArray(trail) || !trail.length) {
+      return [];
+    }
+
+    var isVrGroup = !!(mainGroup && mainGroup.type === "vr");
+    var vrFallbackUrl =
+      (config && config.vrFallbackListUrl) || DEFAULT_VR_FALLBACK_LIST_URL;
+    var fallbackUrl = (mainGroup && mainGroup.fallbackUrl) || "";
+
+    return trail.map(function (category, index) {
+      var href = "";
+
+      if (isVrGroup) {
+        href = index === 0 ? vrFallbackUrl : "";
+      } else if (fallbackUrl) {
+        href = index === 0 ? fallbackUrl : buildSubCategoryUrl(fallbackUrl, category.id);
+      }
+
+      return {
+        id: Number(category.id) || 0,
+        name: category.name || "",
+        href: href,
+        isCurrent: index === trail.length - 1
+      };
+    });
+  }
+
   function mapSharedMainCategoryGroups(sharedConfig, fallbackListUrl) {
     var mainCategories =
       sharedConfig && Array.isArray(sharedConfig.mainCategories)
@@ -235,69 +353,56 @@
 
   function resolveCategoryState(postCategories, categories, config) {
     var vrRootCategoryId = Number(config && config.vrRootCategoryId) || 0;
-    if (vrRootCategoryId && postCategories.indexOf(vrRootCategoryId) !== -1) {
-      var vrRootCategory =
-        categories.find(function (item) {
-          return Number(item.id) === vrRootCategoryId;
-        }) || {
-          id: vrRootCategoryId,
-          name: (config && config.vrRootCategoryName) || VR_ROOT_CATEGORY_NAME,
-          parent: 0,
-          slug: "vr",
-          count: 0
-        };
+    var categoryMap = buildCategoryMap(categories);
+    var primaryCategory = findPrimaryCategory(postCategories, categories, categoryMap);
+    var categoryTrail = buildCategoryTrail(primaryCategory, categoryMap);
+    var rootCategory = categoryTrail[0] || null;
+    var isVrArticle = vrRootCategoryId && postCategories.indexOf(vrRootCategoryId) !== -1;
 
-      return {
-        firstCategory: vrRootCategory,
-        childCategory: null,
-        parentCategory: vrRootCategory,
-        mainGroup: {
-          id: vrRootCategoryId,
-          type: "vr",
-          name: vrRootCategory.name || ((config && config.vrRootCategoryName) || VR_ROOT_CATEGORY_NAME),
-          categoryIds: [vrRootCategoryId],
-          fallbackUrl: (config && config.vrFallbackListUrl) || DEFAULT_VR_FALLBACK_LIST_URL
-        },
-        parentCategoryUrl: (config && config.vrFallbackListUrl) || DEFAULT_VR_FALLBACK_LIST_URL,
-        childCategoryUrl: ""
+    var group = null;
+    if (isVrArticle) {
+      var vrRootCategory = categoryMap[vrRootCategoryId] || rootCategory || {
+        id: vrRootCategoryId,
+        name: (config && config.vrRootCategoryName) || VR_ROOT_CATEGORY_NAME,
+        parent: 0,
+        slug: "vr",
+        count: 0
       };
-    }
 
-    var childCategory =
-      categories.find(function (item) {
-        return Number(item.parent) > 0;
-      }) || null;
-
-    var parentCategory =
-      categories.find(function (item) {
-        return Number(item.parent) === 0;
-      }) || null;
-
-    if (!parentCategory && childCategory) {
-      parentCategory =
-        categories.find(function (item) {
-          return Number(item.id) === Number(childCategory.parent);
-        }) || null;
-    }
-
-    var group =
-      (config.mainCategoryGroups || []).find(function (item) {
+      group = {
+        id: vrRootCategoryId,
+        type: "vr",
+        name:
+          vrRootCategory.name ||
+          ((config && config.vrRootCategoryName) || VR_ROOT_CATEGORY_NAME),
+        categoryIds: [vrRootCategoryId],
+        fallbackUrl:
+          (config && config.vrFallbackListUrl) || DEFAULT_VR_FALLBACK_LIST_URL
+      };
+    } else {
+      group =
+        (config.mainCategoryGroups || []).find(function (item) {
         return (
-          Number(item.id) === Number(parentCategory && parentCategory.id) ||
+          Number(item.id) === Number(rootCategory && rootCategory.id) ||
           item.categoryIds.some(function (id) {
             return postCategories.indexOf(Number(id)) !== -1;
           })
         );
-      }) || null;
+        }) || null;
+    }
+
+    var trailItems = buildCategoryTrailItems(categoryTrail, group, config);
 
     return {
-      firstCategory: categories[0] || null,
-      childCategory: childCategory,
-      parentCategory: parentCategory,
+      firstCategory: categoryTrail[0] || categories[0] || null,
+      firstCategoryUrl: trailItems[0] ? trailItems[0].href : "",
+      childCategory: categoryTrail.length > 1 ? categoryTrail[categoryTrail.length - 1] : null,
+      parentCategory: categoryTrail[0] || null,
       mainGroup: group,
-      parentCategoryUrl: group ? group.fallbackUrl : "",
+      parentCategoryUrl: trailItems[0] ? trailItems[0].href : "",
       childCategoryUrl:
-        group && childCategory ? buildSubCategoryUrl(group.fallbackUrl, childCategory.id) : ""
+        trailItems.length > 1 ? trailItems[trailItems.length - 1].href : "",
+      categoryTrail: trailItems
     };
   }
 

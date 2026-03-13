@@ -1,7 +1,7 @@
 (function (global) {
   "use strict";
 
-  var CATEGORY_CACHE_PREFIX = "zr:article-detail:category-index:";
+  var CATEGORY_CACHE_PREFIX = "zr:article-detail:category-index:v2:";
   var CATEGORY_CACHE_TTL = 60 * 60 * 1000;
 
   function buildUrl(base, path) {
@@ -39,20 +39,11 @@
   }
 
   function buildCategoryIndex(items) {
-    var categories = Array.isArray(items) ? items.map(simplifyCategory).filter(function (item) {
-      return item.id > 0 && item.name;
-    }) : [];
-
-    var topLevelIdMap = {};
-    categories.forEach(function (item) {
-      if (item.parent === 0) {
-        topLevelIdMap[item.id] = true;
-      }
-    });
-
-    return categories.filter(function (item) {
-      return item.parent === 0 || topLevelIdMap[item.parent];
-    });
+    return Array.isArray(items)
+      ? items.map(simplifyCategory).filter(function (item) {
+          return item.id > 0 && item.name;
+        })
+      : [];
   }
 
   function pickCategoriesFromIndex(items, categoryIds) {
@@ -79,13 +70,18 @@
     }
 
     requestedIds.forEach(function (id) {
-      appendCategory(id);
-    });
+      var currentId = Number(id) || 0;
+      var visited = {};
 
-    requestedIds.forEach(function (id) {
-      var item = categoryMap[id];
-      if (item && item.parent > 0) {
-        appendCategory(item.parent);
+      while (currentId && !visited[currentId]) {
+        visited[currentId] = true;
+        appendCategory(currentId);
+
+        if (!categoryMap[currentId] || Number(categoryMap[currentId].parent) <= 0) {
+          break;
+        }
+
+        currentId = Number(categoryMap[currentId].parent) || 0;
       }
     });
 

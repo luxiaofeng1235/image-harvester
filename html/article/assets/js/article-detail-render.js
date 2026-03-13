@@ -48,32 +48,46 @@
       trail.appendChild(separator);
     }
 
-    function appendLink(name, href, isCurrent) {
+    function appendItem(name, href, isCurrent) {
       if (!name) return;
 
-      var link = document.createElement("a");
-      link.className = "zr-article-category-link" + (isCurrent ? " is-current" : "");
-      link.href = href || "#";
-      link.textContent = name;
-      trail.appendChild(link);
+      var node = href ? document.createElement("a") : document.createElement("span");
+      node.className = "zr-article-category-link" + (isCurrent ? " is-current" : "");
+      if (href) {
+        node.href = href;
+      }
+      node.textContent = name;
+      trail.appendChild(node);
+    }
+
+    var trailItems = Array.isArray(payload.categoryTrail) ? payload.categoryTrail : [];
+
+    if (trailItems.length) {
+      trailItems.forEach(function (item, index) {
+        if (index > 0) {
+          appendSeparator();
+        }
+        appendItem(item.name, item.href, !!item.isCurrent);
+      });
+      return;
     }
 
     var hasParent = payload.parentCategory && payload.parentCategory.name;
     var hasChild = payload.childCategory && payload.childCategory.name;
 
     if (hasParent) {
-      appendLink(payload.parentCategory.name, payload.parentCategoryUrl, !hasChild);
+      appendItem(payload.parentCategory.name, payload.parentCategoryUrl, !hasChild);
     }
 
     if (hasChild) {
       if (trail.childNodes.length > 0) {
         appendSeparator();
       }
-      appendLink(payload.childCategory.name, payload.childCategoryUrl, true);
+      appendItem(payload.childCategory.name, payload.childCategoryUrl, true);
     }
 
     if (!hasParent && !hasChild && payload.firstCategory && payload.firstCategory.name) {
-      appendLink(payload.firstCategory.name, payload.firstCategoryUrl || "", true);
+      appendItem(payload.firstCategory.name, payload.firstCategoryUrl || "", true);
     }
   }
 
