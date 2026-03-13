@@ -51,6 +51,21 @@
     }
   }
 
+  function resetPanelDisplay(panel) {
+    if (!panel) {
+      return;
+    }
+    panel.style.removeProperty("display");
+  }
+
+  function clearInlinePanels(exceptPanel) {
+    document.querySelectorAll(".wpsidebar02 .fkf-item-right").forEach(function (node) {
+      if (node !== exceptPanel) {
+        resetPanelDisplay(node);
+      }
+    });
+  }
+
   function bindEventsOnce() {
     if (window.__zrCategorySidebarBound) return;
     window.__zrCategorySidebarBound = true;
@@ -71,17 +86,17 @@
         if (!panel) return;
         event.preventDefault();
         event.stopPropagation();
-        document.querySelectorAll(".wpsidebar02 .fkf-item-right").forEach(function (node) {
-          if (node !== panel) node.style.display = "none";
-        });
-        panel.style.display = panel.style.display === "none" || panel.style.display === "" ? "block" : "none";
+        clearInlinePanels(panel);
+        if (panel.style.display === "block") {
+          resetPanelDisplay(panel);
+        } else {
+          panel.style.display = "block";
+        }
         return;
       }
 
       if (!event.target.closest(".wpsidebar02 .fkf-item-right")) {
-        document.querySelectorAll(".wpsidebar02 .fkf-item-right").forEach(function (node) {
-          node.style.display = "none";
-        });
+        clearInlinePanels();
       }
     }, true);
   }
