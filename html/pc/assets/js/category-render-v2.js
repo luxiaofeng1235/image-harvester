@@ -270,8 +270,10 @@
     var loading = !!payload.loading;
     var error = payload.error || "";
     var empty = !!payload.empty;
+    var hasExistingCards = !!(refs.productGrid && refs.productGrid.children && refs.productGrid.children.length);
+    var showBlockingLoading = loading && !hasExistingCards;
 
-    refs.loadingState.hidden = !loading;
+    refs.loadingState.hidden = !showBlockingLoading;
 
     if (error) {
       refs.errorState.hidden = false;
@@ -284,7 +286,7 @@
     refs.emptyState.hidden = !empty;
 
     var showGrid = !loading && !error && !empty;
-    refs.productGrid.hidden = !showGrid;
+    refs.productGrid.hidden = !showGrid && !hasExistingCards;
     if (!showGrid) refs.pagination.hidden = true;
   }
 

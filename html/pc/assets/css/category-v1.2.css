@@ -244,14 +244,14 @@
 }
 
 .zr-cat-loading-mask {
-  position: absolute;
-  inset: 56px 0 0;
+  position: fixed;
+  inset: 0;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding-top: 48px;
-  background: rgba(239, 239, 239, 0.72);
-  z-index: 2;
+  padding: 24px;
+  background: rgba(239, 239, 239, 0.42);
+  z-index: 1000;
 }
 
 .zr-cat-loading-panel {
@@ -283,6 +283,14 @@
   margin: 0;
   color: var(--subtle-text);
   font-size: 14px;
+}
+
+#zr-cat-loading-state[hidden],
+#zr-cat-error-state[hidden],
+#zr-cat-empty-state[hidden],
+#zr-cat-product-grid[hidden],
+#zr-cat-pagination[hidden] {
+  display: none !important;
 }
 
 .zr-cat-state-card {
