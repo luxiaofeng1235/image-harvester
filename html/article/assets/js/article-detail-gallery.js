@@ -162,10 +162,30 @@
     return !collectImagesFromElement(node).length && !getElementMeaningfulText(node);
   }
 
-  function findLeadingGalleryItems(root, maxCount) {
+  function appendImagesFromNode(items, node, maxCount, seen) {
+    var images = collectImagesFromElement(node);
+
+    for (var i = 0; i < images.length && items.length < maxCount; i += 1) {
+      var image = images[i];
+      var src = normalizeImageSrc(image);
+
+      if (!src || seen[src]) {
+        continue;
+      }
+
+      seen[src] = true;
+      items.push({
+        src: src,
+        alt: image.getAttribute("alt") || "",
+        removableNode: node,
+        imageNode: image
+      });
+    }
+  }
+
+  function extractLeadingGalleryItems(container, maxCount, seen) {
     var items = [];
-    var seen = {};
-    var nodes = Array.prototype.slice.call(root.childNodes);
+    var nodes = Array.prototype.slice.call(container.childNodes || []);
 
     for (var i = 0; i < nodes.length && items.length < maxCount; i += 1) {
       var node = nodes[i];
@@ -175,35 +195,47 @@
       }
 
       if (node.nodeType !== Node.ELEMENT_NODE) {
-        break;
+        return {
+          items: items,
+          stoppedByContent: true
+        };
       }
 
       var images = collectImagesFromElement(node);
       var meaningfulText = getElementMeaningfulText(node);
 
-      if (!images.length || meaningfulText) {
-        break;
+      if (images.length && !meaningfulText) {
+        appendImagesFromNode(items, node, maxCount, seen);
+        continue;
       }
 
-      for (var j = 0; j < images.length && items.length < maxCount; j += 1) {
-        var image = images[j];
-        var src = normalizeImageSrc(image);
-
-        if (!src || seen[src]) {
-          continue;
+      var nested = extractLeadingGalleryItems(node, maxCount - items.length, seen);
+      if (nested.items.length) {
+        items = items.concat(nested.items);
+        if (nested.stoppedByContent || items.length >= maxCount) {
+          return {
+            items: items,
+            stoppedByContent: true
+          };
         }
-
-        seen[src] = true;
-        items.push({
-          src: src,
-          alt: image.getAttribute("alt") || "",
-          removableNode: node,
-          imageNode: image
-        });
+        continue;
       }
+
+      return {
+        items: items,
+        stoppedByContent: true
+      };
     }
 
-    return items;
+    return {
+      items: items,
+      stoppedByContent: false
+    };
+  }
+
+  function findLeadingGalleryItems(root, maxCount) {
+    var seen = {};
+    return extractLeadingGalleryItems(root, maxCount, seen).items;
   }
 
   function removeExtractedNodes(items) {
