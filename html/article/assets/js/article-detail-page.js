@@ -6,7 +6,7 @@
   var DEFAULT_ARTICLE_ID = 395;
   var DEFAULT_API_BASE = "https://www.zgzonre.com/wp-json/wp/v2/";
   var DEFAULT_FALLBACK_LIST_URL = "https://www.zgzonre.com/product";
-  var DEFAULT_VR_FALLBACK_LIST_URL = "https://www.zgzonre.com/index-more";
+  var DEFAULT_VR_FALLBACK_LIST_URL = "https://www.zgzonre.com/vr-category-list";
   var VR_ROOT_CATEGORY_ID = 66;
   var VR_ROOT_CATEGORY_NAME = "VR展示";
   var DEFAULT_COVER_IMAGE = "https://www.zgzonre.com/wp-content/uploads/2026/03/wysm.png";
@@ -193,6 +193,41 @@
     }
   }
 
+  function buildVrCategoryUrl(baseUrl, secondId, thirdId) {
+    if (!baseUrl) {
+      return "";
+    }
+
+    try {
+      var parsed = new URL(baseUrl, window.location.href);
+      parsed.searchParams.delete("open");
+      parsed.searchParams.delete("cat");
+      parsed.searchParams.delete("sub");
+
+      if (secondId) {
+        parsed.searchParams.set("cat", String(secondId));
+      }
+
+      if (thirdId) {
+        parsed.searchParams.set("sub", String(thirdId));
+      }
+
+      return parsed.href;
+    } catch (_error) {
+      var query = [];
+      if (secondId) {
+        query.push("cat=" + encodeURIComponent(String(secondId)));
+      }
+      if (thirdId) {
+        query.push("sub=" + encodeURIComponent(String(thirdId)));
+      }
+      if (!query.length) {
+        return baseUrl;
+      }
+      return baseUrl + (baseUrl.indexOf("?") === -1 ? "?" : "&") + query.join("&");
+    }
+  }
+
   function buildCategoryMap(categories) {
     var categoryMap = {};
     (categories || []).forEach(function (item) {
@@ -297,7 +332,18 @@
       var href = "";
 
       if (isVrGroup) {
-        href = index === 0 ? vrFallbackUrl : "";
+        if (index === 0) {
+          href = vrFallbackUrl;
+        } else if (index === 1) {
+          href = buildVrCategoryUrl(vrFallbackUrl, category.id, "");
+        } else {
+          var secondLevel = trail[1];
+          href = buildVrCategoryUrl(
+            vrFallbackUrl,
+            secondLevel ? secondLevel.id : "",
+            category.id
+          );
+        }
       } else if (fallbackUrl) {
         href = index === 0 ? fallbackUrl : buildSubCategoryUrl(fallbackUrl, category.id);
       }

@@ -147,6 +147,11 @@
     return match ? match[1] : "";
   }
 
+  function buildDetailUrl(id) {
+    if (!id) return "#";
+    return "https://www.zgzonre.com/detail-base?article_id=" + encodeURIComponent(String(id));
+  }
+
   function normalizePost(post) {
     var title = decodeHtml(post && post.title ? post.title.rendered : "").trim();
     var excerpt = stripHtml(post && post.excerpt ? post.excerpt.rendered : "");
@@ -155,23 +160,13 @@
     var summary = excerpt || contentText;
     if (summary.length > 90) summary = summary.slice(0, 90) + "...";
 
-    var link = post && post.link ? post.link : "";
-    var slug = post && post.slug ? post.slug : "";
     var id = post && post.id ? post.id : "";
-
-    if (!link) {
-      if (slug) {
-        link = "https://www.zgzonre.com/index.php/" + slug + "/";
-      } else if (id) {
-        link = "https://www.zgzonre.com/?p=" + id;
-      }
-    }
 
     return {
       id: id,
       title: title || "未命名文章",
       summary: summary,
-      link: link,
+      link: buildDetailUrl(id),
       imageUrl: getFeaturedImage(post),
       categories: Array.isArray(post && post.categories) ? post.categories : []
     };
