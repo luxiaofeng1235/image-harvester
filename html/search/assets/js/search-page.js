@@ -240,9 +240,11 @@
     }
 
     refs.pagination.hidden = false;
-    refs.pagination.appendChild(
-      createPageButton("上一页", currentPage - 1, false, currentPage <= 1, keyword)
-    );
+    if (currentPage > 1) {
+      refs.pagination.appendChild(
+        createPageButton("上一页", currentPage - 1, false, false, keyword)
+      );
+    }
 
     buildVisiblePages(currentPage, totalPages).forEach(function (entry) {
       if (typeof entry === "string") {
@@ -260,6 +262,10 @@
 
     refs.pagination.appendChild(
       createPageButton("下一页", currentPage + 1, false, currentPage >= totalPages, keyword)
+    );
+
+    refs.pagination.appendChild(
+      createPageButton("末页", totalPages, false, currentPage >= totalPages, keyword)
     );
   }
 
