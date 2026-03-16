@@ -136,6 +136,12 @@
     image.src = getFeaturedImage(post);
     image.alt = stripHtml(post.title && post.title.rendered) || "搜索结果封面";
     image.loading = "lazy";
+    image.addEventListener("error", function () {
+      var fallback = getDefaultCover();
+      if (image.src !== fallback) {
+        image.src = fallback;
+      }
+    }, { once: true });
     media.appendChild(image);
 
     var body = document.createElement("div");
