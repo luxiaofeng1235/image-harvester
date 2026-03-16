@@ -1,6 +1,8 @@
 (function (global) {
   "use strict";
 
+  var PAGE_QUERY_KEYS = ["pg", "spage", "pageno", "page", "paged"];
+
   var refs = {
     root: document.querySelector(".zr-search-app"),
     form: document.getElementById("zr-search-form"),
@@ -37,7 +39,18 @@
 
   function getPageFromSearch() {
     var params = new URLSearchParams(global.location.search || "");
-    var value = Number(params.get("page") || "1");
+    var raw = "1";
+
+    PAGE_QUERY_KEYS.some(function (key) {
+      var value = params.get(key);
+      if (hasQueryValue(value)) {
+        raw = value;
+        return true;
+      }
+      return false;
+    });
+
+    var value = Number(raw || "1");
     return Number.isInteger(value) && value > 0 ? value : 1;
   }
 
@@ -306,11 +319,19 @@
     var url = new URL(global.location.href);
     if (hasQueryValue(keyword)) {
       url.searchParams.set("q", String(keyword).trim());
-      url.searchParams.set("page", String(page || 1));
+      PAGE_QUERY_KEYS.forEach(function (key) {
+        url.searchParams.delete(key);
+      });
+
+      if (Number(page || 1) > 1) {
+        url.searchParams.set("pg", String(page));
+      }
     } else {
       url.searchParams.delete("q");
-      url.searchParams.delete("page");
       url.searchParams.delete("s");
+      PAGE_QUERY_KEYS.forEach(function (key) {
+        url.searchParams.delete(key);
+      });
     }
     global.location.href = url.href;
   }
