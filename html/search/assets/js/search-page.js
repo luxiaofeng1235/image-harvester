@@ -87,7 +87,9 @@
       "日 " +
       String(date.getHours()).padStart(2, "0") +
       ":" +
-      String(date.getMinutes()).padStart(2, "0")
+      String(date.getMinutes()).padStart(2, "0") +
+      ":" +
+      String(date.getSeconds()).padStart(2, "0")
     );
   }
 
@@ -267,7 +269,7 @@
     refs.empty.hidden = true;
     refs.results.hidden = true;
     refs.pagination.hidden = true;
-    refs.summary.textContent = keyword ? "正在搜索 “" + keyword + "” ..." : "请输入关键词开始搜索。";
+    refs.summary.textContent = keyword ? "正在搜索标题 “" + keyword + "” ..." : "请输入标题关键词开始搜索。";
   }
 
   function showError(message) {
@@ -285,7 +287,7 @@
     refs.pagination.hidden = true;
     refs.error.hidden = true;
     refs.empty.hidden = false;
-    refs.empty.textContent = keyword ? "没有找到与 “" + keyword + "” 相关的内容。" : "请输入关键词开始搜索。";
+    refs.empty.textContent = keyword ? "没有找到标题包含 “" + keyword + "” 的内容。" : "请输入标题关键词开始搜索。";
   }
 
   function navigate(keyword, page) {

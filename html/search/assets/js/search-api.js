@@ -24,6 +24,7 @@
   function fetchPosts(apiBase, keyword, page, perPage) {
     var params = new URLSearchParams();
     params.set("search", String(keyword || "").trim());
+    params.append("search_columns[]", "post_title");
     params.set("page", String(page || 1));
     params.set("per_page", String(perPage || 10));
     params.set("_embed", "1");
