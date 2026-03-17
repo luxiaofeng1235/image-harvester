@@ -195,7 +195,7 @@
 
 .zr-webdev-benefits {
   padding-top: 114px;
-  padding-bottom: 72px;
+  padding-bottom: 0;
 }
 
 .zr-webdev-benefit-grid {
@@ -472,7 +472,7 @@
 
   .zr-webdev-benefits {
     padding-top: 82px;
-    padding-bottom: 56px;
+    padding-bottom: 0;
   }
 
   .zr-webdev-benefit-column h3 {
