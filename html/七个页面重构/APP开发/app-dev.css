@@ -1,0 +1,451 @@
+@import url("https://static.jsss999.com/upload/zrsite/app/HarmonyOS_Sans.css");
+
+.zr-appdev-preview-body {
+  margin: 0;
+  background: #ffffff;
+}
+
+.zr-appdev-page {
+  --zr-appdev-shell-width: 1500px;
+  --zr-appdev-text: #111111;
+  --zr-appdev-muted: #666666;
+  --zr-appdev-line: #111111;
+  --zr-appdev-soft: rgba(255, 255, 255, 0.2);
+  --zr-appdev-soft-border: rgba(255, 255, 255, 0.16);
+  background: #ffffff;
+  color: var(--zr-appdev-text);
+  font-family: "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+.zr-appdev-page,
+.zr-appdev-page * {
+  box-sizing: border-box;
+}
+
+.zr-appdev-page img {
+  display: block;
+  max-width: 100%;
+}
+
+.zr-appdev-page p:empty {
+  display: none !important;
+  margin: 0 !important;
+}
+
+.zr-appdev-page + br {
+  display: none !important;
+}
+
+.zr-appdev-page > p,
+.zr-appdev-shell > p,
+.zr-appdev-hero-shell > p,
+.zr-appdev-case-grid > p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.zr-appdev-page {
+  width: 100%;
+}
+
+.zr-appdev-shell {
+  width: min(var(--zr-appdev-shell-width), calc(100vw - 32px));
+  margin: 0 auto;
+}
+
+.zr-appdev-hero {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.08)),
+    url("https://static.jsss999.com/upload/zrsite/app/4e0484db67bfba51cbf23bc7403f81a.png") center center / cover no-repeat;
+}
+
+.zr-appdev-hero-shell {
+  position: relative;
+  min-height: 869px;
+}
+
+.zr-appdev-hero-copy {
+  position: absolute;
+  top: 136px;
+  left: 50%;
+  width: min(876px, calc(100vw - 96px));
+  transform: translateX(-50%);
+  text-align: center;
+  color: #ffffff;
+  z-index: 3;
+}
+
+.zr-appdev-hero-kicker {
+  margin: 18px 0 0;
+  font-family: "HarmonyOSSansCNRegular", "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 23px;
+  line-height: 1.3;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #ffffff;
+}
+
+.zr-appdev-hero-copy h1 {
+  margin: 0;
+  font-family: "HarmonyOSSansCNBlack", "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 41px;
+  font-weight: 400;
+  letter-spacing: 4px;
+  line-height: 1.2;
+  color: #ffffff !important;
+}
+
+.zr-appdev-hero-visual {
+  position: absolute;
+  top: 273px;
+  left: 50%;
+  width: min(1500px, 100%);
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.zr-appdev-pill {
+  position: absolute;
+  z-index: 2;
+  min-width: 286px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: "HarmonyOSSansCNMedium", "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  color: #ffffff;
+  font-size: 24px;
+  line-height: 1.45;
+  font-weight: 400;
+  text-align: center;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.zr-appdev-pill-traffic {
+  top: 282px;
+  left: 3px;
+  max-width: 352px;
+  letter-spacing: 2px;
+}
+
+.zr-appdev-pill-grow {
+  top: 554px;
+  left: 65px;
+  min-width: 302px;
+}
+
+.zr-appdev-pill-rebuild {
+  top: 300px;
+  right: 182px;
+  min-width: 290px;
+  letter-spacing: 1px;
+}
+
+.zr-appdev-pill-upgrade {
+  top: 578px;
+  right: 0;
+  min-width: 505px;
+  letter-spacing: 3px;
+}
+
+.zr-appdev-section {
+  padding-top: 31px;
+}
+
+.zr-appdev-section-head {
+  margin: 0 auto 42px;
+  text-align: center;
+}
+
+.zr-appdev-section-head h2 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #111111;
+}
+
+.zr-appdev-section-head p {
+  margin: 10px auto 0;
+  font-size: 23px;
+  line-height: 1.6;
+  letter-spacing: 3px;
+  color: #111111;
+}
+
+.zr-appdev-success .zr-appdev-section-head {
+  margin-bottom: 56px;
+}
+
+.zr-appdev-diverse .zr-appdev-section-head {
+  margin-bottom: 61px;
+}
+
+.zr-appdev-case-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 34px;
+  row-gap: 22px;
+}
+
+.zr-appdev-case-card {
+  text-align: center;
+}
+
+.zr-appdev-case-card h3 {
+  margin: 16px 0 0;
+  font-size: 25px;
+  line-height: 1.35;
+  font-weight: 700;
+  color: #111111;
+}
+
+.zr-appdev-case-card p {
+  margin: 8px auto 0;
+  max-width: 320px;
+  font-size: 23px;
+  line-height: 1.4;
+  color: var(--zr-appdev-muted);
+}
+
+.zr-appdev-portrait-media {
+  position: relative;
+  border: 2px solid var(--zr-appdev-line);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.zr-appdev-portrait-media::before {
+  content: "";
+  display: block;
+  padding-top: calc(737 / 347 * 100%);
+}
+
+.zr-appdev-portrait-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.zr-appdev-portrait-img-lift-sm {
+  transform: translateY(-7px);
+  height: calc(100% + 7px) !important;
+}
+
+.zr-appdev-portrait-img-lift-xs {
+  transform: translateY(-2px);
+  height: calc(100% + 2px) !important;
+}
+
+.zr-appdev-wide-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 58px;
+  row-gap: 34px;
+}
+
+.zr-appdev-wide-card {
+  text-align: center;
+}
+
+.zr-appdev-wide-card h3 {
+  margin: 18px 0 0;
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 500;
+  color: #111111;
+}
+
+.zr-appdev-wide-media {
+  position: relative;
+  border: 3px solid var(--zr-appdev-line);
+  border-radius: 30px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.zr-appdev-wide-media::before {
+  content: "";
+  display: block;
+  padding-top: calc(422 / 715 * 100%);
+}
+
+.zr-appdev-wide-media img {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: auto;
+}
+
+.zr-appdev-wide-media img.zr-appdev-wide-top-shift {
+  top: -32px;
+}
+
+.zr-appdev-diverse {
+  padding-top: 67px;
+  padding-bottom: 0;
+}
+
+/* WordPress/主题全局样式防覆盖 */
+.zr-appdev-page .zr-appdev-hero-copy,
+.zr-appdev-page .zr-appdev-hero-copy h1,
+.zr-appdev-page .zr-appdev-hero-kicker,
+.zr-appdev-page .zr-appdev-pill {
+  color: #ffffff !important;
+}
+
+.zr-appdev-page .zr-appdev-hero-copy h1 {
+  font-family: "HarmonyOSSansCNBlack", "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif !important;
+  font-size: 41px !important;
+  font-weight: 400 !important;
+  letter-spacing: 4px !important;
+  line-height: 1.2 !important;
+}
+
+.zr-appdev-page .zr-appdev-hero-kicker {
+  font-family: "HarmonyOSSansCNRegular", "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif !important;
+  font-size: 23px !important;
+  font-weight: 400 !important;
+  line-height: 1.3 !important;
+}
+
+.zr-appdev-page .zr-appdev-pill {
+  font-family: "HarmonyOSSansCNMedium", "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif !important;
+  font-size: 24px !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+}
+
+.zr-appdev-page .zr-appdev-section-head h2,
+.zr-appdev-page .zr-appdev-wide-card h3,
+.zr-appdev-page .zr-appdev-case-card h3 {
+  color: #111111 !important;
+}
+
+.zr-appdev-page .zr-appdev-section-head p {
+  color: #111111 !important;
+}
+
+.zr-appdev-page .zr-appdev-case-card p {
+  color: #666666 !important;
+}
+
+@media (max-width: 1280px) {
+  .zr-appdev-hero-shell {
+    min-height: 780px;
+  }
+
+  .zr-appdev-hero-visual {
+    top: 316px;
+    width: min(1320px, calc(100vw - 24px));
+  }
+
+  .zr-appdev-pill {
+    min-width: 248px;
+    font-size: 21px;
+  }
+
+  .zr-appdev-pill-traffic {
+    left: 0;
+  }
+
+  .zr-appdev-pill-rebuild {
+    right: 70px;
+  }
+}
+
+@media (max-width: 960px) {
+  .zr-appdev-shell {
+    width: min(var(--zr-appdev-shell-width), calc(100vw - 24px));
+  }
+
+  .zr-appdev-hero-shell {
+    min-height: auto;
+    padding: 80px 0 56px;
+  }
+
+  .zr-appdev-hero-copy {
+    position: static;
+    width: 100%;
+    transform: none;
+    padding: 0 12px;
+  }
+
+  .zr-appdev-hero-copy h1 {
+    font-size: 33px;
+    letter-spacing: 2px;
+  }
+
+  .zr-appdev-hero-kicker {
+    font-size: 18px;
+  }
+
+  .zr-appdev-hero-desc {
+    font-size: 18px;
+    letter-spacing: 1px;
+  }
+
+  .zr-appdev-hero-visual {
+    position: static;
+    transform: none;
+    width: 100%;
+    margin-top: 28px;
+  }
+
+  .zr-appdev-pill {
+    position: static;
+    width: min(100%, 520px);
+    min-width: 0;
+    margin: 14px auto 0;
+    font-size: 18px;
+    backdrop-filter: none;
+  }
+
+  .zr-appdev-section {
+    padding-top: 72px;
+  }
+
+  .zr-appdev-case-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .zr-appdev-wide-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .zr-appdev-section-head p {
+    font-size: 18px;
+    letter-spacing: 1px;
+  }
+
+  .zr-appdev-case-card p {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .zr-appdev-case-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .zr-appdev-section-head h2 {
+    font-size: 28px;
+  }
+
+  .zr-appdev-case-card h3,
+  .zr-appdev-wide-card h3 {
+    font-size: 22px;
+  }
+
+  .zr-appdev-case-card p {
+    font-size: 16px;
+  }
+}
