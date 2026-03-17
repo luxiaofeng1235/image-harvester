@@ -137,12 +137,12 @@
 
 .zr-ai3d-section-head {
   width: min(920px, calc(100vw - 80px));
-  margin: 0 auto 46px;
+  margin: 0 auto 48px;
   text-align: center;
 }
 
 .zr-ai3d-section-head--compact {
-  margin-bottom: 95px;
+  margin-bottom: 47px;
 }
 
 .zr-ai3d-section-head h2 {
@@ -164,12 +164,12 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: 58px;
-  row-gap: 34px;
+  row-gap: 30px;
 }
 
 .zr-ai3d-video-card h3,
 .zr-ai3d-scene-card h3 {
-  margin: 25px 0 0;
+  margin: 26px 0 0;
   text-align: center;
   color: #000000;
 }
@@ -177,7 +177,7 @@
 .zr-ai3d-video-card h3 {
   font-size: 24px;
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 39px;
 }
 
 .zr-ai3d-video-frame {
