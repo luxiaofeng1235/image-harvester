@@ -1,0 +1,367 @@
+@import url("https://static.jsss999.com/upload/zrsite/program/HarmonyOS_Sans.css");
+
+.zr-ai3d-page {
+  --zr-ai3d-shell-width: 1500px;
+  --zr-ai3d-text: #111111;
+  --zr-ai3d-muted: #4b5563;
+  --zr-ai3d-line: #3b3b3b;
+  width: 100%;
+  background: #ffffff;
+  color: var(--zr-ai3d-text);
+  font-family: "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+.zr-ai3d-page,
+.zr-ai3d-page * {
+  box-sizing: border-box;
+}
+
+.zr-ai3d-page img {
+  display: block;
+  max-width: 100%;
+}
+
+.zr-ai3d-page p:empty {
+  display: none !important;
+  margin: 0 !important;
+}
+
+.zr-ai3d-page + br {
+  display: none !important;
+}
+
+.zr-ai3d-page > p,
+.zr-ai3d-shell > p,
+.zr-ai3d-hero-copy > p,
+.zr-ai3d-video-card > p,
+.zr-ai3d-scene-card > p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.zr-ai3d-shell {
+  width: min(var(--zr-ai3d-shell-width), calc(100vw - 32px));
+  margin: 0 auto;
+}
+
+.zr-ai3d-hero {
+  background:
+    url("https://static.jsss999.com/upload/zrsite/sanwei/851efdd669a5cc3f352d9176505208e5d78ae1aa60455-fzMWuM.jpg")
+    center center / cover no-repeat;
+}
+
+.zr-ai3d-hero .zr-ai3d-shell {
+  min-height: 1509px;
+  padding-top: 70px;
+  padding-bottom: 70px;
+}
+
+.zr-ai3d-hero-copy {
+  max-width: 1120px;
+  margin: 0 auto;
+  text-align: center;
+  color: #ffffff;
+}
+
+.zr-ai3d-hero-copy h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.5;
+  color: #ffffff !important;
+}
+
+.zr-ai3d-hero-copy p {
+  margin: 14px auto 0;
+  font-size: 23px;
+  line-height: 1.55;
+  color: #ffffff !important;
+}
+
+.zr-ai3d-evolution-list {
+  margin-top: 47px;
+  display: grid;
+  gap: 37px;
+}
+
+.zr-ai3d-evolution-row {
+  position: relative;
+  aspect-ratio: 1500 / 586;
+}
+
+.zr-ai3d-evolution-panel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.zr-ai3d-evolution-stage,
+.zr-ai3d-evolution-arrow {
+  position: absolute;
+  z-index: 2;
+}
+
+.zr-ai3d-evolution-stage {
+  top: 8.87%;
+  width: 18%;
+  height: auto;
+}
+
+.zr-ai3d-evolution-stage-1 {
+  left: 3%;
+}
+
+.zr-ai3d-evolution-stage-2 {
+  left: 33.2667%;
+}
+
+.zr-ai3d-evolution-stage-3 {
+  left: 55.3333%;
+}
+
+.zr-ai3d-evolution-stage-4 {
+  left: 77.6%;
+}
+
+.zr-ai3d-evolution-arrow {
+  top: 40.44%;
+  left: 24.0667%;
+  width: 6.7333%;
+  height: auto;
+}
+
+.zr-ai3d-section {
+  padding-top: 142px;
+}
+
+.zr-ai3d-section-head {
+  width: min(920px, calc(100vw - 80px));
+  margin: 0 auto 48px;
+  text-align: center;
+}
+
+.zr-ai3d-section-head--compact {
+  margin-bottom: 47px;
+}
+
+.zr-ai3d-section-head h2 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.5;
+  color: #000000;
+}
+
+.zr-ai3d-section-head p {
+  margin: 10px auto 0;
+  font-size: 23px;
+  line-height: 1.7;
+  color: var(--zr-ai3d-muted);
+}
+
+.zr-ai3d-video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 58px;
+  row-gap: 30px;
+}
+
+.zr-ai3d-video-card h3,
+.zr-ai3d-scene-card h3 {
+  margin: 26px 0 0;
+  text-align: center;
+  color: #000000;
+}
+
+.zr-ai3d-video-card h3 {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 39px;
+}
+
+.zr-ai3d-video-frame {
+  overflow: hidden;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  background: #000000;
+  aspect-ratio: 719 / 426;
+}
+
+.zr-ai3d-video-frame video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000000;
+}
+
+.zr-ai3d-scene {
+  padding-top: 60px;
+  padding-bottom: 0;
+}
+
+.zr-ai3d-scene-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 20px;
+  row-gap: 21px;
+}
+
+.zr-ai3d-scene-media {
+  position: relative;
+  overflow: hidden;
+  border: 3px solid var(--zr-ai3d-line);
+  border-radius: 30px;
+  background: #ffffff;
+  aspect-ratio: 354 / 246;
+}
+
+.zr-ai3d-scene-media .zr-ai3d-scene-image {
+  max-width: none;
+}
+
+.zr-ai3d-scene-image {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: auto;
+}
+
+.zr-ai3d-scene-image--crop-left {
+  left: -11.6%;
+}
+
+.zr-ai3d-scene-card h3 {
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+@media (max-width: 1280px) {
+  .zr-ai3d-hero .zr-ai3d-shell {
+    min-height: 0;
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
+
+  .zr-ai3d-hero-copy h1,
+  .zr-ai3d-section-head h2 {
+    font-size: 30px;
+  }
+
+  .zr-ai3d-hero-copy p,
+  .zr-ai3d-section-head p {
+    font-size: 20px;
+  }
+
+  .zr-ai3d-video-grid {
+    column-gap: 26px;
+  }
+}
+
+@media (max-width: 960px) {
+  .zr-ai3d-shell {
+    width: min(var(--zr-ai3d-shell-width), calc(100vw - 24px));
+  }
+
+  .zr-ai3d-hero .zr-ai3d-shell {
+    padding-top: 56px;
+    padding-bottom: 40px;
+  }
+
+  .zr-ai3d-hero-copy {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+
+  .zr-ai3d-hero-copy h1 {
+    font-size: 28px;
+  }
+
+  .zr-ai3d-hero-copy p {
+    font-size: 16px;
+    line-height: 1.75;
+  }
+
+  .zr-ai3d-evolution-list {
+    margin-top: 30px;
+    gap: 18px;
+  }
+
+  .zr-ai3d-evolution-row {
+    aspect-ratio: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 24px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 30px;
+    background: rgba(28, 31, 40, 0.72);
+    backdrop-filter: blur(6px);
+  }
+
+  .zr-ai3d-evolution-panel,
+  .zr-ai3d-evolution-arrow {
+    display: none;
+  }
+
+  .zr-ai3d-evolution-stage {
+    position: static;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .zr-ai3d-section {
+    padding-top: 82px;
+  }
+
+  .zr-ai3d-section-head {
+    width: 100%;
+    margin-bottom: 32px;
+  }
+
+  .zr-ai3d-section-head--compact {
+    margin-bottom: 36px;
+  }
+
+  .zr-ai3d-section-head h2 {
+    font-size: 28px;
+  }
+
+  .zr-ai3d-section-head p {
+    margin-top: 12px;
+    font-size: 16px;
+  }
+
+  .zr-ai3d-video-grid {
+    grid-template-columns: 1fr;
+    row-gap: 26px;
+  }
+
+  .zr-ai3d-video-card h3 {
+    margin-top: 16px;
+    font-size: 20px;
+  }
+
+  .zr-ai3d-scene {
+    padding-top: 82px;
+    padding-bottom: 22px;
+  }
+
+  .zr-ai3d-scene-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px 18px;
+  }
+
+  .zr-ai3d-scene-card h3 {
+    margin-top: 16px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .zr-ai3d-evolution-row,
+  .zr-ai3d-scene-grid {
+    grid-template-columns: 1fr;
+  }
+}

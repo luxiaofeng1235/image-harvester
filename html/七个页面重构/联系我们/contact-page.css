@@ -1,0 +1,301 @@
+@import url("https://static.jsss999.com/upload/zrsite/ai_platform/HarmonyOS_Sans.css");
+
+.zr-contact-page {
+  --zr-contact-shell-width: 1500px;
+  --zr-contact-panel-width: 1200px;
+  --zr-contact-text: #111111;
+  --zr-contact-muted: #666666;
+  --zr-contact-line: #e9e9e9;
+  --zr-contact-accent: #525b8d;
+  --zr-contact-shadow: 0 0 140px rgba(203, 184, 149, 0.18) inset;
+  color: var(--zr-contact-text);
+  background:
+    radial-gradient(circle at left center, rgba(214, 192, 154, 0.18), transparent 34%),
+    radial-gradient(circle at right center, rgba(214, 192, 154, 0.18), transparent 34%),
+    #ffffff;
+  font-family: "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+.zr-contact-page,
+.zr-contact-page * {
+  box-sizing: border-box;
+}
+
+.zr-contact-page img {
+  display: block;
+  max-width: 100%;
+}
+
+.zr-contact-page p:empty {
+  display: none !important;
+  margin: 0 !important;
+}
+
+.zr-contact-page + br {
+  display: none !important;
+}
+
+.zr-contact-page > p,
+.zr-contact-shell > p,
+.zr-contact-main > p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.zr-contact-shell {
+  width: min(var(--zr-contact-shell-width), calc(100vw - 32px));
+  margin: 0 auto;
+}
+
+.zr-contact-hero {
+  height: 600px;
+  background: url("https://static.jsss999.com/upload/zrsite/recruit/yibei-geng--UdYbiywGeg-unsplash.jpg") center top / cover no-repeat;
+}
+
+.zr-contact-main {
+  position: relative;
+  padding: 14px 0 150px;
+  background: transparent;
+  box-shadow: var(--zr-contact-shadow);
+}
+
+.zr-contact-heading {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.zr-contact-kicker {
+  margin: 0;
+  color: #666666 !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px;
+  line-height: 1.4 !important;
+  text-transform: uppercase;
+}
+
+.zr-contact-heading h1 {
+  margin: 10px 0 0;
+  color: #111111 !important;
+  font-size: 36px !important;
+  line-height: 1.39 !important;
+  font-weight: 800 !important;
+}
+
+.zr-contact-phone-grid {
+  width: 579px;
+  margin: 22px auto 0;
+  display: grid;
+  grid-template-columns: repeat(2, 277px);
+  gap: 25px;
+}
+
+.zr-contact-phone-card {
+  min-height: 312px;
+  padding: 34px 26px 26px;
+  border: 1px solid var(--zr-contact-line);
+  background: #ffffff;
+  text-align: center;
+}
+
+.zr-contact-phone-icon {
+  width: 74px;
+  height: 64px;
+  margin: 0 auto 8px;
+  object-fit: contain;
+}
+
+.zr-contact-phone-card h2 {
+  margin: 0 0 12px;
+  color: #000000 !important;
+  font-size: 25px !important;
+  line-height: 1.4 !important;
+  font-weight: 800 !important;
+}
+
+.zr-contact-phone-card p {
+  margin: 0;
+  color: var(--zr-contact-muted) !important;
+  font-size: 25px !important;
+  line-height: 1.41 !important;
+  font-weight: 700 !important;
+}
+
+.zr-contact-staff-grid {
+  width: 533px;
+  margin: 2px auto 0;
+  display: grid;
+  grid-template-columns: repeat(2, 220px);
+  justify-content: space-between;
+}
+
+.zr-contact-staff-card {
+  position: relative;
+  width: 220px;
+  height: 364px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.zr-contact-staff-media {
+  width: 220px;
+  height: 364px;
+}
+
+.zr-contact-staff-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.zr-contact-staff-overlay {
+  position: absolute;
+  inset: auto 0 0;
+  height: 165px;
+  padding: 118px 14px 12px;
+  color: #ffffff;
+  background: var(--zr-contact-accent);
+  clip-path: polygon(0 42%, 33% 35%, 100% 75%, 100% 100%, 0 100%);
+}
+
+.zr-contact-staff-overlay h3 {
+  margin: 0;
+  color: #ffffff !important;
+  font-size: 16px !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+}
+
+.zr-contact-staff-overlay span {
+  display: block;
+  width: 25px;
+  height: 1px;
+  margin: 12px 0 10px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.zr-contact-staff-overlay p {
+  margin: 0;
+  color: #ffffff !important;
+  font-size: 18px !important;
+  line-height: 1.8 !important;
+  font-weight: 400 !important;
+}
+
+.zr-contact-qrcode-grid {
+  width: 531px;
+  margin: 38px auto 0;
+  display: grid;
+  grid-template-columns: 215px 221px;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.zr-contact-qrcode-card {
+  overflow: hidden;
+}
+
+.zr-contact-qrcode-card:first-child {
+  width: 215px;
+  height: 216px;
+}
+
+.zr-contact-qrcode-card:last-child {
+  width: 221px;
+  height: 221px;
+}
+
+.zr-contact-qrcode-card:first-child img {
+  width: auto;
+  height: 216px;
+  max-width: none;
+  transform: translateX(-1px);
+}
+
+.zr-contact-qrcode-card:last-child img {
+  width: 221px;
+  height: auto;
+}
+
+.zr-contact-recruit-banner {
+  display: block;
+  width: 891px;
+  margin: 158px auto 0;
+}
+
+.zr-contact-recruit-banner img {
+  width: 891px;
+  height: 266px;
+}
+
+.zr-contact-page .zr-contact-kicker,
+.zr-contact-page .zr-contact-heading h1,
+.zr-contact-page .zr-contact-phone-card h2,
+.zr-contact-page .zr-contact-phone-card p,
+.zr-contact-page .zr-contact-staff-overlay h3,
+.zr-contact-page .zr-contact-staff-overlay p {
+  text-decoration: none !important;
+}
+
+@media (max-width: 960px) {
+  .zr-contact-shell {
+    width: min(100vw - 24px, 720px);
+  }
+
+  .zr-contact-hero {
+    height: 320px;
+  }
+
+  .zr-contact-main {
+    padding: 32px 0 72px;
+    box-shadow: none;
+  }
+
+  .zr-contact-phone-grid,
+  .zr-contact-staff-grid,
+  .zr-contact-qrcode-grid {
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    justify-items: center;
+  }
+
+  .zr-contact-phone-card {
+    width: min(100%, 320px);
+    min-height: auto;
+  }
+
+  .zr-contact-staff-card {
+    width: min(100%, 320px);
+    height: 528px;
+  }
+
+  .zr-contact-staff-media {
+    width: 100%;
+    height: 528px;
+  }
+
+  .zr-contact-qrcode-card:first-child,
+  .zr-contact-qrcode-card:last-child {
+    width: min(100%, 240px);
+    height: auto;
+  }
+
+  .zr-contact-qrcode-card:first-child img,
+  .zr-contact-qrcode-card:last-child img {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    transform: none;
+  }
+
+  .zr-contact-recruit-banner {
+    width: 100%;
+    margin-top: 56px;
+  }
+
+  .zr-contact-recruit-banner img {
+    width: 100%;
+    height: auto;
+  }
+}
