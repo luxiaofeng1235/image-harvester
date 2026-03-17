@@ -54,7 +54,7 @@
 
 .zr-contact-main {
   position: relative;
-  padding: 14px 0 18px;
+  padding: 14px 0 0;
   background: transparent;
   box-shadow: var(--zr-contact-shadow);
 }
@@ -232,12 +232,18 @@
 .zr-contact-recruit-banner {
   display: block;
   width: 891px;
+  height: 266px;
   margin: 88px auto 0;
+  line-height: 0;
+  font-size: 0;
+  overflow: hidden;
 }
 
 .zr-contact-recruit-banner img {
   width: 891px;
   height: 266px;
+  object-fit: fill;
+  vertical-align: top;
 }
 
 .zr-contact-page .zr-contact-kicker,
@@ -247,67 +253,4 @@
 .zr-contact-page .zr-contact-staff-overlay h3,
 .zr-contact-page .zr-contact-staff-overlay p {
   text-decoration: none !important;
-}
-
-@media (max-width: 960px) {
-  .zr-contact-shell {
-    width: min(100vw - 24px, 720px);
-  }
-
-  .zr-contact-hero {
-    height: 320px;
-  }
-
-  .zr-contact-main {
-    padding: 32px 0 72px;
-    box-shadow: none;
-  }
-
-  .zr-contact-phone-grid,
-  .zr-contact-staff-grid,
-  .zr-contact-qrcode-grid {
-    width: 100%;
-    grid-template-columns: 1fr;
-    gap: 20px;
-    justify-items: center;
-  }
-
-  .zr-contact-phone-card {
-    width: min(100%, 320px);
-    min-height: auto;
-  }
-
-  .zr-contact-staff-card {
-    width: min(100%, 320px);
-    height: 528px;
-  }
-
-  .zr-contact-staff-media {
-    width: 100%;
-    height: 528px;
-  }
-
-  .zr-contact-qrcode-card:first-child,
-  .zr-contact-qrcode-card:last-child {
-    width: min(100%, 240px);
-    height: auto;
-  }
-
-  .zr-contact-qrcode-card:first-child img,
-  .zr-contact-qrcode-card:last-child img {
-    width: 100%;
-    height: auto;
-    max-width: 100%;
-    transform: none;
-  }
-
-  .zr-contact-recruit-banner {
-    width: 100%;
-    margin-top: 56px;
-  }
-
-  .zr-contact-recruit-banner img {
-    width: 100%;
-    height: auto;
-  }
 }

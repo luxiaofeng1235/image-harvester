@@ -1,0 +1,210 @@
+@import url("https://static.jsss999.com/upload/zrsite/program/HarmonyOS_Sans.css");
+
+.zr-recruit-page {
+  --zr-recruit-shell-width: 1500px;
+  --zr-recruit-content-width: 1100px;
+  --zr-recruit-text: #111111;
+  width: 100%;
+  background: #ffffff;
+  color: var(--zr-recruit-text);
+  font-family: "Microsoft YaHei", "HarmonyOS Sans SC", "PingFang SC", sans-serif;
+}
+
+.zr-recruit-page,
+.zr-recruit-page * {
+  box-sizing: border-box;
+}
+
+.zr-recruit-page img {
+  display: block;
+  max-width: 100%;
+}
+
+.zr-recruit-page p:empty {
+  display: none !important;
+  margin: 0 !important;
+}
+
+.zr-recruit-page + br {
+  display: none !important;
+}
+
+.zr-recruit-page > p,
+.zr-recruit-shell > p,
+.zr-recruit-main > p,
+.zr-recruit-content > p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.zr-recruit-shell {
+  width: min(var(--zr-recruit-shell-width), calc(100vw - 32px));
+  margin: 0 auto;
+}
+
+.zr-recruit-hero {
+  height: 600px;
+  background: url("https://static.jsss999.com/upload/zrsite/zhaopin/yibei-geng--UdYbiywGeg-unsplash.jpg") center top / cover no-repeat;
+}
+
+.zr-recruit-main {
+  background: #ffffff;
+  padding: 100px 0 0;
+}
+
+.zr-recruit-intro,
+.zr-recruit-content {
+  width: min(var(--zr-recruit-content-width), calc(100vw - 80px));
+  margin: 0 auto;
+}
+
+.zr-recruit-intro {
+  margin-bottom: 28px;
+}
+
+.zr-recruit-page .zr-recruit-intro h1 {
+  margin: 0;
+  font-family: "Microsoft YaHei", "HarmonyOS Sans SC", "PingFang SC", sans-serif !important;
+  color: #111111 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+}
+
+.zr-recruit-page .zr-recruit-intro p {
+  margin: 22px 0 0;
+  font-family: "Microsoft YaHei", "HarmonyOS Sans SC", "PingFang SC", sans-serif !important;
+  color: #111111 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+.zr-recruit-content {
+  padding-bottom: 0;
+}
+
+.zr-recruit-page .zr-recruit-label,
+.zr-recruit-page .zr-recruit-job-group p,
+.zr-recruit-page .zr-recruit-delivery p {
+  margin: 0;
+  font-family: "Microsoft YaHei", "HarmonyOS Sans SC", "PingFang SC", sans-serif !important;
+  color: #111111 !important;
+}
+
+.zr-recruit-page .zr-recruit-label {
+  font-size: 15px !important;
+  line-height: 1.4 !important;
+}
+
+.zr-recruit-job {
+  margin-top: 21px;
+}
+
+.zr-recruit-page .zr-recruit-job h2 {
+  margin: 0;
+  font-family: "Microsoft YaHei", "HarmonyOS Sans SC", "PingFang SC", sans-serif !important;
+  color: #0000ff !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+}
+
+.zr-recruit-job-group {
+  margin-top: 18px;
+}
+
+.zr-recruit-group-title {
+  margin-bottom: 2px;
+}
+
+.zr-recruit-page .zr-recruit-job-group p {
+  font-size: 15px !important;
+  line-height: 1.4 !important;
+}
+
+.zr-recruit-job-group p + p {
+  margin-top: 2px;
+}
+
+.zr-recruit-job + .zr-recruit-job {
+  margin-top: 56px;
+}
+
+.zr-recruit-delivery {
+  margin-top: 22px;
+}
+
+.zr-recruit-page .zr-recruit-delivery p {
+  color: rgba(0, 0, 0, 0.85) !important;
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+}
+
+.zr-recruit-page .zr-recruit-delivery p + p {
+  margin-top: 18px;
+}
+
+.zr-recruit-page .zr-recruit-delivery span {
+  font-family: "Microsoft YaHei", "HarmonyOS Sans SC", "PingFang SC", sans-serif !important;
+  color: #111111 !important;
+  font-weight: 400 !important;
+}
+
+.zr-recruit-qrcode {
+  width: 303px;
+  margin-top: 31px;
+}
+
+.zr-recruit-page .zr-recruit-qrcode img {
+  width: 303px !important;
+  height: auto !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+}
+
+@media (max-width: 960px) {
+  .zr-recruit-shell {
+    width: min(var(--zr-recruit-shell-width), calc(100vw - 24px));
+  }
+
+  .zr-recruit-hero {
+    height: 320px;
+  }
+
+  .zr-recruit-main {
+    padding-top: 42px;
+  }
+
+  .zr-recruit-intro,
+  .zr-recruit-content {
+    width: min(var(--zr-recruit-content-width), calc(100vw - 32px));
+  }
+
+  .zr-recruit-intro {
+    margin-bottom: 16px;
+  }
+
+  .zr-recruit-page .zr-recruit-intro p {
+    margin-top: 14px;
+  }
+
+  .zr-recruit-job {
+    margin-top: 18px;
+  }
+
+  .zr-recruit-job + .zr-recruit-job {
+    margin-top: 42px;
+  }
+
+  .zr-recruit-job-group {
+    margin-top: 16px;
+  }
+
+  .zr-recruit-qrcode {
+    width: min(303px, 100%);
+  }
+
+  .zr-recruit-page .zr-recruit-qrcode img {
+    width: 100% !important;
+  }
+}
