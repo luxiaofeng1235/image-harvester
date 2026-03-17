@@ -22,6 +22,19 @@
   max-width: 100%;
 }
 
+.zr-webdev-page p:empty {
+  display: none !important;
+  margin: 0 !important;
+}
+
+.zr-webdev-page > p,
+.zr-webdev-shell > p,
+.zr-webdev-hero-shell > p,
+.zr-webdev-benefit-stack > p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 .zr-webdev-page {
   width: 100%;
   background: #ffffff;
@@ -60,6 +73,7 @@
   font-weight: 800;
   letter-spacing: 4px;
   line-height: 1.2;
+  color: #ffffff !important;
 }
 
 .zr-webdev-hero-copy p {
@@ -67,6 +81,7 @@
   max-width: 840px;
   font-size: 21px;
   line-height: 1.65;
+  color: #ffffff !important;
 }
 
 .zr-webdev-hero-overlay {
