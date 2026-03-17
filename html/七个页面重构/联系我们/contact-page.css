@@ -7,12 +7,8 @@
   --zr-contact-muted: #666666;
   --zr-contact-line: #e9e9e9;
   --zr-contact-accent: #525b8d;
-  --zr-contact-shadow: 0 0 140px rgba(203, 184, 149, 0.18) inset;
   color: var(--zr-contact-text);
-  background:
-    radial-gradient(circle at left center, rgba(214, 192, 154, 0.18), transparent 34%),
-    radial-gradient(circle at right center, rgba(214, 192, 154, 0.18), transparent 34%),
-    #ffffff;
+  background: #ffffff;
   font-family: "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
 }
 
@@ -56,7 +52,7 @@
   position: relative;
   padding: 14px 0 0;
   background: transparent;
-  box-shadow: var(--zr-contact-shadow);
+  box-shadow: none;
 }
 
 .zr-contact-heading {
