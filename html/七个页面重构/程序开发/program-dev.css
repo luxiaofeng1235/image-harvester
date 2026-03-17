@@ -183,9 +183,9 @@
 .zr-program-media {
   position: relative;
   overflow: hidden;
-  border: 3px solid var(--zr-program-line);
-  border-radius: 30px;
-  background: #ffffff;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .zr-program-media .zr-program-media-image {
@@ -232,7 +232,7 @@
 
 .zr-program-advantages {
   padding-top: 106px;
-  padding-bottom: 28px;
+  padding-bottom: 0;
 }
 
 .zr-program-advantage-grid {
@@ -370,7 +370,7 @@
 
   .zr-program-advantages {
     padding-top: 82px;
-    padding-bottom: 22px;
+    padding-bottom: 0;
   }
 
   .zr-program-advantage-grid {
