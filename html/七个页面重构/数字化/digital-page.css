@@ -1,0 +1,73 @@
+@import url("https://static.jsss999.com/upload/zrsite/program/HarmonyOS_Sans.css");
+
+.zr-digital-page {
+  --zr-digital-shell-width: 1500px;
+  --zr-digital-block-gap: 24px;
+  display: block;
+  width: 100%;
+  margin: 0 !important;
+  padding: var(--zr-digital-block-gap) 0 !important;
+  background: transparent;
+  color: #111111;
+  font-family: "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  line-height: 0;
+  isolation: isolate;
+}
+
+.zr-digital-page,
+.zr-digital-page * {
+  box-sizing: border-box;
+}
+
+.zr-digital-page a,
+.zr-digital-page a:hover,
+.zr-digital-page a:focus,
+.zr-digital-page a:visited {
+  color: inherit;
+  text-decoration: none;
+}
+
+.zr-digital-page video {
+  display: block;
+  width: 100%;
+  max-width: none;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: #000000 !important;
+}
+
+.zr-digital-page p:empty {
+  display: none !important;
+  margin: 0 !important;
+}
+
+.zr-digital-page + br {
+  display: none !important;
+}
+
+.zr-digital-page .zr-digital-shell {
+  width: min(var(--zr-digital-shell-width), calc(100vw - 32px));
+  margin: 0 auto;
+}
+
+.zr-digital-page .zr-digital-hero {
+  display: block;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+}
+
+.zr-digital-page .zr-digital-video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1500 / 848;
+  overflow: hidden;
+  background: #000000;
+}
+
+.zr-digital-page .zr-digital-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
