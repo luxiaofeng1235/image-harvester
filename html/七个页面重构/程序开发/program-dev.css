@@ -75,6 +75,7 @@
   line-height: 1.2;
   letter-spacing: 4px;
   color: #ffffff !important;
+  font-family: "HarmonyOSSansCNBlack", "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
 }
 
 .zr-program-hero-copy p {
@@ -83,6 +84,8 @@
   font-size: 21px;
   line-height: 1.6;
   color: #ffffff !important;
+  font-family: "HarmonyOSSansCNRegular", "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-weight: 400;
 }
 
 .zr-program-hero-visual {
@@ -109,6 +112,9 @@
   font-size: 24px;
   line-height: 1;
   text-align: center;
+  letter-spacing: 1px;
+  font-family: "HarmonyOSSansCNMedium", "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-weight: 500;
 }
 
 .zr-program-callout-web {
@@ -148,16 +154,19 @@
 .zr-program-section-head h2 {
   margin: 0;
   font-size: 32px;
-  font-weight: 800;
-  line-height: 1.2;
+  font-weight: 700;
+  line-height: 48px;
   color: #000000;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
 }
 
 .zr-program-section-head p {
   margin: 20px auto 0;
   font-size: 23px;
-  line-height: 1.7;
+  line-height: 39px;
   color: var(--zr-program-muted);
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-weight: 400;
 }
 
 .zr-program-case-grid {
@@ -171,13 +180,16 @@
 .zr-program-advantage-card h3 {
   margin: 18px 0 0;
   text-align: center;
-  font-weight: 500;
-  color: #000000;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .zr-program-case-card h3 {
   font-size: 24px;
-  line-height: 1.5;
+  line-height: 39px;
+  font-weight: 400;
+  color: #000000;
 }
 
 .zr-program-media {
@@ -231,7 +243,7 @@
 }
 
 .zr-program-advantages {
-  padding-top: 106px;
+  padding-top: 78px;
   padding-bottom: 0;
 }
 
@@ -244,7 +256,13 @@
 
 .zr-program-advantage-card h3 {
   font-size: 18px;
-  line-height: 1.45;
+  line-height: 39px;
+  font-weight: 700;
+  color: #434343;
+}
+
+.zr-program-advantage-card:nth-child(4) h3 {
+  font-size: 17px;
 }
 
 @media (max-width: 1280px) {
@@ -369,7 +387,7 @@
   }
 
   .zr-program-advantages {
-    padding-top: 82px;
+    padding-top: 62px;
     padding-bottom: 0;
   }
 

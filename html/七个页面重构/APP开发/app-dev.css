@@ -22,9 +22,30 @@
   box-sizing: border-box;
 }
 
+.zr-appdev-page h1,
+.zr-appdev-page h2,
+.zr-appdev-page h3,
+.zr-appdev-page p {
+  margin: 0;
+  font-family: inherit;
+}
+
 .zr-appdev-page img {
   display: block;
   max-width: 100%;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  vertical-align: top;
+}
+
+.zr-appdev-page a,
+.zr-appdev-page a:hover,
+.zr-appdev-page a:focus,
+.zr-appdev-page a:visited {
+  color: inherit;
+  text-decoration: none;
 }
 
 .zr-appdev-page p:empty {
@@ -334,6 +355,14 @@
 
 .zr-appdev-page .zr-appdev-case-card p {
   color: #666666 !important;
+}
+
+.zr-appdev-page .zr-appdev-case-card h3,
+.zr-appdev-page .zr-appdev-wide-card h3,
+.zr-appdev-page .zr-appdev-case-card p,
+.zr-appdev-page .zr-appdev-section-head p,
+.zr-appdev-page .zr-appdev-section-head h2 {
+  font-family: "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif !important;
 }
 
 @media (max-width: 1280px) {
