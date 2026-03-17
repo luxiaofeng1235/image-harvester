@@ -1,10 +1,5 @@
 @import url("https://static.jsss999.com/upload/zrsite/program/HarmonyOS_Sans.css");
 
-.zr-program-body {
-  margin: 0;
-  background: #ffffff;
-}
-
 .zr-program-page {
   --zr-program-shell-width: 1500px;
   --zr-program-line: #3b3b3b;
