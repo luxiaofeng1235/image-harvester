@@ -216,6 +216,10 @@
   background: #ffffff;
 }
 
+.zr-program-media .zr-program-media-image {
+  max-width: none;
+}
+
 .zr-program-media-large::before {
   content: "";
   display: block;
@@ -231,7 +235,6 @@
 .zr-program-media-image {
   position: absolute;
   display: block;
-  max-width: none;
 }
 
 .zr-program-media-image--wide-left {
