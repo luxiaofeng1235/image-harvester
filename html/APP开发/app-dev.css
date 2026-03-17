@@ -292,6 +292,50 @@
   padding-bottom: 0;
 }
 
+/* WordPress/主题全局样式防覆盖 */
+.zr-appdev-page .zr-appdev-hero-copy,
+.zr-appdev-page .zr-appdev-hero-copy h1,
+.zr-appdev-page .zr-appdev-hero-kicker,
+.zr-appdev-page .zr-appdev-pill {
+  color: #ffffff !important;
+}
+
+.zr-appdev-page .zr-appdev-hero-copy h1 {
+  font-family: "HarmonyOSSansCNBlack", "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif !important;
+  font-size: 41px !important;
+  font-weight: 400 !important;
+  letter-spacing: 4px !important;
+  line-height: 1.2 !important;
+}
+
+.zr-appdev-page .zr-appdev-hero-kicker {
+  font-family: "HarmonyOSSansCNRegular", "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif !important;
+  font-size: 23px !important;
+  font-weight: 400 !important;
+  line-height: 1.3 !important;
+}
+
+.zr-appdev-page .zr-appdev-pill {
+  font-family: "HarmonyOSSansCNMedium", "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif !important;
+  font-size: 24px !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+}
+
+.zr-appdev-page .zr-appdev-section-head h2,
+.zr-appdev-page .zr-appdev-wide-card h3,
+.zr-appdev-page .zr-appdev-case-card h3 {
+  color: #111111 !important;
+}
+
+.zr-appdev-page .zr-appdev-section-head p {
+  color: #111111 !important;
+}
+
+.zr-appdev-page .zr-appdev-case-card p {
+  color: #666666 !important;
+}
+
 @media (max-width: 1280px) {
   .zr-appdev-hero-shell {
     min-height: 780px;
@@ -360,7 +404,7 @@
     min-width: 0;
     margin: 14px auto 0;
     font-size: 18px;
-    backdrop-filter: blur(6px);
+    backdrop-filter: none;
   }
 
   .zr-appdev-section {
