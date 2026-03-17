@@ -16,9 +16,30 @@
   box-sizing: border-box;
 }
 
+.zr-ai3d-page h1,
+.zr-ai3d-page h2,
+.zr-ai3d-page h3,
+.zr-ai3d-page p {
+  margin: 0;
+  font-family: inherit;
+}
+
 .zr-ai3d-page img {
   display: block;
   max-width: 100%;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  vertical-align: top;
+}
+
+.zr-ai3d-page a,
+.zr-ai3d-page a:hover,
+.zr-ai3d-page a:focus,
+.zr-ai3d-page a:visited {
+  color: inherit;
+  text-decoration: none;
 }
 
 .zr-ai3d-page p:empty {
@@ -235,6 +256,66 @@
   font-size: 22px;
   font-weight: 400;
   line-height: 1.45;
+}
+
+/* WordPress/主题全局样式防覆盖 */
+.zr-ai3d-page .zr-ai3d-hero-copy,
+.zr-ai3d-page .zr-ai3d-hero-copy h1,
+.zr-ai3d-page .zr-ai3d-hero-copy p {
+  color: #ffffff !important;
+}
+
+.zr-ai3d-page .zr-ai3d-hero-copy h1,
+.zr-ai3d-page .zr-ai3d-section-head h2,
+.zr-ai3d-page .zr-ai3d-video-card h3,
+.zr-ai3d-page .zr-ai3d-scene-card h3 {
+  font-family: "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif !important;
+}
+
+.zr-ai3d-page .zr-ai3d-hero-copy h1 {
+  font-size: 32px !important;
+  font-weight: 800 !important;
+  line-height: 1.5 !important;
+}
+
+.zr-ai3d-page .zr-ai3d-hero-copy p,
+.zr-ai3d-page .zr-ai3d-section-head p {
+  font-family: "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif !important;
+}
+
+.zr-ai3d-page .zr-ai3d-hero-copy p {
+  font-size: 23px !important;
+  line-height: 1.55 !important;
+}
+
+.zr-ai3d-page .zr-ai3d-section-head h2,
+.zr-ai3d-page .zr-ai3d-video-card h3,
+.zr-ai3d-page .zr-ai3d-scene-card h3 {
+  color: #000000 !important;
+}
+
+.zr-ai3d-page .zr-ai3d-section-head h2 {
+  font-size: 32px !important;
+  font-weight: 800 !important;
+  line-height: 1.5 !important;
+}
+
+.zr-ai3d-page .zr-ai3d-section-head p {
+  color: #4b5563 !important;
+  font-size: 23px !important;
+  line-height: 1.7 !important;
+}
+
+.zr-ai3d-page .zr-ai3d-video-card h3 {
+  font-size: 24px !important;
+  font-weight: 400 !important;
+  line-height: 39px !important;
+}
+
+.zr-ai3d-page .zr-ai3d-scene-card h3 {
+  font-size: 22px !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
 }
 
 @media (max-width: 1280px) {
