@@ -281,3 +281,24 @@
 .zr-contact-page .zr-contact-staff-overlay p {
   font-family: "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif !important;
 }
+
+/* 嵌入 WP 编辑器时，清掉模块前后的空段落留白 */
+.zr-contact-page {
+  display: block;
+  margin: 0 !important;
+}
+
+p:empty + .zr-contact-page,
+.zr-contact-page + p:empty,
+.zr-contact-page + p:empty + p:empty {
+  display: block;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.zr-contact-page + p:empty,
+.zr-contact-page + p:empty + p:empty {
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
