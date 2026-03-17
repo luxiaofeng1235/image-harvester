@@ -16,3 +16,4 @@ goods_excel/.env
 goods_excel/.env.*
 !goods_excel/.env.example
 /html/__pycache__/
+/html/out
