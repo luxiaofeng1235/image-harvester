@@ -59,6 +59,7 @@
   width: 328px;
   margin: 0;
   color: #111111 !important;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
   font-size: 32px;
   line-height: 1.2;
   text-align: center;
@@ -129,13 +130,16 @@
 .zr-aiplat-feature-plate span {
   position: absolute;
   left: 31px;
-  right: 31px;
-  bottom: 13px;
+  top: 44px;
+  width: 187px;
+  height: 31px;
   color: #ffffff !important;
   font-family: "HarmonyOSSansCNMedium", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
   font-size: 18px;
   line-height: 1.2;
+  display: block;
   text-align: center;
+  white-space: nowrap;
 }
 
 .zr-aiplat-feature-title {
@@ -143,10 +147,14 @@
   left: 284px;
   top: 33px;
   width: 328px;
+  height: 39px;
   color: #111111 !important;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
   font-size: 22px;
   line-height: 1.2;
+  display: block;
   text-align: center;
+  white-space: nowrap;
 }
 
 .zr-aiplat-feature-left-1 { left: 292px; top: 168px; }
@@ -157,6 +165,16 @@
 .zr-aiplat-feature-left .zr-aiplat-feature-icon { left: 0; }
 .zr-aiplat-feature-left .zr-aiplat-feature-plate { left: 40px; }
 
+.zr-aiplat-feature-left-1 .zr-aiplat-feature-plate { top: -10px; }
+.zr-aiplat-feature-left-2 .zr-aiplat-feature-plate { top: -14px; }
+.zr-aiplat-feature-left-3 .zr-aiplat-feature-plate { top: -17px; }
+.zr-aiplat-feature-left-4 .zr-aiplat-feature-plate { top: -20px; }
+
+.zr-aiplat-feature-left-1 .zr-aiplat-feature-title { top: 33px; }
+.zr-aiplat-feature-left-2 .zr-aiplat-feature-title { top: 0; }
+.zr-aiplat-feature-left-3 .zr-aiplat-feature-title { top: -30px; }
+.zr-aiplat-feature-left-4 .zr-aiplat-feature-title { top: -37px; }
+
 .zr-aiplat-feature-right-1 { left: 885px; top: 159px; }
 .zr-aiplat-feature-right-2 { left: 886px; top: 331px; }
 .zr-aiplat-feature-right-3 { left: 884px; top: 506px; }
@@ -164,6 +182,10 @@
 
 .zr-aiplat-feature-right .zr-aiplat-feature-plate { left: 0; }
 .zr-aiplat-feature-right .zr-aiplat-feature-icon { left: 260px; }
+.zr-aiplat-feature-right .zr-aiplat-feature-plate span {
+  left: 29px;
+  top: 53px;
+}
 
 .zr-aiplat-section {
   padding-top: 95px;
@@ -276,13 +298,45 @@
   color: #111111 !important;
 }
 
+.zr-aiplat-page .zr-aiplat-hero-title {
+  font-size: 32px !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+}
+
+.zr-aiplat-page .zr-aiplat-feature-title {
+  font-size: 22px !important;
+  line-height: 1.2 !important;
+  font-weight: 400 !important;
+}
+
 .zr-aiplat-page .zr-aiplat-feature-plate span {
   color: #ffffff !important;
   font-family: "HarmonyOSSansCNMedium", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif !important;
+  font-size: 18px !important;
+  line-height: 1.2 !important;
 }
 
 .zr-aiplat-page .zr-aiplat-section-head p {
   color: #4b5563 !important;
+  font-size: 23px !important;
+  line-height: 1.45 !important;
+}
+
+.zr-aiplat-page .zr-aiplat-section-head h2 {
+  font-size: 32px !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+}
+
+.zr-aiplat-page .zr-aiplat-case-card h3 {
+  font-size: 24px !important;
+  line-height: 1.2 !important;
+}
+
+.zr-aiplat-page .zr-aiplat-industry-card h3 {
+  font-size: 22px !important;
+  line-height: 1.2 !important;
 }
 
 @media (max-width: 1560px) {
