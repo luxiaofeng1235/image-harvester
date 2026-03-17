@@ -27,6 +27,10 @@
   margin: 0 !important;
 }
 
+.zr-webdev-page + br {
+  display: none !important;
+}
+
 .zr-webdev-page > p,
 .zr-webdev-shell > p,
 .zr-webdev-hero-shell > p,
