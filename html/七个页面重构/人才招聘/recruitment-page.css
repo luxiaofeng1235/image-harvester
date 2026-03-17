@@ -30,35 +30,35 @@
 }
 
 .zr-recruit-page > p,
-.zr-recruit-shell > p,
-.zr-recruit-main > p,
-.zr-recruit-content > p {
+.zr-recruit-page .zr-recruit-shell > p,
+.zr-recruit-page .zr-recruit-main > p,
+.zr-recruit-page .zr-recruit-content > p {
   margin: 0 !important;
   padding: 0 !important;
 }
 
-.zr-recruit-shell {
+.zr-recruit-page .zr-recruit-shell {
   width: min(var(--zr-recruit-shell-width), calc(100vw - 32px));
   margin: 0 auto;
 }
 
-.zr-recruit-hero {
+.zr-recruit-page .zr-recruit-hero {
   height: 600px;
   background: url("https://static.jsss999.com/upload/zrsite/zhaopin/yibei-geng--UdYbiywGeg-unsplash.jpg") center top / cover no-repeat;
 }
 
-.zr-recruit-main {
+.zr-recruit-page .zr-recruit-main {
   background: #ffffff;
   padding: 100px 0 0;
 }
 
-.zr-recruit-intro,
-.zr-recruit-content {
+.zr-recruit-page .zr-recruit-intro,
+.zr-recruit-page .zr-recruit-content {
   width: min(var(--zr-recruit-content-width), calc(100vw - 80px));
   margin: 0 auto;
 }
 
-.zr-recruit-intro {
+.zr-recruit-page .zr-recruit-intro {
   margin-bottom: 28px;
 }
 
@@ -79,7 +79,7 @@
   line-height: 1.4 !important;
 }
 
-.zr-recruit-content {
+.zr-recruit-page .zr-recruit-content {
   padding-bottom: 0;
 }
 
@@ -96,7 +96,7 @@
   line-height: 1.4 !important;
 }
 
-.zr-recruit-job {
+.zr-recruit-page .zr-recruit-job {
   margin-top: 21px;
 }
 
@@ -109,11 +109,11 @@
   line-height: 1.4 !important;
 }
 
-.zr-recruit-job-group {
+.zr-recruit-page .zr-recruit-job-group {
   margin-top: 18px;
 }
 
-.zr-recruit-group-title {
+.zr-recruit-page .zr-recruit-group-title {
   margin-bottom: 2px;
 }
 
@@ -122,15 +122,15 @@
   line-height: 1.4 !important;
 }
 
-.zr-recruit-job-group p + p {
+.zr-recruit-page .zr-recruit-job-group p + p {
   margin-top: 2px;
 }
 
-.zr-recruit-job + .zr-recruit-job {
+.zr-recruit-page .zr-recruit-job + .zr-recruit-job {
   margin-top: 56px;
 }
 
-.zr-recruit-delivery {
+.zr-recruit-page .zr-recruit-delivery {
   margin-top: 22px;
 }
 
@@ -150,7 +150,7 @@
   font-weight: 400 !important;
 }
 
-.zr-recruit-qrcode {
+.zr-recruit-page .zr-recruit-qrcode {
   width: 303px;
   margin-top: 31px;
 }
@@ -163,24 +163,24 @@
 }
 
 @media (max-width: 960px) {
-  .zr-recruit-shell {
+  .zr-recruit-page .zr-recruit-shell {
     width: min(var(--zr-recruit-shell-width), calc(100vw - 24px));
   }
 
-  .zr-recruit-hero {
+  .zr-recruit-page .zr-recruit-hero {
     height: 320px;
   }
 
-  .zr-recruit-main {
+  .zr-recruit-page .zr-recruit-main {
     padding-top: 42px;
   }
 
-  .zr-recruit-intro,
-  .zr-recruit-content {
+  .zr-recruit-page .zr-recruit-intro,
+  .zr-recruit-page .zr-recruit-content {
     width: min(var(--zr-recruit-content-width), calc(100vw - 32px));
   }
 
-  .zr-recruit-intro {
+  .zr-recruit-page .zr-recruit-intro {
     margin-bottom: 16px;
   }
 
@@ -188,19 +188,19 @@
     margin-top: 14px;
   }
 
-  .zr-recruit-job {
+  .zr-recruit-page .zr-recruit-job {
     margin-top: 18px;
   }
 
-  .zr-recruit-job + .zr-recruit-job {
+  .zr-recruit-page .zr-recruit-job + .zr-recruit-job {
     margin-top: 42px;
   }
 
-  .zr-recruit-job-group {
+  .zr-recruit-page .zr-recruit-job-group {
     margin-top: 16px;
   }
 
-  .zr-recruit-qrcode {
+  .zr-recruit-page .zr-recruit-qrcode {
     width: min(303px, 100%);
   }
 
