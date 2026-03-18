@@ -1,4 +1,4 @@
-import { initSharedSlider } from "../js/shared-slider.js";
+import { initSharedSlider } from "../plugin/shared-slider.js";
 
 var root = document.getElementById("zr-more-root");
 

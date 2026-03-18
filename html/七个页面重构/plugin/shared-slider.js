@@ -26,6 +26,7 @@ export function initSharedSlider(root, options) {
   var isAnimating = false;
 
   root.innerHTML = "";
+  root.classList.add("zr-shared-slider");
 
   var stage = document.createElement("div");
   stage.className = "zr-more-slider-stage";
@@ -51,12 +52,36 @@ export function initSharedSlider(root, options) {
   nextButton.setAttribute("aria-label", "下一张");
   nextButton.textContent = "›";
 
+  var dots = document.createElement("div");
+  dots.className = "zr-more-slider-dots";
+  dots.setAttribute("aria-label", "轮播分页");
+
+  var dotButtons = slides.map(function (_, index) {
+    var dot = document.createElement("button");
+    dot.className = "zr-more-slider-dot";
+    dot.type = "button";
+    dot.setAttribute("aria-label", "跳转到第" + (index + 1) + "张");
+    dot.addEventListener("click", function () {
+      goTo(index);
+      startAuto();
+    });
+    dots.appendChild(dot);
+    return dot;
+  });
+
   stage.appendChild(currentLayer);
   stage.appendChild(revealLayer);
   stage.appendChild(piecesLayer);
   stage.appendChild(prevButton);
   stage.appendChild(nextButton);
+  stage.appendChild(dots);
   root.appendChild(stage);
+
+  if (slides.length <= 1) {
+    prevButton.hidden = true;
+    nextButton.hidden = true;
+    dots.hidden = true;
+  }
 
   function applyBackground(target, slide) {
     if (!target || !slide) return;
@@ -64,10 +89,23 @@ export function initSharedSlider(root, options) {
     target.setAttribute("aria-label", slide.alt || "");
   }
 
+  function updateDots(index) {
+    dotButtons.forEach(function (dot, dotIndex) {
+      var isActive = dotIndex === index;
+      dot.classList.toggle("is-active", isActive);
+      if (isActive) {
+        dot.setAttribute("aria-current", "true");
+      } else {
+        dot.removeAttribute("aria-current");
+      }
+    });
+  }
+
   function renderStatic(index) {
     currentIndex = index;
     applyBackground(currentLayer, slides[currentIndex]);
     applyBackground(revealLayer, slides[currentIndex]);
+    updateDots(currentIndex);
   }
 
   function chooseEffect() {
@@ -249,6 +287,7 @@ export function initSharedSlider(root, options) {
     }
 
     isAnimating = true;
+    updateDots(nextIndex);
     var targetSlide = slides[nextIndex];
     var effect = chooseEffect();
     var effectState = buildEffectPieces(effect, targetSlide.imageUrl);
@@ -287,6 +326,11 @@ export function initSharedSlider(root, options) {
 
   function go(step) {
     var nextIndex = (currentIndex + step + slides.length) % slides.length;
+    animateTo(nextIndex);
+  }
+
+  function goTo(index) {
+    var nextIndex = ((index % slides.length) + slides.length) % slides.length;
     animateTo(nextIndex);
   }
 

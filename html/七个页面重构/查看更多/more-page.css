@@ -51,77 +51,13 @@
   overflow: hidden;
 }
 
-.zr-more-slider-stage,
-.zr-more-slider-image,
-.zr-more-slider-pieces {
-  position: absolute;
-  inset: 0;
-}
-
-.zr-more-slider-image {
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
-.zr-more-slider-image.is-reveal {
-  opacity: 0;
-}
-
-.zr-more-slider.is-effect-running .zr-more-slider-image.is-reveal {
-  opacity: 1;
-  transition: opacity 0.25s ease;
-}
-
-.zr-more-slider.is-effect-running .zr-more-slider-image.is-current {
-  opacity: 0.14;
-  transition:
-    opacity 0.85s ease,
-    transform 0.85s ease;
-}
-
-.zr-more-slider-piece {
-  position: absolute;
-  background-repeat: no-repeat;
-  opacity: 0;
-  filter: blur(2px);
-  backface-visibility: hidden;
-  transform-origin: center center;
-  transition:
-    opacity 0.56s ease,
-    transform 0.82s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.56s ease;
-}
-
-.zr-more-slider.is-effect-running.is-effect-threed .zr-more-slider-piece {
-  transform-origin: center center;
-}
-
-.zr-more-slider.is-effect-running.is-effect-fade .zr-more-slider-image.is-current {
-  opacity: 0;
-}
-
-.zr-more-slider.is-effect-running.is-effect-shrink .zr-more-slider-image.is-current {
-  opacity: 0;
-  transform: scale(0.94);
-}
-
 .zr-more-slider-arrow {
-  position: absolute;
-  top: 50%;
-  z-index: 4;
   width: 42px;
   height: 42px;
-  border: none;
   background: rgba(0, 0, 0, 0.28);
   color: #ffffff;
   font-size: 28px;
   line-height: 1;
-  transform: translateY(-50%);
-  cursor: pointer;
-  transition:
-    background 0.2s ease,
-    opacity 0.2s ease;
 }
 
 .zr-more-slider-arrow:hover {
