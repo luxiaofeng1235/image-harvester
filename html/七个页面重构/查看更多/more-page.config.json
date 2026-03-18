@@ -1,0 +1,157 @@
+{
+  "companyTitle": "江苏中热机械设备有限公司",
+  "slider": {
+    "interval": 3000,
+    "effect": "all",
+    "slides": [
+      {
+        "imageUrl": "https://static.jsss999.com/upload/zrsite/more/iy99.jpg",
+        "alt": "更多产品页轮播图一"
+      },
+      {
+        "imageUrl": "https://static.jsss999.com/upload/zrsite/more/0anf.png",
+        "alt": "更多产品页轮播图二"
+      }
+    ]
+  },
+  "sections": [
+    {
+      "title": "加热器系列产品",
+      "moreUrl": "https://www.zgzonre.com/product?type=1",
+      "rows": [
+        [
+          {
+            "title": "导热油炉加热器",
+            "href": "https://www.zgzonre.com/detail-base?article_id=405",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/w98l.jpg",
+            "variant": "large"
+          },
+          {
+            "title": "管道加热器",
+            "href": "https://www.zgzonre.com/product?type=1&sub=43",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/bnqc.jpg",
+            "variant": "large"
+          },
+          {
+            "title": "风道加热器",
+            "href": "https://www.zgzonre.com/product?type=1&sub=44",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/5ob4.jpg",
+            "variant": "narrow"
+          }
+        ],
+        [
+          {
+            "title": "暖风机电加热器",
+            "href": "https://www.zgzonre.com/product?type=1&sub=45",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/bt1r.jpg",
+            "variant": "large"
+          },
+          {
+            "title": "卧式电加热罐_三法兰加热管",
+            "href": "https://www.zgzonre.com/product?type=1&sub=45",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/286w.jpg",
+            "variant": "large"
+          },
+          {
+            "title": "法兰加热管",
+            "href": "https://www.zgzonre.com/product?type=1&sub=46",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/1-1.jpg",
+            "variant": "narrow"
+          }
+        ]
+      ]
+    },
+    {
+      "title": "水处理系列产品",
+      "moreUrl": "https://www.zgzonre.com/product?type=3",
+      "rows": [
+        [
+          {
+            "title": "分集水器",
+            "href": "https://www.zgzonre.com/detail-base?article_id=373",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/lkfy.jpg",
+            "variant": "large"
+          },
+          {
+            "title": "石英砂过滤器",
+            "href": "https://www.zgzonre.com/detail-base?article_id=387",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/2br8.jpg",
+            "variant": "large"
+          },
+          {
+            "title": "机械过滤器",
+            "href": "https://www.zgzonre.com/detail-base?article_id=387",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/t288.jpg",
+            "variant": "narrow"
+          }
+        ],
+        [
+          {
+            "title": "精密过滤器",
+            "href": "https://www.zgzonre.com/detail-base?article_id=375",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/0_6_ya42.png",
+            "variant": "large"
+          },
+          {
+            "title": "篮式除污器",
+            "href": "https://www.zgzonre.com/detail-base?article_id=375",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/0_10_8g5h.png",
+            "variant": "large"
+          },
+          {
+            "title": "旋流除污器",
+            "href": "https://www.zgzonre.com/detail-base?article_id=375",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/0_5_c43t.png",
+            "variant": "narrow"
+          }
+        ]
+      ]
+    },
+    {
+      "title": "搅拌系列产品",
+      "moreUrl": "https://www.zgzonre.com/product?type=2",
+      "rows": [
+        [
+          {
+            "title": "不锈钢搅拌罐",
+            "href": "https://www.zgzonre.com/detail-base?article_id=345",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/0pvp.jpg",
+            "variant": "large"
+          },
+          {
+            "title": "电加热搅拌罐",
+            "href": "https://www.zgzonre.com/detail-base?article_id=345",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/7864.jpg",
+            "variant": "large"
+          },
+          {
+            "title": "沥青搅拌罐",
+            "href": "https://www.zgzonre.com/detail-base?article_id=345",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/r64k.jpg",
+            "variant": "narrow"
+          }
+        ],
+        [
+          {
+            "title": "侧入式搅拌器",
+            "href": "https://www.zgzonre.com/detail-base?article_id=345",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/jbq009.jpg",
+            "variant": "large"
+          },
+          {
+            "title": "电加热搅拌罐",
+            "href": "https://www.zgzonre.com/detail-base?article_id=345",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/jbq003.jpg",
+            "variant": "large"
+          },
+          {
+            "title": "锚式搅拌器",
+            "href": "https://www.zgzonre.com/detail-base?article_id=345",
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/more/jbq007.jpg",
+            "variant": "narrow"
+          }
+        ]
+      ]
+    }
+  ]
+}

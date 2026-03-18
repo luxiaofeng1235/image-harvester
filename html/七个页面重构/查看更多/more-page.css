@@ -1,0 +1,299 @@
+@import url("https://static.jsss999.com/upload/zrsite/program/HarmonyOS_Sans.css");
+
+.zr-more-page {
+  --zr-more-shell-width: 1500px;
+  --zr-more-page-bg: #eeeeee;
+  --zr-more-text: #111111;
+  --zr-more-line: #343434;
+  --zr-more-button-bg: rgba(217, 217, 217, 1);
+  --zr-more-button-hover: rgba(204, 204, 204, 1);
+  width: 100%;
+  min-width: 1500px;
+  background: var(--zr-more-page-bg);
+  color: var(--zr-more-text);
+  font-family: "HarmonyOS Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+.zr-more-page,
+.zr-more-page * {
+  box-sizing: border-box;
+}
+
+.zr-more-page img {
+  display: block;
+  max-width: 100%;
+}
+
+.zr-more-page p:empty,
+.zr-more-page br {
+  display: none !important;
+}
+
+.zr-more-page + br {
+  display: none !important;
+}
+
+.zr-more-shell {
+  width: min(var(--zr-more-shell-width), calc(100vw - 32px));
+  margin: 0 auto;
+}
+
+.zr-more-hero {
+  padding: 0;
+}
+
+.zr-more-slider {
+  position: relative;
+  width: 100vw;
+  min-width: 1500px;
+  height: 787px;
+  margin-left: calc(50% - 50vw);
+  overflow: hidden;
+}
+
+.zr-more-slider-stage,
+.zr-more-slider-image,
+.zr-more-slider-pieces {
+  position: absolute;
+  inset: 0;
+}
+
+.zr-more-slider-image {
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.zr-more-slider-image.is-reveal {
+  opacity: 0;
+}
+
+.zr-more-slider.is-effect-running .zr-more-slider-image.is-reveal {
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.zr-more-slider.is-effect-running .zr-more-slider-image.is-current {
+  opacity: 0.14;
+  transition:
+    opacity 0.85s ease,
+    transform 0.85s ease;
+}
+
+.zr-more-slider-piece {
+  position: absolute;
+  background-repeat: no-repeat;
+  opacity: 0;
+  filter: blur(2px);
+  backface-visibility: hidden;
+  transform-origin: center center;
+  transition:
+    opacity 0.56s ease,
+    transform 0.82s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.56s ease;
+}
+
+.zr-more-slider.is-effect-running.is-effect-threed .zr-more-slider-piece {
+  transform-origin: center center;
+}
+
+.zr-more-slider.is-effect-running.is-effect-fade .zr-more-slider-image.is-current {
+  opacity: 0;
+}
+
+.zr-more-slider.is-effect-running.is-effect-shrink .zr-more-slider-image.is-current {
+  opacity: 0;
+  transform: scale(0.94);
+}
+
+.zr-more-slider-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  width: 42px;
+  height: 42px;
+  border: none;
+  background: rgba(0, 0, 0, 0.28);
+  color: #ffffff;
+  font-size: 28px;
+  line-height: 1;
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.zr-more-slider-arrow:hover {
+  background: rgba(0, 0, 0, 0.46);
+}
+
+.zr-more-slider-arrow-prev {
+  left: 25px;
+}
+
+.zr-more-slider-arrow-next {
+  right: 25px;
+}
+
+.zr-more-company {
+  padding: 56px 0 18px;
+}
+
+.zr-more-company h1 {
+  margin: 0;
+  text-align: center;
+  font-family: "SimHei", "Microsoft YaHei", sans-serif;
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 1.25;
+  color: #111111;
+}
+
+.zr-more-sections {
+  padding: 0 0 0;
+}
+
+.zr-more-section {
+  padding: 0;
+}
+
+.zr-more-section + .zr-more-section {
+  margin-top: 22px;
+}
+
+.zr-more-section:last-child {
+  padding-bottom: 97px;
+}
+
+.zr-more-section-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.zr-more-section-line {
+  display: none;
+}
+
+.zr-more-section-heading h2 {
+  margin: 0;
+  font-family: "SimHei", "Microsoft YaHei", sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #111111;
+}
+
+.zr-more-row {
+  display: grid;
+  grid-template-columns: 500px 500px 450px;
+  column-gap: 25px;
+  margin-top: 29px;
+}
+
+.zr-more-row + .zr-more-row {
+  margin-top: 37px;
+}
+
+.zr-more-card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.zr-more-card-media {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 498px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #d7d7d7;
+  contain: paint;
+}
+
+.zr-more-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition: transform 0.3s ease;
+}
+
+.zr-more-card-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 50px;
+  padding: 0 20px;
+  background: rgba(0, 0, 0, 0.46);
+  transform: translateY(100%);
+  opacity: 0;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.zr-more-card-title {
+  display: block;
+  color: #ffffff;
+  font-family: "SimHei", "Microsoft YaHei", sans-serif;
+  font-size: 25px;
+  line-height: 1;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zr-more-card:hover img {
+  transform: translateZ(0) scale(1.02);
+}
+
+.zr-more-card:hover .zr-more-card-overlay {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.zr-more-section-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 42px;
+  margin-bottom: 0;
+}
+
+.zr-more-more-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  min-height: 50px;
+  padding: 4px 0 8px;
+  border-radius: 30px;
+  background: var(--zr-more-button-bg);
+  color: #ffffff !important;
+  font-family: "SimHei", "Microsoft YaHei", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.zr-more-more-button:hover {
+  background: var(--zr-more-button-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.16);
+}

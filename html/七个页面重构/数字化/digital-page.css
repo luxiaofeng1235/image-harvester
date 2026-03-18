@@ -71,3 +71,35 @@
   height: 100%;
   object-fit: cover;
 }
+
+.zr-digital-page .zr-digital-enter-button {
+  position: absolute;
+  left: 50%;
+  bottom: 220px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 50px;
+  transform: translateX(-50%);
+  border-radius: 5px;
+  background: rgba(201, 218, 248, 0.2);
+  color: #ffffff !important;
+  font-family: "SimHei", "Microsoft YaHei", sans-serif;
+  font-size: 20px;
+  line-height: 1;
+  text-decoration: none;
+  backdrop-filter: blur(3px);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.zr-digital-page .zr-digital-enter-button:hover,
+.zr-digital-page .zr-digital-enter-button:focus {
+  background: rgba(111, 168, 220, 0.2);
+  color: rgba(204, 204, 204, 1) !important;
+  transform: translateX(-50%) translateY(-1px);
+}
