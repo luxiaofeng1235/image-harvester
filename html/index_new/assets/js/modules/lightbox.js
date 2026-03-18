@@ -20,6 +20,7 @@ export function initLightbox(root) {
   let renderToken = 0;
   const preloaded = new Set();
   const MIN_LOADING_MS = 650;
+  const EXIT_MS = 260;
 
   function setLoading(flag) {
     root.classList.toggle("is-loading", Boolean(flag));
@@ -48,7 +49,7 @@ export function initLightbox(root) {
 
     setLoading(true);
     image.alt = current.name || "图片预览";
-    caption.textContent = current.name || "";
+    caption.textContent = `${index + 1} / ${items.length}`;
 
     const loader = new Image();
     const done = () => {
@@ -79,12 +80,16 @@ export function initLightbox(root) {
   }
 
   function close() {
-    root.hidden = true;
+    root.classList.remove("is-open");
     setLoading(false);
     unlockBody();
-    if (opener && typeof opener.focus === "function") {
-      opener.focus();
-    }
+    window.setTimeout(() => {
+      if (root.classList.contains("is-open")) return;
+      root.hidden = true;
+      if (opener && typeof opener.focus === "function") {
+        opener.focus();
+      }
+    }, EXIT_MS);
   }
 
   function open(inputItems, startIndex, sourceEl) {
@@ -95,9 +100,15 @@ export function initLightbox(root) {
     index = Math.max(0, Math.min(startIndex || 0, inputItems.length - 1));
     opener = sourceEl || document.activeElement;
     root.hidden = false;
+    root.classList.remove("is-open");
     lockBody();
     render();
     window.setTimeout(preloadBatch, 1200);
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        root.classList.add("is-open");
+      });
+    });
     if (dialog) {
       dialog.focus();
     }

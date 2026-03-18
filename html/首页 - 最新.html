@@ -6,7 +6,8 @@
     <link href="https://static.jsss999.com/upload/zrsite/index/media.css" rel="stylesheet" type="text/css"/>
     <link href="https://static.jsss999.com/upload/zrsite/index/title.css" rel="stylesheet" type="text/css"/>
 
-    <link href="https://static.jsss999.com/upload/zrsite/index/sidebar.css" rel="stylesheet" type="text/css"/>
+    <link href="https://static.ysjianzhan.cn/website/plugin/sidebar/css/sidebar.css?v=16860282" rel="stylesheet" type="text/css"/>
+    <link href="https://static.jsss999.com/upload/zrsite/slider/category-sidebar-v1.css?v=20260313-2" rel="stylesheet" type="text/css"/>
 
     <link href="https://static.jsss999.com/upload/zrsite/index/HarmonyOS_Sans.css" rel="stylesheet" type="text/css"/>
     <link href="https://static.jsss999.com/upload/zrsite/common/common_layers-v2.css" rel="stylesheet" type="text/css"/>
@@ -150,11 +151,6 @@
                     </style>
                     <div id="layerC27426EF003DEDA58C5FE78E2161F468_content" class="wp-unslider_content"
                          style="overflow: hidden; border: none; left: -178.5px; width: 1857px; height: 1080px; position: absolute;">
-                        <script type="text/javascript">
-
-                        </script>
-
-                        <!-- loop star -->
                         <div id="layerC27426EF003DEDA58C5FE78E2161F468html5zoo-1">
                             <ul class="html5zoo-slides" style="display:none;">
 
@@ -177,45 +173,7 @@
                                          class="html5lightbox"/></a></li>
                             </ul>
                         </div>
-                        <!-- loop end -->
-
-                        <script language="javascript">
-                            (function () {
-                                var layerparams = {
-                                    "layerid": "layerC27426EF003DEDA58C5FE78E2161F468",
-                                    "pstyle": "none",
-                                    "plborder_size": null,
-                                    "interval": 4000,
-                                    "autoplays": "true",
-                                    "title_size": 40,
-                                    "title_family": "SimSun",
-                                    "title_color": "#fff",
-                                    "easing": "slide",
-                                    "show_title": "1",
-                                    "show_nav": "1",
-                                    "navigation_style": "01",
-                                    "navbg_hover_color": "#660000",
-                                    "nav_margin_bottom_size": "25",
-                                    "nav_arrow": "1",
-                                    "arrow_left": "https://static.jsss999.com/upload/zrsite/index/left_arrow.png",
-                                    "arrow_right": "https://static.jsss999.com/upload/zrsite/index/right_arrow.png",
-                                    "nav_margin_left_size": "25",
-                                    "nav_margin_right_size": "25",
-                                    "skin": "02",
-                                    "default_show": "1",
-                                    "hover_show": "0",
-                                    "pauseonmouseover": "0",
-                                    "nav_arrow_w_size": "32",
-                                    "nav_arrow_h_size": "32",
-                                    "iconstyle": "01",
-                                    "nav_height_size": "2",
-                                    "wsize": null,
-                                    "editMode": false,
-                                    "unslideradapt": null
-                                };
-                                layer_unslider_init_func(layerparams);
-                            })()
-                        </script>
+                        <script language="javascript">(function(){var layerparams={"layerid":"layerC27426EF003DEDA58C5FE78E2161F468","pstyle":"none","plborder_size":null,"interval":4000,"autoplays":"true","title_size":40,"title_family":"SimSun","title_color":"#fff","easing":"slide","show_title":"1","show_nav":"1","navigation_style":"01","navbg_hover_color":"#660000","nav_margin_bottom_size":"25","nav_arrow":"1","arrow_left":"https://static.jsss999.com/upload/zrsite/index/left_arrow.png","arrow_right":"https://static.jsss999.com/upload/zrsite/index/right_arrow.png","nav_margin_left_size":"25","nav_margin_right_size":"25","skin":"02","default_show":"1","hover_show":"0","pauseonmouseover":"0","nav_arrow_w_size":"32","nav_arrow_h_size":"32","iconstyle":"01","nav_height_size":"2","wsize":null,"editMode":false,"unslideradapt":null};layer_unslider_init_func(layerparams);})();</script>
                     </div>
                 </div>
                 <script>                 $('#layerC27426EF003DEDA58C5FE78E2161F468').triggerHandler('layer_ready');</script>
@@ -278,68 +236,7 @@
                             </div>
                         </div>
                     </div>
-                    <script>
-                        (function () {
-                            function bindHomeBlockitLightbox() {
-                                if (!window.jQuery) {
-                                    return;
-                                }
-                                var $container = $('#layerBD4BA54D27F239424CB34FEE9C845286_container');
-                                if (!$container.length) {
-                                    return;
-                                }
-                                $container.css('visibility', '');
-                                if ($container.data('lightbox_bound')) {
-                                    return;
-                                }
-
-                                function doBind() {
-                                    if (!$.fn.lightBox) {
-                                        return;
-                                    }
-                                    var $imgLinks = $container.find('.imgholder a');
-                                    if (!$imgLinks.length) {
-                                        $container.data('lightbox_bound', true);
-                                        return;
-                                    }
-                                    // 首页这 6 张图保留图片弹窗：强制使用当前缩略图地址作为弹层源。
-                                    $imgLinks.each(function () {
-                                        var $a = $(this);
-                                        var src = $a.find('img').attr('src');
-                                        if (src) {
-                                            $a.attr('href', src);
-                                        }
-                                    });
-                                    var plugindir = 'https://static.ysjianzhan.cn/website/plugin/blocksit/';
-                                    $imgLinks.lightBox({
-                                        imageLoading: plugindir + 'images/lightbox-ico-loading.gif',
-                                        imageBtnPrev: plugindir + 'images/lightbox-btn-prev.gif',
-                                        imageBtnNext: plugindir + 'images/lightbox-btn-next.gif',
-                                        imageBtnClose: plugindir + 'images/lightbox-btn-close.gif',
-                                        imageBlank: plugindir + 'images/lightbox-blank.gif',
-                                        fixedNavigation: true,
-                                        overlayOpacity: 0.7,
-                                        cursorBtnPrev: plugindir + 'images/albumleftarrow.cur',
-                                        cursorBtnNext: plugindir + 'images/albumrightarrow.cur'
-                                    });
-                                    $container.data('lightbox_bound', true);
-                                }
-
-                                if ($.fn.lightBox) {
-                                    doBind();
-                                    return;
-                                }
-
-                                $LAB.script('https://static.jsss999.com/upload/zrsite/index/common/jquery.lightbox.js').wait(function () {
-                                    doBind();
-                                });
-                            }
-
-                            $('#layerBD4BA54D27F239424CB34FEE9C845286').layer_ready(bindHomeBlockitLightbox);
-                            $(bindHomeBlockitLightbox);
-                            $(window).on('load', bindHomeBlockitLightbox);
-                        })();
-                    </script>
+                    <script>(function(){function bindHomeBlockitLightbox(){if(!window.jQuery){return;}var $container=$('#layerBD4BA54D27F239424CB34FEE9C845286_container');if(!$container.length){return;}$container.css('visibility','');if($container.data('lightbox_bound')){return;}function doBind(){if(!$.fn.lightBox){return;}var $imgLinks=$container.find('.imgholder a');if(!$imgLinks.length){$container.data('lightbox_bound',true);return;}$imgLinks.each(function(){var $a=$(this);var src=$a.find('img').attr('src');if(src){$a.attr('href',src);}});var plugindir='https://static.ysjianzhan.cn/website/plugin/blocksit/';$imgLinks.lightBox({imageLoading:plugindir+'images/lightbox-ico-loading.gif',imageBtnPrev:plugindir+'images/lightbox-btn-prev.gif',imageBtnNext:plugindir+'images/lightbox-btn-next.gif',imageBtnClose:plugindir+'images/lightbox-btn-close.gif',imageBlank:plugindir+'images/lightbox-blank.gif',fixedNavigation:true,overlayOpacity:0.7,cursorBtnPrev:plugindir+'images/albumleftarrow.cur',cursorBtnNext:plugindir+'images/albumrightarrow.cur'});$container.data('lightbox_bound',true);}if($.fn.lightBox){doBind();return;}$LAB.script('https://static.jsss999.com/upload/zrsite/index/common/jquery.lightbox.js').wait(function(){doBind();});}$('#layerBD4BA54D27F239424CB34FEE9C845286').layer_ready(bindHomeBlockitLightbox);$(bindHomeBlockitLightbox);$(window).on('load',bindHomeBlockitLightbox);})();</script>
                 </div>
                 <script>                 $('#layerBD4BA54D27F239424CB34FEE9C845286').triggerHandler('layer_ready');</script>
 
@@ -356,8 +253,6 @@
                             <div class="wp-line_content"
                                  style="padding: 0px; border-color: transparent; border-width: 0px; overflow: hidden; width: 1500px; height: 32px;">
                                 <div class="wpline-wrapper horizontal-dashed"></div>
-                                <script language="javascript">
-                                </script>
                             </div>
                         </div>
                         <script>                 $('#layerC41B6B7E53EE7D2088F1BAEFB988C1F2').triggerHandler('layer_ready');</script>
@@ -437,8 +332,6 @@
                             <div class="wp-line_content"
                                  style="padding: 0px; border-color: transparent; border-width: 0px; overflow: hidden; width: 64px; height: 1425px;">
                                 <div class="wpline-wrapper vertical-dashed"></div>
-                                <script language="javascript">
-                                </script>
                             </div>
                         </div>
                         <script>                 $('#layer451A871677FE124C7A9094E58A322165').triggerHandler('layer_ready');</script>
@@ -804,100 +697,6 @@
                 </script>
 
 
-                <div id='layerCBEBB2153194013B26685B04DC2EF79E' type='sidebar' class='cstlayer'
-                     style='left: 1386px; top: 2223px; position: absolute; z-index: 143; width: 114px; height: 87px; display: block; '
-                     mid="" deg='0'>
-                    <div class="wp-sidebar_content"
-                         style="overflow: hidden; border-color: transparent; border-width: 0px; width: 114px; height: 87px; border-style: solid; padding: 0px;;visibility:hidden">
-                        <!--start-->
-                        <link href="https://static.jsss999.com/upload/zrsite/index/sidebar02.css" rel="stylesheet"
-                              type="text/css"/>
-                        <script type="text/javascript">
-
-                        </script>
-
-                        <script type="text/javascript">
-                            $(function () {
-                                var celancount = $('.wpsidebar02').length;
-                                if (!celancount) $("<div class=\"wpsidebar-fkf wpsidebar02\"><ul class=\"fkf\"><li class=\"fkf-item\"><img src=\"https:\/\/static.jsss999.com\/upload\/zrsite\/common\/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png\"><img class=\"hover\" src=\"https:\/\/static.jsss999.com\/upload\/zrsite\/common\/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png\"><div class=\"fkf-item-right\"><div class=\"fkf-item-right-content right-content-tele\"><img class=\"arrow\" src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/arrow-r.png\"><div class=\"fkf-item-right-content-top\" ><img src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-4.png\" style=\"width: 25px;height: 25px;\"><h2 class=\"txt_fam\">180 6619 0606<\/h2><p class=\"txt_fam\"><\/p><\/div><div class=\"fkf-item-right-content-top\" ><img src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-4.png\" style=\"width: 25px;height: 25px;\"><h2 class=\"txt_fam\">189 6208 2198<\/h2><p class=\"txt_fam\"><\/p><\/div><\/div><\/div><\/li><li class=\"fkf-item\"><img src=\"https:\/\/static.jsss999.com\/upload\/zrsite\/common\/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg\"><img class=\"hover\" src=\"https:\/\/static.jsss999.com\/upload\/zrsite\/common\/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg\"><div class=\"fkf-item-right fkf-item-right-ewm\"><div class=\"right-content-ewm\"><img class=\"arrow\" src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/arrow-r.png\"><div class=\"ewm\"><div><img src=\"https:\/\/static.jsss999.com\/upload\/zrsite\/common\/1_moxe.jpg\"><\/div><p>\u5fae\u4fe1\u626b\u4e00\u626b<\/p><\/div><div class=\"ewm\"><div><img src=\"https:\/\/static.jsss999.com\/upload\/zrsite\/common\/2_7gzi.jpg\"><\/div><p>\u5fae\u4fe1\u626b\u4e00\u626b<\/p><\/div><\/div><\/div><\/li><li class=\"fkf-item sgotop\"><img src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-8.png\"><img class=\"hover\" src=\"https:\/\/static.ysjianzhan.cn\/website\/plugin\/sidebar\/images\/fkf-88.png\"><\/li><\/ul><\/div>").appendTo('body');
-
-                                function autoImg(type) {
-                                }
-
-                                $('.wpsidebar02 a.custom').hover(function () {
-                                    var def = $(this).find("img").attr("data-over");
-                                    $(this).find("img").attr("src", def);
-                                }, function () {
-                                    var hov = $(this).find("img").attr("data-out");
-                                    $(this).find("img").attr("src", hov);
-                                })
-                                //showjs
-                                $('.wpsidebar02 li.smember img.hover').click(function () {
-                                    sidebar_cart_colse();
-                                    if (4 > 3) {
-                                        wp_shoppingCart_1(parseToURL('wp_user_manage', 'user_manage'), {
-                                            title: '',
-                                            width: 1000,
-                                            height: 560
-                                        });
-                                        return false;
-                                    }
-                                    $LAB.script("https://static.jsss999.com/upload/zrsite/index/custom_dialog.js").wait(function () {
-                                        show_custom_panel(parseToURL('userlogin', 'login_dialog'), {
-                                            title: '登录', overlay: true, id: 'wp_sidebar_dialog_login'
-                                        });
-                                    });
-                                });
-                                $('.wpsidebar02 li.scart img.hover').click(function () {
-                                    kf_close();
-                                    remove_login();
-                                    $('.rm_bz,.rm_kf').stop().animate({right: '-291px'}, 10);
-                                });
-
-                                function remove_login() {
-                                    $('#wp_sidebar_dialog_login,#wp-floatpanel_overlay').remove();
-                                };
-
-                                function kf_close() {
-                                    $('.wp_celan_detailcontent,.rm_bz,.rm_kf').stop().animate({'left': '-291px'}, 300);
-                                    $('.wp_celan_content').find('.s_arrow').css("display", "none");
-                                    $('.wp_celan_content').find('p.p3').css("background", "none");
-                                };
-
-                                function sidebar_cart_colse() {
-                                    $('#shopping_cart-items,#wp-floatpanel_overlay').remove();
-                                };
-                                //左侧参数
-                                $.sidebar_aleft = '1';
-                                $.sidebar_pathimg = 'https://static.ysjianzhan.cn/website/plugin/sidebar/images/';
-                                $.sidebar_menuclolr = '#6aa84f';
-                                $.sidebar_linkstr = JSON.parse('{"help":{"linkurl":"","target":""},"message":{"linkurl":"","target":""}}');
-                            });
-                        </script>
-                        <script src="https://static.jsss999.com/upload/zrsite/index/rightmenu.js"
-                                type="text/javascript"></script>
-
-                        <!--右侧菜单end-->
-                        <!--end-->
-                    </div>
-                    <script language="javascript">
-                        (function (window) {
-                            $('#layerCBEBB2153194013B26685B04DC2EF79E').hide();
-                            if (!window.wp_shoppingCart_1) {
-                                function wp_shoppingCart_1(load_url, option) {
-                                    $LAB
-                                        .script("https://static.jsss999.com/upload/zrsite/index/usermanage.js")
-                                        .wait(function () {
-                                            wp_openManageDialog(load_url, option);
-                                        });
-                                }
-
-                                window.wp_shoppingCart_1 = wp_shoppingCart_1;
-                            }
-                        })(window);
-                    </script>
-                </div>
-                <script>                 $('#layerCBEBB2153194013B26685B04DC2EF79E').triggerHandler('layer_ready');</script>
                 <div id='layerFB03D3B3B55A74E2F0DD0ECC2E41145C' type='buttons' class='cstlayer'
                      style='left: 671px; top: 4843px; position: absolute; z-index: 144; width: 150px; height: 50px; display: block; '
                      mid="" deg='0'>
@@ -1569,5 +1368,6 @@ mso-font-kerning:1.0000pt;"><o:p></o:p></span></p>
         color: #ffffff !important;
     }
     </style>
+    <script src="https://static.jsss999.com/upload/zrsite/slider/category-sidebar-v1.js?v=20260313-2"></script>
 
 </div>
