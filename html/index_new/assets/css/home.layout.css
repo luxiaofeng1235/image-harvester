@@ -1,4 +1,4 @@
-body {
+#home-root {
   min-width: var(--home-min-width);
   color: var(--home-text);
   background: var(--home-bg);

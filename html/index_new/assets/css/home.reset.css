@@ -1,46 +1,56 @@
-* {
+#home-root,
+#home-root *,
+#home-lightbox,
+#home-lightbox * {
   box-sizing: border-box;
 }
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-
-body {
+#home-root,
+#home-lightbox {
   font-family: "Microsoft YaHei", "HarmonyOS Sans", sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
-h1,
-h2,
-h3,
-h4,
-p,
-figure,
-ul,
-li {
+#home-root h1,
+#home-root h2,
+#home-root h3,
+#home-root h4,
+#home-root p,
+#home-root figure,
+#home-root ul,
+#home-root li,
+#home-lightbox h1,
+#home-lightbox h2,
+#home-lightbox h3,
+#home-lightbox h4,
+#home-lightbox p,
+#home-lightbox figure,
+#home-lightbox ul,
+#home-lightbox li {
   margin: 0;
   padding: 0;
 }
 
-ul {
+#home-root ul,
+#home-lightbox ul {
   list-style: none;
 }
 
-a {
+#home-root a,
+#home-lightbox a {
   color: inherit;
   text-decoration: none;
 }
 
-img {
+#home-root img,
+#home-lightbox img {
   display: block;
   max-width: 100%;
 }
 
-button {
+#home-root button,
+#home-lightbox button {
   font: inherit;
   color: inherit;
 }

@@ -1,8 +1,8 @@
-.lightbox[hidden] {
+#home-lightbox[hidden] {
   display: none;
 }
 
-.lightbox {
+#home-lightbox {
   position: fixed;
   inset: 0;
   z-index: 2147483647 !important;
@@ -11,7 +11,7 @@
   transition: opacity 0.28s ease;
 }
 
-.lightbox-mask {
+#home-lightbox .lightbox-mask {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.62);
@@ -20,7 +20,7 @@
   transition: opacity 0.3s ease;
 }
 
-.lightbox-dialog {
+#home-lightbox .lightbox-dialog {
   position: relative;
   z-index: 1;
   width: min(1480px, calc(100vw - 24px));
@@ -60,7 +60,7 @@
     box-shadow 0.36s ease;
 }
 
-#lightbox-image {
+#home-lightbox #lightbox-image {
   display: block;
   width: 100%;
   height: 100%;
@@ -71,7 +71,7 @@
   will-change: opacity;
 }
 
-.lightbox-loading {
+#home-lightbox .lightbox-loading {
   position: absolute;
   inset: 0;
   display: flex;
@@ -88,7 +88,7 @@
   transition: opacity 0.24s ease;
 }
 
-.lightbox-loading::before {
+#home-lightbox .lightbox-loading::before {
   content: "";
   width: 6px;
   height: 6px;
@@ -103,19 +103,19 @@
     -8.5px 8.5px 0 -0.9px rgba(17, 17, 17, 0.48),
     -12px 0 0 -1.2px rgba(17, 17, 17, 0.38),
     -8.5px -8.5px 0 -1.45px rgba(17, 17, 17, 0.28);
-  animation: lightbox-spin 1.35s linear infinite;
+  animation: zr-home-lightbox-spin 1.35s linear infinite;
 }
 
-.lightbox.is-loading #lightbox-image {
+#home-lightbox.is-loading #lightbox-image {
   opacity: 0;
 }
 
-.lightbox:not(.is-loading) .lightbox-loading {
+#home-lightbox:not(.is-loading) .lightbox-loading {
   opacity: 0;
   pointer-events: none;
 }
 
-#lightbox-caption {
+#home-lightbox #lightbox-caption {
   position: absolute;
   left: 50%;
   right: auto;
@@ -137,13 +137,13 @@
   pointer-events: none;
 }
 
-@keyframes lightbox-spin {
+@keyframes zr-home-lightbox-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-.lightbox-close {
+#home-lightbox .lightbox-close {
   position: absolute;
   top: 8px;
   right: 0;
@@ -158,7 +158,7 @@
   cursor: pointer;
 }
 
-.lightbox-nav {
+#home-lightbox .lightbox-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -172,20 +172,20 @@
   cursor: pointer;
 }
 
-.lightbox-prev {
+#home-lightbox .lightbox-prev {
   left: -56px;
 }
 
-.lightbox-next {
+#home-lightbox .lightbox-next {
   right: -56px;
 }
 
-.lightbox-actions {
+#home-lightbox .lightbox-actions {
   margin-top: 12px;
   text-align: center;
 }
 
-.lightbox-detail-link {
+#home-lightbox .lightbox-detail-link {
   display: inline-block;
   min-width: 130px;
   padding: 10px 22px;
@@ -195,39 +195,39 @@
   background: rgba(0, 0, 0, 0.42);
 }
 
-.lightbox-detail-link:hover {
+#home-lightbox .lightbox-detail-link:hover {
   background: #ffffff;
   color: #111111;
 }
 
-.lightbox.is-loading .lightbox-actions,
-.lightbox.is-loading #lightbox-caption,
-.lightbox.is-loading .lightbox-nav {
+#home-lightbox.is-loading .lightbox-actions,
+#home-lightbox.is-loading #lightbox-caption,
+#home-lightbox.is-loading .lightbox-nav {
   opacity: 0;
   pointer-events: none;
 }
 
-.lightbox.is-open {
+#home-lightbox.is-open {
   opacity: 1;
 }
 
-.lightbox.is-open .lightbox-mask {
+#home-lightbox.is-open .lightbox-mask {
   opacity: 1;
 }
 
-.lightbox.is-open .lightbox-dialog {
+#home-lightbox.is-open .lightbox-dialog {
   opacity: 1;
   transform: scale(1);
-  animation: lightbox-dialog-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: zr-home-lightbox-dialog-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.lightbox.is-open .lightbox-figure {
+#home-lightbox.is-open .lightbox-figure {
   transform: scale(1);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
-  animation: lightbox-figure-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: zr-home-lightbox-figure-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@keyframes lightbox-dialog-pop {
+@keyframes zr-home-lightbox-dialog-pop {
   0% {
     opacity: 0;
     transform: scale(0.56);
@@ -242,7 +242,7 @@
   }
 }
 
-@keyframes lightbox-figure-pop {
+@keyframes zr-home-lightbox-figure-pop {
   0% {
     transform: scale(0.82);
   }
