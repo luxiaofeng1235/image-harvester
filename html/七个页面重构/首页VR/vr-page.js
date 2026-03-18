@@ -75,6 +75,10 @@ function createCard(item) {
   var media = document.createElement("div");
   media.className = "zr-vr-card-media";
 
+  var loading = document.createElement("div");
+  loading.className = "zr-vr-card-loading";
+  loading.setAttribute("aria-hidden", "true");
+
   var iframe = document.createElement("iframe");
   iframe.src = item.iframeUrl || "";
   iframe.title = item.title || "";
@@ -83,6 +87,9 @@ function createCard(item) {
   iframe.setAttribute("allowtransparency", "true");
   iframe.width = "650";
   iframe.height = "460";
+  iframe.addEventListener("load", function () {
+    media.classList.add("is-loaded");
+  });
 
   var line = document.createElement("span");
   line.className = "zr-vr-card-line";
@@ -91,6 +98,7 @@ function createCard(item) {
   title.className = "zr-vr-card-title";
   title.textContent = item.title || "";
 
+  media.appendChild(loading);
   media.appendChild(iframe);
   card.appendChild(media);
   card.appendChild(line);
