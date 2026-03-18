@@ -14,7 +14,7 @@ function createPiece(stageRect, pieceRect, imageUrl, delay, fromTransform) {
   return piece;
 }
 
-export function initMoreSlider(root, options) {
+export function initSharedSlider(root, options) {
   if (!root || !options || !Array.isArray(options.slides) || options.slides.length === 0) {
     return null;
   }

@@ -1,4 +1,4 @@
-import { initMoreSlider } from "./more-slider.js";
+import { initSharedSlider } from "../js/shared-slider.js";
 
 var root = document.getElementById("zr-more-root");
 
@@ -11,7 +11,7 @@ async function initPage() {
     var config = await loadConfig();
     renderCompanyTitle(config.companyTitle);
     renderSections(config.sections || []);
-    initMoreSlider(document.getElementById("zr-more-slider"), config.slider || {});
+    initSharedSlider(document.getElementById("zr-more-slider"), config.slider || {});
   } catch (error) {
     console.error("Failed to render more products page.", error);
   }

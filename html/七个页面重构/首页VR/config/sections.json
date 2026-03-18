@@ -1,0 +1,111 @@
+{
+  "slider": {
+    "interval": 3000,
+    "effect": "all",
+    "slides": [
+      {
+        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/vr/wysm.png",
+        "alt": "首页VR轮播图一"
+      },
+      {
+        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/vr/myo1.jpg",
+        "alt": "首页VR轮播图二"
+      }
+    ]
+  },
+  "moreButton": {
+    "text": "更多产品",
+    "href": "https://www.zgzonre.com/index-vr-more?vr_page=1",
+    "target": "_self"
+  },
+  "sections": [
+    {
+      "id": "heater",
+      "title": "加热器系列",
+      "items": [
+        {
+          "title": "VR展示_导热油炉加热器(撬装)",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715058524.html"
+        },
+        {
+          "title": "VR展示_立式电加热罐",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715058924.html"
+        },
+        {
+          "title": "VR展示_气体管道加热器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715058977.html"
+        },
+        {
+          "title": "VR展示_风道加热器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715059031.html"
+        }
+      ]
+    },
+    {
+      "id": "water-treatment",
+      "title": "水处理系列",
+      "items": [
+        {
+          "title": "VR展示_机械过滤器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715059106.html"
+        },
+        {
+          "title": "VR展示_卧式直通除污器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715059147.html"
+        },
+        {
+          "title": "VR展示_旋流除污器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715059186.html"
+        },
+        {
+          "title": "VR展示_精密过滤器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715059230.html"
+        }
+      ]
+    },
+    {
+      "id": "mixing",
+      "title": "搅拌系列",
+      "items": [
+        {
+          "title": "VR展示_立式电加热搅拌罐",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715059265.html"
+        },
+        {
+          "title": "VR展示_搅拌罐（带平台）",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715059306.html"
+        },
+        {
+          "title": "VR展示_夹套搅拌罐",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715059356.html"
+        },
+        {
+          "title": "VR展示_立式电加搅拌罐",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715059399.html"
+        }
+      ]
+    },
+    {
+      "id": "expansion-joint",
+      "title": "膨胀节系列",
+      "items": [
+        {
+          "title": "VR展示_单式铰链型膨胀节",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715059465.html"
+        },
+        {
+          "title": "VR展示_复式铰链型膨胀节",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715059502.html"
+        },
+        {
+          "title": "VR展示_通用型金属补偿器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715059542.html"
+        },
+        {
+          "title": "VR展示_通用型金属补偿器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/vr/chtml_1715059588.html"
+        }
+      ]
+    }
+  ]
+}
