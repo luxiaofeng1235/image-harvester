@@ -5,12 +5,10 @@
     "effect": "all",
     "slides": [
       {
-        "imageUrl": "https://static.jsss999.com/upload/zrsite/more/iy99.jpg",
-        "alt": "更多产品页轮播图一"
+        "imageUrl": "https://static.jsss999.com/upload/zrsite/more/iy99.jpg"
       },
       {
-        "imageUrl": "https://static.jsss999.com/upload/zrsite/more/0anf.png",
-        "alt": "更多产品页轮播图二"
+        "imageUrl": "https://static.jsss999.com/upload/zrsite/more/0anf.png"
       }
     ]
   },

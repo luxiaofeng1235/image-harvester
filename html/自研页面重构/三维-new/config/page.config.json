@@ -4,12 +4,10 @@
     "effect": "fade",
     "slides": [
       {
-        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/slider/myo1.jpg",
-        "alt": "三维展示页轮播图一"
+        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/slider/myo1.jpg"
       },
       {
-        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/slider/wysm.png",
-        "alt": "三维展示页轮播图二"
+        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/slider/wysm.png"
       }
     ]
   },

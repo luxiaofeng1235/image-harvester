@@ -13,11 +13,12 @@ async function initPage() {
     var config = await loadConfig(root.getAttribute("data-config"));
     var currentTypeKey = resolveType(config, getTypeParam() || root.getAttribute("data-default-type"));
     var currentType = config.types[currentTypeKey];
+    var sliderConfig = resolveSliderConfig(config, currentType);
 
     root.dataset.type = currentTypeKey;
-    applySliderAssets(config.slider || {});
+    applySliderAssets(sliderConfig);
     renderType(currentType);
-    initSharedSlider(document.getElementById("zr-3dseries-slider"), config.slider || {});
+    initSharedSlider(document.getElementById("zr-3dseries-slider"), sliderConfig);
   } catch (error) {
     console.error("Failed to render three series page.", error);
   }
@@ -56,6 +57,18 @@ function resolveType(config, rawType) {
     aliases[fallbackType] ||
     fallbackType
   );
+}
+
+function resolveSliderConfig(config, currentType) {
+  var baseSlider = config.slider || {};
+  var typeSlider = (currentType && currentType.slider) || {};
+  return {
+    interval: typeSlider.interval || baseSlider.interval,
+    effect: typeSlider.effect || baseSlider.effect,
+    arrowLeft: typeSlider.arrowLeft || baseSlider.arrowLeft,
+    arrowRight: typeSlider.arrowRight || baseSlider.arrowRight,
+    slides: typeSlider.slides || baseSlider.slides || []
+  };
 }
 
 function applySliderAssets(sliderConfig) {

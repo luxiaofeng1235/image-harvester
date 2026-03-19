@@ -1,23 +1,7 @@
 {
   "slider": {
     "interval": 3000,
-    "effect": "all",
-    "arrowLeft": "https://static.jsss999.com/upload/zrsite/index/jiareqi/left_arrow.png",
-    "arrowRight": "https://static.jsss999.com/upload/zrsite/index/jiareqi/right_arrow.png",
-    "slides": [
-      {
-        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/myo1.jpg",
-        "alt": "三维系列轮播图一"
-      },
-      {
-        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/0anf.png",
-        "alt": "三维系列轮播图二"
-      },
-      {
-        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/wysm.png",
-        "alt": "三维系列轮播图三"
-      }
-    ]
+    "effect": "all"
   },
   "aliases": {
     "1": "heater",
@@ -41,6 +25,21 @@
   "types": {
     "heater": {
       "pageTitle": "加热器产品",
+      "slider": {
+        "arrowLeft": "https://static.jsss999.com/upload/zrsite/index/jiareqi/left_arrow.png",
+        "arrowRight": "https://static.jsss999.com/upload/zrsite/index/jiareqi/right_arrow.png",
+        "slides": [
+          {
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/myo1.jpg"
+          },
+          {
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/0anf.png"
+          },
+          {
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/wysm.png"
+          }
+        ]
+      },
       "cards": [
         {
           "title": "三维展示_风道加热器（DN65）",
@@ -86,6 +85,21 @@
     },
     "water": {
       "pageTitle": "水处理系列产品",
+      "slider": {
+        "arrowLeft": "https://static.jsss999.com/upload/zrsite/index/water/left_arrow.png",
+        "arrowRight": "https://static.jsss999.com/upload/zrsite/index/water/right_arrow.png",
+        "slides": [
+          {
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/index/water/myo1.jpg"
+          },
+          {
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/index/water/0anf.png"
+          },
+          {
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/index/water/wysm.png"
+          }
+        ]
+      },
       "cards": [
         {
           "title": "三维展示_机械过滤器",
@@ -126,6 +140,21 @@
     },
     "mixing": {
       "pageTitle": "搅拌系列产品",
+      "slider": {
+        "arrowLeft": "https://static.jsss999.com/upload/zrsite/index/jiaoban/left_arrow.png",
+        "arrowRight": "https://static.jsss999.com/upload/zrsite/index/jiaoban/right_arrow.png",
+        "slides": [
+          {
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/index/jiaoban/myo1.jpg"
+          },
+          {
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/index/jiaoban/0anf.png"
+          },
+          {
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/index/jiaoban/wysm.png"
+          }
+        ]
+      },
       "cards": [
         {
           "title": "三维展示_第一主标题第一主标题",
@@ -171,6 +200,21 @@
     },
     "expansion": {
       "pageTitle": "膨胀节系列产品",
+      "slider": {
+        "arrowLeft": "https://static.jsss999.com/upload/zrsite/index/pengzhang/left_arrow.png",
+        "arrowRight": "https://static.jsss999.com/upload/zrsite/index/pengzhang/right_arrow.png",
+        "slides": [
+          {
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/index/pengzhang/myo1.jpg"
+          },
+          {
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/index/pengzhang/0anf.png"
+          },
+          {
+            "imageUrl": "https://static.jsss999.com/upload/zrsite/index/pengzhang/wysm.png"
+          }
+        ]
+      },
       "cards": [
         {
           "title": "三维展示_通用型补偿器",
