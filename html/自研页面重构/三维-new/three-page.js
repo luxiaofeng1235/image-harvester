@@ -1,4 +1,4 @@
-import { initSharedSlider } from "../plugin/shared-slider.js";
+import { initSharedSlider } from "../plugin/shared-slider.js?v=20260319-1";
 
 var root = document.getElementById("zr-3dnew-root");
 

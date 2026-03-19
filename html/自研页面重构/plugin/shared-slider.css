@@ -17,30 +17,35 @@
 
 .zr-shared-slider.is-effect-running .zr-more-slider-image.is-reveal {
   opacity: 1;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.34s ease;
 }
 
 .zr-shared-slider.is-effect-running .zr-more-slider-image.is-current {
-  opacity: 0.14;
+  opacity: 0.08;
   transition:
-    opacity 0.85s ease,
-    transform 0.85s ease;
+    opacity 1s ease,
+    transform 1s ease;
 }
 
 .zr-more-slider-piece {
   position: absolute;
   background-repeat: no-repeat;
   opacity: 0;
-  filter: blur(2px);
+  filter: blur(4px);
   backface-visibility: hidden;
   transform-origin: center center;
   transition:
-    opacity 0.56s ease,
-    transform 0.82s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.56s ease;
+    opacity 0.68s ease,
+    transform 0.96s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.68s ease;
 }
 
 .zr-shared-slider.is-effect-running.is-effect-threed .zr-more-slider-piece {
+  transform-origin: center center;
+}
+
+.zr-shared-slider.is-effect-running.is-effect-fragments .zr-more-slider-piece,
+.zr-shared-slider.is-effect-running.is-effect-shards .zr-more-slider-piece {
   transform-origin: center center;
 }
 
@@ -51,6 +56,16 @@
 .zr-shared-slider.is-effect-running.is-effect-shrink .zr-more-slider-image.is-current {
   opacity: 0;
   transform: scale(0.94);
+}
+
+.zr-shared-slider.is-effect-running.is-effect-fragments .zr-more-slider-image.is-current,
+.zr-shared-slider.is-effect-running.is-effect-shards .zr-more-slider-image.is-current {
+  opacity: 0.04;
+  transform: scale(1.03);
+}
+
+.zr-shared-slider.is-effect-running.is-effect-curtain .zr-more-slider-image.is-current {
+  opacity: 0.05;
 }
 
 .zr-more-slider-arrow {

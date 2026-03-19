@@ -24,6 +24,8 @@ export function initSharedSlider(root, options) {
   var currentIndex = 0;
   var timer = null;
   var isAnimating = false;
+  var transitionCount = 0;
+  var lastEffect = "";
 
   root.innerHTML = "";
   root.classList.add("zr-shared-slider");
@@ -110,11 +112,41 @@ export function initSharedSlider(root, options) {
 
   function chooseEffect() {
     var effect = options.effect || "all";
-    var pool = ["slice", "blocks", "blinds", "shuffle", "threed", "fade", "shrink"];
     if (effect === "all") {
-      return pool[Math.floor(Math.random() * pool.length)];
+      if (transitionCount === 0) {
+        return "slice";
+      }
+      return pickRandomEffect([
+        "fragments",
+        "fragments",
+        "shards",
+        "shards",
+        "blocks",
+        "blocks",
+        "blinds",
+        "shuffle",
+        "threed",
+        "curtain",
+        "slice"
+      ]);
     }
     return effect;
+  }
+
+  function pickRandomEffect(pool) {
+    if (!Array.isArray(pool) || pool.length === 0) {
+      return "slice";
+    }
+
+    var next = pool[Math.floor(Math.random() * pool.length)];
+    var attempts = 0;
+
+    while (pool.length > 1 && next === lastEffect && attempts < 6) {
+      next = pool[Math.floor(Math.random() * pool.length)];
+      attempts += 1;
+    }
+
+    return next;
   }
 
   function buildEffectPieces(effect, imageUrl) {
@@ -185,71 +217,76 @@ export function initSharedSlider(root, options) {
 
     if (effect === "blinds") {
       addGrid(
-        3,
+        5,
         1,
         function (index) {
-          return index * 95;
+          return index * 72;
         },
-        function () {
-          return "scaleX(0.08)";
+        function (index) {
+          return index % 2 === 0
+            ? "translateY(-16px) scaleX(0.08)"
+            : "translateY(16px) scaleX(0.08)";
         }
       );
       return {
         pieces: pieces,
-        duration: 900
+        duration: 980
       };
     }
 
     if (effect === "blocks") {
       addGrid(
-        5,
+        6,
         5,
         function (index) {
-          return index * 28;
+          return index * 20;
         },
         function (index, column, row) {
-          var x = (column - 2) * 10;
-          var y = (row - 2) * 10;
-          return "translate(" + x + "px, " + y + "px) scale(0.72)";
+          var x = (column - 2.5) * 14;
+          var y = (row - 2) * 14;
+          var rotate = (index % 2 === 0 ? 1 : -1) * (5 + ((column + row) % 3) * 2);
+          return "translate(" + x + "px, " + y + "px) rotate(" + rotate + "deg) scale(0.64)";
         }
       );
       return {
         pieces: pieces,
-        duration: 1150
+        duration: 1220
       };
     }
 
     if (effect === "shuffle") {
       var order = [];
-      for (var i = 0; i < 25; i += 1) {
+      for (var i = 0; i < 30; i += 1) {
         order.push(i);
       }
       order.sort(function () {
         return Math.random() - 0.5;
       });
       addGrid(
-        5,
+        6,
         5,
         function (index) {
-          return order[index] * 22;
+          return order[index] * 16;
         },
         function (index, column, row) {
-          var rotate = (index % 2 === 0 ? 1 : -1) * (6 + ((column + row) % 3) * 2);
-          return "translateY(" + (row % 2 === 0 ? -18 : 18) + "px) rotate(" + rotate + "deg) scale(0.84)";
+          var rotate = (index % 2 === 0 ? 1 : -1) * (10 + ((column + row) % 4) * 2);
+          var x = column % 2 === 0 ? -14 - row * 2 : 14 + row * 2;
+          var y = row % 2 === 0 ? -24 : 24;
+          return "translate(" + x + "px, " + y + "px) rotate(" + rotate + "deg) scale(0.78)";
         }
       );
       return {
         pieces: pieces,
-        duration: 1150
+        duration: 1240
       };
     }
 
     if (effect === "threed") {
       addGrid(
-        5,
+        7,
         1,
         function (index) {
-          return index * 80;
+          return index * 54;
         },
         function (index) {
           var angle = index % 2 === 0 ? -90 : 90;
@@ -258,26 +295,93 @@ export function initSharedSlider(root, options) {
       );
       return {
         pieces: pieces,
-        duration: 1100
+        duration: 1160
+      };
+    }
+
+    if (effect === "fragments") {
+      var fragmentOrder = [];
+      for (var fragmentIndex = 0; fragmentIndex < 48; fragmentIndex += 1) {
+        fragmentOrder.push(fragmentIndex);
+      }
+      fragmentOrder.sort(function () {
+        return Math.random() - 0.5;
+      });
+      addGrid(
+        8,
+        6,
+        function (index, column, row) {
+          return fragmentOrder[index] * 14 + ((column + row) % 2) * 12;
+        },
+        function (index, column, row) {
+          var x = (column - 3.5) * 16;
+          var y = (row - 2.5) * 16;
+          var rotate = (index % 2 === 0 ? 1 : -1) * (8 + ((column + row) % 4) * 3);
+          return "translate(" + x + "px, " + y + "px) rotate(" + rotate + "deg) scale(0.54)";
+        }
+      );
+      return {
+        pieces: pieces,
+        duration: 1360
+      };
+    }
+
+    if (effect === "shards") {
+      addGrid(
+        6,
+        4,
+        function (index, column, row) {
+          return column * 46 + row * 30;
+        },
+        function (index, column, row) {
+          var x = row % 2 === 0 ? -28 - column * 2 : 28 + column * 2;
+          var y = (row - 1.5) * 20;
+          var rotate = row % 2 === 0 ? -12 - column * 2 : 12 + column * 2;
+          var skew = row % 2 === 0 ? -10 : 10;
+          return "translate(" + x + "px, " + y + "px) rotate(" + rotate + "deg) skewX(" + skew + "deg) scale(0.8)";
+        }
+      );
+      return {
+        pieces: pieces,
+        duration: 1280
+      };
+    }
+
+    if (effect === "curtain") {
+      addGrid(
+        12,
+        1,
+        function (index) {
+          return index * 34;
+        },
+        function (index) {
+          return index % 2 === 0
+            ? "translateY(-34px) scaleY(0.1)"
+            : "translateY(34px) scaleY(0.1)";
+        }
+      );
+      return {
+        pieces: pieces,
+        duration: 1040
       };
     }
 
     addGrid(
-      10,
+      14,
       1,
       function (index) {
-        return index * 42;
+        return index * 28;
       },
       function (index) {
         return index % 2 === 0
-          ? "translateY(-20px) scaleY(0.92)"
-          : "translateY(24px) scaleY(0.92)";
+          ? "translateY(-26px) scaleY(0.84)"
+          : "translateY(30px) scaleY(0.84)";
       }
     );
 
     return {
       pieces: pieces,
-      duration: 1050
+      duration: 1120
     };
   }
 
@@ -303,6 +407,9 @@ export function initSharedSlider(root, options) {
       "is-effect-blinds",
       "is-effect-shuffle",
       "is-effect-threed",
+      "is-effect-fragments",
+      "is-effect-shards",
+      "is-effect-curtain",
       "is-effect-fade",
       "is-effect-shrink"
     );
@@ -320,6 +427,8 @@ export function initSharedSlider(root, options) {
       root.classList.remove("is-effect-running", "is-effect-" + effect);
       piecesLayer.innerHTML = "";
       currentIndex = nextIndex;
+      lastEffect = effect;
+      transitionCount += 1;
       isAnimating = false;
     }, effectState.duration);
   }
