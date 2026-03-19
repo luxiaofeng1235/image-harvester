@@ -1,0 +1,243 @@
+.zr-3dnew-content {
+  height: 1843px;
+}
+
+.zr-3dnew-section[data-section-id="heater"] {
+  top: 36px;
+  height: 436px;
+}
+
+.zr-3dnew-section[data-section-id="heater"] .zr-3dnew-section-label {
+  left: 14px;
+  top: 7px;
+  width: 150px;
+  height: 33px;
+  line-height: 33px;
+}
+
+.zr-3dnew-section[data-section-id="heater"] .zr-3dnew-guide {
+  left: 149px;
+  top: 4px;
+  width: 498px;
+}
+
+.zr-3dnew-section[data-section-id="heater"] .zr-3dnew-button {
+  left: 671px;
+  top: 0;
+}
+
+.zr-3dnew-section[data-section-id="heater"] .zr-3dnew-media-item:nth-child(1) {
+  left: 169px;
+  top: 59px;
+}
+
+.zr-3dnew-section[data-section-id="heater"] .zr-3dnew-media-item:nth-child(1) .zr-3dnew-media {
+  width: 540px;
+  height: 320px;
+}
+
+.zr-3dnew-section[data-section-id="heater"] .zr-3dnew-media-item:nth-child(1) .zr-3dnew-media-title {
+  margin-top: 8.5px;
+  margin-left: 0;
+  width: 450px;
+  height: 41px;
+  line-height: 41px;
+}
+
+.zr-3dnew-section[data-section-id="heater"] .zr-3dnew-media-item:nth-child(2) {
+  left: 776px;
+  top: 58px;
+}
+
+.zr-3dnew-section[data-section-id="heater"] .zr-3dnew-media-item:nth-child(2) .zr-3dnew-media {
+  width: 540px;
+  height: 319px;
+}
+
+.zr-3dnew-section[data-section-id="heater"] .zr-3dnew-media-item:nth-child(2) .zr-3dnew-media-title {
+  margin-top: 14px;
+  margin-left: 4px;
+  width: 450px;
+  height: 41px;
+  line-height: 41px;
+}
+
+.zr-3dnew-section[data-section-id="water"] {
+  top: 495px;
+  height: 433px;
+}
+
+.zr-3dnew-section[data-section-id="water"] .zr-3dnew-section-label {
+  left: 16px;
+  top: 15px;
+  width: 150px;
+  height: 33px;
+  line-height: 33px;
+}
+
+.zr-3dnew-section[data-section-id="water"] .zr-3dnew-guide {
+  left: 150px;
+  top: 11px;
+  width: 484px;
+}
+
+.zr-3dnew-section[data-section-id="water"] .zr-3dnew-button {
+  left: 670px;
+  top: 0;
+}
+
+.zr-3dnew-section[data-section-id="water"] .zr-3dnew-media-item:nth-child(1) {
+  left: 168px;
+  top: 57px;
+}
+
+.zr-3dnew-section[data-section-id="water"] .zr-3dnew-media-item:nth-child(1) .zr-3dnew-media {
+  width: 540px;
+  height: 320px;
+}
+
+.zr-3dnew-section[data-section-id="water"] .zr-3dnew-media-item:nth-child(1) .zr-3dnew-media-title {
+  margin-top: 8px;
+  margin-left: 0;
+  width: 450px;
+  height: 41px;
+  line-height: 41px;
+}
+
+.zr-3dnew-section[data-section-id="water"] .zr-3dnew-media-item:nth-child(2) {
+  left: 778px;
+  top: 57px;
+}
+
+.zr-3dnew-section[data-section-id="water"] .zr-3dnew-media-item:nth-child(2) .zr-3dnew-media {
+  width: 540px;
+  height: 319px;
+}
+
+.zr-3dnew-section[data-section-id="water"] .zr-3dnew-media-item:nth-child(2) .zr-3dnew-media-title {
+  margin-top: 12px;
+  margin-left: 5px;
+  width: 450px;
+  height: 41px;
+  line-height: 41px;
+}
+
+.zr-3dnew-section[data-section-id="mixing"] {
+  top: 920px;
+  height: 430px;
+}
+
+.zr-3dnew-section[data-section-id="mixing"] .zr-3dnew-section-label {
+  left: 31px;
+  top: 15px;
+  width: 111px;
+  height: 33px;
+  line-height: 33px;
+}
+
+.zr-3dnew-section[data-section-id="mixing"] .zr-3dnew-guide {
+  left: 149px;
+  top: 10px;
+  width: 476px;
+}
+
+.zr-3dnew-section[data-section-id="mixing"] .zr-3dnew-button {
+  left: 672px;
+  top: 0;
+}
+
+.zr-3dnew-section[data-section-id="mixing"] .zr-3dnew-media-item:nth-child(1) {
+  left: 168px;
+  top: 58px;
+}
+
+.zr-3dnew-section[data-section-id="mixing"] .zr-3dnew-media-item:nth-child(1) .zr-3dnew-media {
+  width: 540px;
+  height: 320px;
+}
+
+.zr-3dnew-section[data-section-id="mixing"] .zr-3dnew-media-item:nth-child(1) .zr-3dnew-media-title {
+  margin-top: 8px;
+  margin-left: 0;
+  width: 450px;
+  height: 41px;
+  line-height: 41px;
+}
+
+.zr-3dnew-section[data-section-id="mixing"] .zr-3dnew-media-item:nth-child(2) {
+  left: 780px;
+  top: 58px;
+}
+
+.zr-3dnew-section[data-section-id="mixing"] .zr-3dnew-media-item:nth-child(2) .zr-3dnew-media {
+  width: 540px;
+  height: 319px;
+}
+
+.zr-3dnew-section[data-section-id="mixing"] .zr-3dnew-media-item:nth-child(2) .zr-3dnew-media-title {
+  margin-top: 9px;
+  margin-left: 3px;
+  width: 450px;
+  height: 41px;
+  line-height: 41px;
+}
+
+.zr-3dnew-section[data-section-id="expansion"] {
+  top: 1359px;
+  height: 438px;
+}
+
+.zr-3dnew-section[data-section-id="expansion"] .zr-3dnew-section-label {
+  left: 18px;
+  top: 1px;
+  width: 150px;
+  height: 33px;
+  line-height: 33px;
+}
+
+.zr-3dnew-section[data-section-id="expansion"] .zr-3dnew-guide {
+  left: 153px;
+  top: 3px;
+  width: 486px;
+}
+
+.zr-3dnew-section[data-section-id="expansion"] .zr-3dnew-button {
+  left: 680px;
+  top: 0;
+}
+
+.zr-3dnew-section[data-section-id="expansion"] .zr-3dnew-media-item:nth-child(1) {
+  left: 170px;
+  top: 68px;
+}
+
+.zr-3dnew-section[data-section-id="expansion"] .zr-3dnew-media-item:nth-child(1) .zr-3dnew-media {
+  width: 540px;
+  height: 320px;
+}
+
+.zr-3dnew-section[data-section-id="expansion"] .zr-3dnew-media-item:nth-child(1) .zr-3dnew-media-title {
+  margin-top: 8px;
+  margin-left: 0;
+  width: 450px;
+  height: 41px;
+  line-height: 41px;
+}
+
+.zr-3dnew-section[data-section-id="expansion"] .zr-3dnew-media-item:nth-child(2) {
+  left: 780px;
+  top: 68px;
+}
+
+.zr-3dnew-section[data-section-id="expansion"] .zr-3dnew-media-item:nth-child(2) .zr-3dnew-media {
+  width: 540px;
+  height: 319px;
+}
+
+.zr-3dnew-section[data-section-id="expansion"] .zr-3dnew-media-item:nth-child(2) .zr-3dnew-media-title {
+  margin-top: 9px;
+  margin-left: 5px;
+  width: 450px;
+  height: 41px;
+  line-height: 41px;
+}
