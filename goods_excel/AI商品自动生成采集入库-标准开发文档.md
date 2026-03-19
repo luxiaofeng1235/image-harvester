@@ -1,7 +1,7 @@
 # AI商品自动生成采集入库-标准开发文档
 
 ## 1. 文档信息
-- 文档版本: `v1.4`
+- 文档版本: `v1.5`
 - 创建日期: `2026-03-04`
 - 更新日期: `2026-03-19`
 - 适用项目: `image-harvester/goods_excel`
@@ -402,21 +402,32 @@ AI_TECH_PRESET_IMAGE_FILE=AI科技商品整理.txt
 - 已泄露旧 key 需尽快轮换。
 
 ## 11. 建议代码结构
-`goods_excel/` 下新增:
-- `generate_goods.py` 主入口
-- `pipeline.py` 编排流程
-- `clients/qwen_client.py`
-- `clients/image_client.py`
-- `validators/goods_validator.py`
-- `writers/db_writer.py`
-- `writers/excel_writer.py` (可选)
-- `prompts/category_profiles.py`
-- `utils/retry.py`, `utils/logger.py`
+开发规范:
+- `goods_excel/` 根目录保留文档、样例 Excel、历史脚本、配置模板和辅助素材，不再继续散落新增正式业务代码。
+- 本项目后续新增的正式开发代码统一存放到独立目录 `goods_excel/ai_goods_pipeline/` 下，便于管理、部署和后续维护。
+- 运行日志、失败队列、审稿导出文件也建议统一放在该目录下的子目录中，避免污染根目录。
+
+推荐结构:
+- `ai_goods_pipeline/__init__.py`
+- `ai_goods_pipeline/generate_goods.py` 主入口
+- `ai_goods_pipeline/pipeline.py` 编排流程
+- `ai_goods_pipeline/config.py`
+- `ai_goods_pipeline/clients/qwen_client.py`
+- `ai_goods_pipeline/clients/image_client.py`
+- `ai_goods_pipeline/validators/goods_validator.py`
+- `ai_goods_pipeline/writers/db_writer.py`
+- `ai_goods_pipeline/writers/excel_writer.py` (可选)
+- `ai_goods_pipeline/prompts/category_profiles.py`
+- `ai_goods_pipeline/utils/retry.py`
+- `ai_goods_pipeline/utils/logger.py`
+- `ai_goods_pipeline/logs/`
+- `ai_goods_pipeline/exports/`
+- `ai_goods_pipeline/runtime/` (可选，用于缓存中间结果/失败队列)
 
 ## 12. 运行方式
 示例:
 ```bash
-python3 generate_goods.py \
+python3 ai_goods_pipeline/generate_goods.py \
   --category-id 126 \
   --keywords "江苏特产,盐城特产,地方礼盒" \
   --count 50 \
@@ -515,6 +526,7 @@ python3 generate_goods.py \
 ## 17. 变更记录
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| v1.5 | 2026-03-19 | 新增目录规范，要求正式开发代码统一存放在 `goods_excel/ai_goods_pipeline/` 独立目录下，便于管理和维护 |
 | v1.4 | 2026-03-19 | 补齐实现级细节，明确 `count` 语义、固定 JSON Schema、图片映射降级规则、去重算法范围、失败日志与审稿导出字段 |
 | v1.3 | 2026-03-19 | 按真实业务场景补强 127/128/129 分类提示词约束，统一四类商品的高质量生成标准与自检规则 |
 | v1.2 | 2026-03-19 | 强化 Prompt 工程标准，新增高质量输出约束、126 江苏特产专属提示词规则、自检与历史防重约束 |
