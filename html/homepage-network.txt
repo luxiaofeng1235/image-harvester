@@ -1,0 +1,66 @@
+[GET] https://www.zgzonre.com/ => [200] 
+[GET] https://hm.baidu.com/hm.gif?hca=CCF758D86DD164AC&cc=1&ck=1&cl=24-bit&ds=800x600&vl=493&ep=1115916%2C1115915&et=3&ja=0&ln=en-us&lo=0&lt=1773794539&rnd=579059548&si=36893b6cb3f8f8fe15b6828ef9eee429&v=1.3.2&lv=3&sn=27465&r=0&ww=780&u=https%3A%2F%2Fwww.zgzonre.com%2Ftesting => [FAILED] net::ERR_ABORTED
+[GET] https://hm.baidu.com/hm.gif?hca=CCF758D86DD164AC&cc=1&ck=1&cl=24-bit&ds=800x600&vl=493&ep=1115916%2C1115915&et=3&ja=0&ln=en-us&lo=0&lt=1773794539&rnd=579059548&si=36893b6cb3f8f8fe15b6828ef9eee429&v=1.3.2&lv=3&sn=27465&r=0&ww=780&u=https%3A%2F%2Fwww.zgzonre.com%2Ftesting => [FAILED] net::ERR_ABORTED
+[GET] https://www.zgzonre.com/wp-content/plugins/categories-images/assets/css/zci-styles.css?ver=3.3.1 => [200] 
+[GET] https://www.zgzonre.com/wp-content/themes/mine-educn//assets/css/global.css => [200] 
+[GET] https://www.zgzonre.com/wp-content/plugins/elementor/assets/css/frontend.min.css?ver=3.35.3 => [200] 
+[GET] https://www.zgzonre.com/wp-content/plugins/essential-addons-for-elementor-lite/assets/front-end/css/view/general.min.css?ver=6.5.9 => [200] 
+[GET] https://www.zgzonre.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1 => [200] 
+[GET] https://www.zgzonre.com/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1 => [200] 
+[GET] https://www.zgzonre.com/wp-includes/js/dist/script-modules/interactivity/index.min.js?ver=66c613f68580994bb00a => [200] 
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/home.reset.css => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/home.tokens.css => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/home.layout.css => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/home.components.css => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/home.sections.css => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/home.animations.css => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/home.lightbox.css => [200] OK
+[GET] https://static.ysjianzhan.cn/website/plugin/sidebar/css/sidebar.css?v=16860282 => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/slider/category-sidebar-v1.css => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/banner/home-banner-guanzi-20260227v4.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/home.js?v=20260318-home-sync-1 => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/slider/category-sidebar-v1.js => [200] OK
+[GET] https://www.zgzonre.com/wp-includes/js/dist/script-modules/block-library/navigation/view.min.js?ver=b0f909c3ec791c383210 => [200] 
+[GET] https://www.zgzonre.com/wp-content/themes/mine-educn//assets/js/index.js => [200] 
+[GET] https://www.zgzonre.com/wp-content/plugins/essential-addons-for-elementor-lite/assets/front-end/js/view/general.min.js?ver=6.5.9 => [200] 
+[GET] https://hm.baidu.com/hm.js?36893b6cb3f8f8fe15b6828ef9eee429 => [200] OK
+[GET] https://goutong.baidu.com/site/251/36893b6cb3f8f8fe15b6828ef9eee429/b.js?siteId=4347144 => [503] Service Unavailable
+[GET] https://hm.baidu.com/hm.gif?hca=CCF758D86DD164AC&cc=1&ck=1&cl=24-bit&ds=800x600&vl=493&ep=1115916%2C1115915&et=3&ja=0&ln=en-us&lo=0&lt=1773794539&rnd=579059548&si=36893b6cb3f8f8fe15b6828ef9eee429&v=1.3.2&lv=3&sn=27465&r=0&ww=780&u=https%3A%2F%2Fwww.zgzonre.com%2Ftesting => [200] OK
+[GET] https://hm.baidu.com/hm.gif?hca=CCF758D86DD164AC&cc=1&ck=1&cl=24-bit&ds=1600x980&vl=980&et=0&ja=0&ln=en-us&lo=0&lt=1773794539&rnd=373388771&si=36893b6cb3f8f8fe15b6828ef9eee429&v=1.3.2&lv=3&sn=28581&r=0&ww=1600&u=https%3A%2F%2Fwww.zgzonre.com%2F&tt=%E4%B8%AD%E7%83%AD%E6%9C%BA%E6%A2%B0%EF%BC%8C%E7%A9%BA%E6%B0%94%E7%94%B5%E5%8A%A0%E7%83%AD%E5%99%A8%EF%BC%8C%E7%94%B5%E5%8A%A0%E7%83%AD%E5%AF%BC%E7%83%AD%E6%B2%B9%E7%82%89%EF%BC%8C%E6%B0%B4%E5%A4%84%E7%90%86%E8%AE%BE%E5%A4%87%EF%BC%8C%E6%90%85%E6%8B%8C%E5%99%A8 => [200] OK
+[GET] https://www.zgzonre.com/wp-content/themes/mine-educn//assets/fonts/fontawesome-webfont.woff2?v=4.7.0 => [200] 
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/hero-slider.js?v=20260318-home-sync-1 => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/lightbox.js?v=20260318-home-sync-1 => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/quick-cases.js?v=20260318-home-sync-1 => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/major-projects.js?v=20260318-home-sync-1 => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/featured-cases.js?v=20260318-home-sync-1 => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/about-section.js?v=20260318-home-sync-1 => [200] OK
+[GET] blob:https://www.zgzonre.com/51be59fc-126d-4cd0-b433-0079475627bf => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/common/zr_logo.png => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/ai_platform/sidebar02.css => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/ai_platform/rightmenu.js => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/common/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png => [200] OK
+[GET] https://static.ysjianzhan.cn/website/plugin/sidebar/images/arrow-r.png => [200] OK
+[GET] https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-4.png => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/common/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/common/1_moxe.jpg => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/common/2_7gzi.jpg => [200] OK
+[GET] https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-8.png => [200] OK
+[GET] https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-88.png => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/index_assert/home.config.json?v=20260318-home-sync-1 => [200] OK
+[GET] https://www.zgzonre.com/wp-includes/js/wp-emoji-release.min.js?ver=6.9.4 => [200] 
+[GET] https://static.jsss999.com/upload/zrsite/index/slider/9aedbda2111616aabe80c2520620392-v2.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/slider/z0u2-v2.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/banner/home-jsanim-w98l-20260227v2.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/banner/home-jsanim-gxq9-20260227v2.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/banner/home-heavy-588a0612-20260227v2.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/banner/home-banner-445ef0-20260227v4.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/banner/home-banner-d2on-20260227v4.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/banner/home-banner-b9b937-20260227v2.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/banner/home-banner-ca1ad42-20260227v2.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/slider/c0qt-v2.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/slider/h5cw-v2.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/slider/fbrl-v2.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/slider/x6zp-v2.webp => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/1_vbq6.jpg => [200] OK
+[GET] https://static.jsss999.com/upload/zrsite/index/banner/home-heavy-08-20260227v2.webp => [200] OK
+[GET] https://goutong.baidu.com/site/251/36893b6cb3f8f8fe15b6828ef9eee429/b.js?siteId=4347144 => [503] Service Unavailable

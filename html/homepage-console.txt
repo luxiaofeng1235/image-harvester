@@ -1,0 +1,6 @@
+Total messages: 3 (Errors: 2, Warnings: 0)
+
+[LOG] JQMIGRATE: Migrate is installed, version 3.4.1 @ https://www.zgzonre.com/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1:1
+[ERROR] Failed to load resource: the server responded with a status of 503 (Service Unavailable) @ https://goutong.baidu.com/site/251/36893b6cb3f8f8fe15b6828ef9eee429/b.js?siteId=4347144:0
+Uncaught TypeError: $ is not a function
+    at <anonymous> (https://static.jsss999.com/upload/zrsite/ai_platform/rightmenu.js:1:0)

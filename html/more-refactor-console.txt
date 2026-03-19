@@ -1,0 +1,14 @@
+Total messages: 1 (Errors: 1, Warnings: 0)
+
+Uncaught (in promise) TypeError: e.indexOf is not a function
+    at ce.fn.load (https://static.jsss999.com/upload/zrsite/common/jquery-3.7.1.min.js:1:82863)
+    at showImage (https://static.ysjianzhan.cn/website/plugin/unslider/js/html5zoo.js?v=26:2709:21)
+    at slideRun (https://static.ysjianzhan.cn/website/plugin/unslider/js/html5zoo.js?v=26:2694:25)
+    at init (https://static.ysjianzhan.cn/website/plugin/unslider/js/html5zoo.js?v=26:890:18)
+    at initData (https://static.ysjianzhan.cn/website/plugin/unslider/js/html5zoo.js?v=26:816:16)
+    at J (https://static.ysjianzhan.cn/website/plugin/unslider/js/html5zoo.js?v=26:811:17)
+    at <anonymous> (https://static.ysjianzhan.cn/website/plugin/unslider/js/html5zoo.js?v=26:3114:16)
+    at each (https://static.jsss999.com/upload/zrsite/common/jquery-3.7.1.min.js:1:3128)
+    at each (https://static.jsss999.com/upload/zrsite/common/jquery-3.7.1.min.js:1:1593)
+    at $.fn.html5zoo (https://static.ysjianzhan.cn/website/plugin/unslider/js/html5zoo.js?v=26:2872:13)
+    at initMoreSlider (http://127.0.0.1:8787/%E4%B8%83%E4%B8%AA%E9%A1%B5%E9%9D%A2%E9%87%8D%E6%9E%84/%E6%9F%A5%E7%9C%8B%E6%9B%B4%E5%A4%9A/more-slider.js:106:31)
