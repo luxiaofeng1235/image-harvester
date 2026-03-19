@@ -127,7 +127,7 @@
   font-family: "SimHei", "Microsoft YaHei", sans-serif;
   font-size: 30px;
   font-weight: 400;
-  color: #000000;
+  color: #5a5a5a;
   text-align: center;
   white-space: nowrap;
 }
@@ -159,13 +159,13 @@
 
 #zr-3dseries-root .zr-3dseries-card-title {
   margin: 0;
-  font-family: "SimSun", "Songti SC", serif;
+  font-family: Arial, "SimSun", Helvetica, sans-serif, Verdana;
   font-size: 24px;
-  font-weight: 700;
+  font-weight: 400;
   text-align: left;
   width: 450px;
   height: 41px;
   line-height: 41px;
-  color: #000000;
+  color: #111111;
   white-space: nowrap;
 }
