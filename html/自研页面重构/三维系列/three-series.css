@@ -98,22 +98,35 @@
   background: #ffffff;
 }
 
+.zr-3dseries-items {
+  position: relative;
+  width: 1500px;
+  height: 100%;
+}
+
 .zr-3dseries-page-title {
   position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   margin: 0;
   font-family: "SimHei", "Microsoft YaHei", sans-serif;
   font-size: 30px;
   font-weight: 400;
-  line-height: 40px;
   color: #000000;
   text-align: center;
   white-space: nowrap;
 }
 
-.zr-3dseries-card {
+.zr-3dseries-item {
   position: absolute;
+  width: 540px;
+}
+
+.zr-3dseries-card {
   overflow: hidden;
   background: transparent;
+  width: 540px;
+  height: 320px;
 }
 
 .zr-3dseries-card iframe {
@@ -125,11 +138,13 @@
 }
 
 .zr-3dseries-card-title {
-  position: absolute;
   margin: 0;
   font-family: "SimSun", "Songti SC", serif;
   font-size: 24px;
   font-weight: 700;
+  text-align: left;
+  width: 450px;
+  height: 41px;
   line-height: 41px;
   color: #000000;
   white-space: nowrap;

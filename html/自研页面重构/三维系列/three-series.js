@@ -66,35 +66,41 @@ function applySliderAssets(sliderConfig) {
 }
 
 function renderType(typeConfig) {
-  var shell = document.getElementById("zr-3dseries-content-shell");
   var container = document.getElementById("zr-3dseries-content");
-  if (!shell || !container || !typeConfig) {
+  if (!container || !typeConfig) {
     return;
   }
 
-  shell.style.paddingTop = String(typeConfig.contentOffset || 0) + "px";
-  container.style.height = String(typeConfig.contentHeight || 0) + "px";
   container.innerHTML = "";
 
-  container.appendChild(createPageTitle(typeConfig.pageTitle || {}));
-  (typeConfig.cards || []).forEach(function (card) {
-    container.appendChild(createCard(card));
-    container.appendChild(createCardTitle(card, typeConfig.cardTitleAlign || "left"));
-  });
+  container.appendChild(createPageTitle(typeConfig.pageTitle || ""));
+  container.appendChild(createItems(typeConfig.cards || []));
 }
 
-function createPageTitle(titleConfig) {
+function createPageTitle(titleText) {
   var title = document.createElement("h1");
   title.className = "zr-3dseries-page-title";
-  title.textContent = titleConfig.text || "";
-  applyBoxStyle(title, titleConfig.box || {});
+  title.textContent = titleText || "";
   return title;
 }
 
-function createCard(cardConfig) {
-  var card = document.createElement("article");
+function createItems(cards) {
+  var items = document.createElement("div");
+  items.className = "zr-3dseries-items";
+
+  cards.forEach(function (cardConfig) {
+    items.appendChild(createItem(cardConfig));
+  });
+
+  return items;
+}
+
+function createItem(cardConfig) {
+  var item = document.createElement("article");
+  item.className = "zr-3dseries-item";
+
+  var card = document.createElement("div");
   card.className = "zr-3dseries-card";
-  applyBoxStyle(card, cardConfig.frame || {});
 
   var iframe = document.createElement("iframe");
   iframe.src = cardConfig.iframeUrl || "";
@@ -108,33 +114,10 @@ function createCard(cardConfig) {
   }
 
   card.appendChild(iframe);
-  return card;
-}
-
-function createCardTitle(cardConfig, defaultAlign) {
   var title = document.createElement("div");
   title.className = "zr-3dseries-card-title";
   title.textContent = cardConfig.title || "";
-  title.style.textAlign = cardConfig.titleAlign || defaultAlign || "left";
-  applyBoxStyle(title, cardConfig.titleBox || {});
-  return title;
-}
-
-function applyBoxStyle(node, box) {
-  if (!node || !box) {
-    return;
-  }
-
-  if (box.left !== undefined) {
-    node.style.left = String(box.left) + "px";
-  }
-  if (box.top !== undefined) {
-    node.style.top = String(box.top) + "px";
-  }
-  if (box.width !== undefined) {
-    node.style.width = String(box.width) + "px";
-  }
-  if (box.height !== undefined) {
-    node.style.height = String(box.height) + "px";
-  }
+  item.appendChild(card);
+  item.appendChild(title);
+  return item;
 }

@@ -95,7 +95,6 @@
 .zr-3dnew-content {
   position: relative;
   width: 1500px;
-  height: 1843px;
   background: #ffffff;
 }
 
@@ -105,13 +104,18 @@
   width: 1500px;
 }
 
+.zr-3dnew-section-items {
+  position: relative;
+  width: 1500px;
+  height: 100%;
+}
+
 .zr-3dnew-section-label {
   position: absolute;
   margin: 0;
   font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
   font-size: 26px;
   font-weight: 700;
-  line-height: 33px;
   color: #000000;
   white-space: nowrap;
 }
@@ -196,10 +200,16 @@
   white-space: nowrap;
 }
 
-.zr-3dnew-media {
+.zr-3dnew-media-item {
   position: absolute;
+  width: 540px;
+}
+
+.zr-3dnew-media {
   overflow: hidden;
   background: #ffffff;
+  width: 540px;
+  height: 320px;
 }
 
 .zr-3dnew-media iframe {
@@ -211,12 +221,10 @@
 }
 
 .zr-3dnew-media-title {
-  position: absolute;
   margin: 0;
   font-family: "SimSun", "Songti SC", serif;
   font-size: 24px;
   font-weight: 700;
-  line-height: 41px;
   color: #000000;
   white-space: nowrap;
 }

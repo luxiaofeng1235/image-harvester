@@ -41,7 +41,6 @@ function renderSections(config) {
   }
 
   container.innerHTML = "";
-  container.style.height = String(config.contentHeight || 1843) + "px";
 
   (config.sections || []).forEach(function (sectionConfig) {
     container.appendChild(createSection(sectionConfig));
@@ -52,43 +51,38 @@ function createSection(sectionConfig) {
   var section = document.createElement("section");
   section.className = "zr-3dnew-section";
   section.setAttribute("data-section-id", sectionConfig.id || "");
-  section.style.top = String(sectionConfig.top || 0) + "px";
-  section.style.height = String(sectionConfig.height || 0) + "px";
 
   if (sectionConfig.label) {
     section.appendChild(createLabel(sectionConfig.label));
   }
 
-  if (sectionConfig.guide) {
-    section.appendChild(createGuide(sectionConfig.guide));
-  }
+  section.appendChild(createGuide());
 
   if (sectionConfig.button) {
     section.appendChild(createButton(sectionConfig.button));
   }
 
+  var items = document.createElement("div");
+  items.className = "zr-3dnew-section-items";
+
   (sectionConfig.cards || []).forEach(function (cardConfig) {
-    section.appendChild(createMedia(cardConfig));
-    section.appendChild(createMediaTitle(cardConfig));
+    items.appendChild(createMediaItem(cardConfig));
   });
 
+  section.appendChild(items);
   return section;
 }
 
-function createLabel(labelConfig) {
+function createLabel(labelText) {
   var label = document.createElement("div");
   label.className = "zr-3dnew-section-label";
-  label.textContent = labelConfig.text || "";
-  applyBoxStyle(label, labelConfig);
+  label.textContent = labelText || "";
   return label;
 }
 
-function createGuide(guideConfig) {
+function createGuide() {
   var guide = document.createElement("div");
   guide.className = "zr-3dnew-guide";
-  guide.style.left = String(guideConfig.left || 0) + "px";
-  guide.style.top = String(guideConfig.top || 0) + "px";
-  guide.style.width = String(guideConfig.width || 0) + "px";
 
   var wrap = document.createElement("div");
   wrap.className = "zr-3dnew-guide-wrap";
@@ -111,8 +105,6 @@ function createButton(buttonConfig) {
   button.href = buttonConfig.href || "#";
   button.target = buttonConfig.target || "_self";
   button.rel = button.target === "_blank" ? "noopener noreferrer" : "";
-  button.style.left = String(buttonConfig.left || 0) + "px";
-  button.style.top = String(buttonConfig.top || 0) + "px";
 
   var label = document.createElement("span");
   label.className = "zr-3dnew-button-label";
@@ -122,10 +114,12 @@ function createButton(buttonConfig) {
   return button;
 }
 
-function createMedia(cardConfig) {
+function createMediaItem(cardConfig) {
+  var item = document.createElement("article");
+  item.className = "zr-3dnew-media-item";
+
   var media = document.createElement("article");
   media.className = "zr-3dnew-media";
-  applyBoxStyle(media, cardConfig.frame || {});
 
   var iframe = document.createElement("iframe");
   iframe.src = cardConfig.iframeUrl || "";
@@ -136,32 +130,11 @@ function createMedia(cardConfig) {
   iframe.setAttribute("frameborder", "0");
 
   media.appendChild(iframe);
-  return media;
-}
-
-function createMediaTitle(cardConfig) {
   var title = document.createElement("div");
   title.className = "zr-3dnew-media-title";
   title.textContent = cardConfig.title || "";
-  applyBoxStyle(title, cardConfig.titleBox || {});
-  return title;
-}
 
-function applyBoxStyle(node, box) {
-  if (!node || !box) {
-    return;
-  }
-
-  if (box.left !== undefined) {
-    node.style.left = String(box.left) + "px";
-  }
-  if (box.top !== undefined) {
-    node.style.top = String(box.top) + "px";
-  }
-  if (box.width !== undefined) {
-    node.style.width = String(box.width) + "px";
-  }
-  if (box.height !== undefined) {
-    node.style.height = String(box.height) + "px";
-  }
+  item.appendChild(media);
+  item.appendChild(title);
+  return item;
 }
