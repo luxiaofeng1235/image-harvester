@@ -1,4 +1,4 @@
-import { initSharedSlider } from "../plugin/shared-slider.js?v=20260319-2";
+import { initSharedSlider } from "https://static.jsss999.com/upload/zrsite/plugin/shared-slider.js?v=20260319-oss-1";
 
 var root = document.getElementById("zr-more-root");
 
