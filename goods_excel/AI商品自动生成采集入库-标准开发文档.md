@@ -1,7 +1,7 @@
 # AI商品自动生成采集入库-标准开发文档
 
 ## 1. 文档信息
-- 文档版本: `v1.12`
+- 文档版本: `v1.13`
 - 创建日期: `2026-03-04`
 - 更新日期: `2026-03-19`
 - 适用项目: `image-harvester/goods_excel`
@@ -189,6 +189,7 @@ Prompt组装(全局+分类+任务+输出Schema)
 - `128 AI科技` 如 Bing 图片搜索与图片接口都未返回可用静态图，才允许回退到项目内预置素材、静态效果图或与交付场景匹配的系统界面图。
 - `129 苏超纪念品` 应优先使用不含官方 logo、球员肖像、受保护视觉元素的通用场景图或自有风格图，避免侵权风险。
 - 主图和详情图在写库前应统一同步到 OSS，并使用业务访问域名写入数据库。
+- 默认建议开启 OSS 同步；如需排查性能或先验证生成链路，可通过 `OSS_ENABLED=0` 临时关闭，此时数据库直接写入原图 URL。
 - 详情图 HTML 必须固定输出 `3` 个有效 `img` 标签，禁止保留模板占位符、空链接或缺图入库。
 
 ## 8. Prompt工程标准
@@ -422,6 +423,13 @@ IMG_ALLOW_GIF_AS_MAIN=0
 TITLE_SIMILARITY_THRESHOLD=0.88
 TASK_MAX_ATTEMPTS_MULTIPLIER=3
 AI_TECH_PRESET_IMAGE_FILE=AI科技商品整理.txt
+
+OSS_ENABLED=1
+OSS_ACCESS_KEY_ID=your_oss_key_id
+OSS_ACCESS_KEY_SECRET=your_oss_key_secret
+OSS_BUCKET=your_bucket
+OSS_ENDPOINT=oss-cn-shanghai.aliyuncs.com
+OSS_VIEW_DOMAIN=https://static.example.com/
 ```
 
 说明:
@@ -553,6 +561,7 @@ python3 ai_goods_pipeline/generate_goods.py \
 ## 17. 变更记录
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| v1.13 | 2026-03-19 | 新增 `OSS_ENABLED` 开关，支持临时关闭 OSS 同步以便排查性能或快速验证链路 |
 | v1.12 | 2026-03-19 | 明确 Bing 使用大图搜索参数，固定搜图优先级为商品名优先，并将入库图片标准收敛为 `1 主图 + 3 详情图 + OSS 同步` |
 | v1.11 | 2026-03-19 | 强化提示词真实性约束，明确禁止虚构本地背书、非遗名录、老字号、客户案例等无法核验信息 |
 | v1.10 | 2026-03-19 | 将 Bing 图片来源正式切换为 `images/search` 页面解析原图，不再使用视频封面抓取逻辑 |

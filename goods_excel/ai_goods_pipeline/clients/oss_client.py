@@ -23,6 +23,7 @@ class OSSImageUploader:
     def __init__(
         self,
         *,
+        enabled: bool,
         access_key_id: str,
         access_key_secret: str,
         bucket_name: str,
@@ -31,6 +32,7 @@ class OSSImageUploader:
         prefix: str,
         timeout: int = 20,
     ) -> None:
+        self.force_enabled = enabled
         self.access_key_id = access_key_id
         self.access_key_secret = access_key_secret
         self.bucket_name = bucket_name
@@ -40,7 +42,7 @@ class OSSImageUploader:
         self.timeout = timeout
         self.session = requests.Session()
         self.upload_cache: dict[str, str] = {}
-        self.enabled = all(
+        self.enabled = self.force_enabled and all(
             [self.access_key_id, self.access_key_secret, self.bucket_name, self.endpoint, self.view_domain]
         )
         self.bucket = None

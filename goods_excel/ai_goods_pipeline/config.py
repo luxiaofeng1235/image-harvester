@@ -59,6 +59,7 @@ class Settings:
     title_similarity_threshold: float
     task_max_attempts_multiplier: int
     ai_tech_preset_image_file: Path
+    oss_enabled: bool
     oss_access_key_id: str
     oss_access_key_secret: str
     oss_rolearn: str
@@ -152,6 +153,7 @@ def load_settings(env_file: Path | None = None) -> Settings:
         ),
         ai_tech_preset_image_file=PROJECT_DIR
         / os.getenv("AI_TECH_PRESET_IMAGE_FILE", "AI科技商品整理.txt"),
+        oss_enabled=_as_bool(os.getenv("OSS_ENABLED"), True),
         oss_access_key_id=os.getenv("OSS_ACCESS_KEY_ID", ""),
         oss_access_key_secret=os.getenv("OSS_ACCESS_KEY_SECRET", ""),
         oss_rolearn=os.getenv("OSS_ROLEARN", ""),

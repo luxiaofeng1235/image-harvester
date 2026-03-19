@@ -84,6 +84,7 @@ class AIGoodsPipeline:
             table=settings.db_table,
         )
         self.oss_uploader = OSSImageUploader(
+            enabled=settings.oss_enabled,
             access_key_id=settings.oss_access_key_id,
             access_key_secret=settings.oss_access_key_secret,
             bucket_name=settings.oss_bucket,
