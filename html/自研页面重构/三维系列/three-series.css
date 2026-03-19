@@ -1,0 +1,136 @@
+.zr-3dseries-page {
+  width: 100%;
+  min-width: 1500px;
+  background: #ffffff;
+  color: #000000;
+  font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+}
+
+.zr-3dseries-page,
+.zr-3dseries-page * {
+  box-sizing: border-box;
+}
+
+.zr-3dseries-page p:empty,
+.zr-3dseries-page br {
+  display: none !important;
+  margin: 0 !important;
+}
+
+.zr-3dseries-page + br {
+  display: none !important;
+}
+
+.zr-3dseries-page a {
+  text-decoration: none;
+}
+
+.zr-3dseries-hero {
+  padding: 0;
+}
+
+.zr-3dseries-slider {
+  position: relative;
+  width: 100vw;
+  min-width: 1500px;
+  height: 592px;
+  margin-left: calc(50% - 50vw);
+  overflow: hidden;
+  background: #111111;
+}
+
+.zr-3dseries-page .zr-more-slider-arrow {
+  width: 32px;
+  height: 32px;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 32px 32px;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+  opacity: 0.85;
+}
+
+.zr-3dseries-page .zr-more-slider-arrow:hover {
+  opacity: 1;
+}
+
+.zr-3dseries-page .zr-more-slider-arrow-prev {
+  left: 25px;
+  background-image: var(--zr-3dseries-arrow-left);
+}
+
+.zr-3dseries-page .zr-more-slider-arrow-next {
+  right: 25px;
+  background-image: var(--zr-3dseries-arrow-right);
+}
+
+.zr-3dseries-page .zr-more-slider-dots {
+  bottom: 25px;
+  gap: 10px;
+}
+
+.zr-3dseries-page .zr-more-slider-dot {
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.zr-3dseries-page .zr-more-slider-dot:hover,
+.zr-3dseries-page .zr-more-slider-dot:focus-visible {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.zr-3dseries-page .zr-more-slider-dot.is-active {
+  background: #ffffff;
+}
+
+.zr-3dseries-content-shell {
+  width: 1500px;
+  margin: 0 auto;
+}
+
+.zr-3dseries-content {
+  position: relative;
+  width: 1500px;
+  background: #ffffff;
+}
+
+.zr-3dseries-page-title {
+  position: absolute;
+  margin: 0;
+  font-family: "SimHei", "Microsoft YaHei", sans-serif;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 40px;
+  color: #000000;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.zr-3dseries-card {
+  position: absolute;
+  overflow: hidden;
+  background: transparent;
+}
+
+.zr-3dseries-card iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+.zr-3dseries-card-title {
+  position: absolute;
+  margin: 0;
+  font-family: "SimSun", "Songti SC", serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 41px;
+  color: #000000;
+  white-space: nowrap;
+}

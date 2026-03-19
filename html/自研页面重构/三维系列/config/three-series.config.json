@@ -1,0 +1,670 @@
+{
+  "slider": {
+    "interval": 3000,
+    "effect": "all",
+    "arrowLeft": "https://static.jsss999.com/upload/zrsite/index/jiareqi/left_arrow.png",
+    "arrowRight": "https://static.jsss999.com/upload/zrsite/index/jiareqi/right_arrow.png",
+    "slides": [
+      {
+        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/myo1.jpg",
+        "alt": "三维系列轮播图一"
+      },
+      {
+        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/0anf.png",
+        "alt": "三维系列轮播图二"
+      },
+      {
+        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/wysm.png",
+        "alt": "三维系列轮播图三"
+      }
+    ]
+  },
+  "aliases": {
+    "1": "heater",
+    "heater": "heater",
+    "jiareqi": "heater",
+    "加热器": "heater",
+    "2": "mixing",
+    "mixing": "mixing",
+    "jiaoban": "mixing",
+    "搅拌": "mixing",
+    "搅拌设备": "mixing",
+    "3": "water",
+    "water": "water",
+    "水处理": "water",
+    "水处理设备": "water",
+    "4": "expansion",
+    "expansion": "expansion",
+    "pengzhang": "expansion",
+    "膨胀节": "expansion"
+  },
+  "types": {
+    "heater": {
+      "contentOffset": 42,
+      "contentHeight": 2151,
+      "cardTitleAlign": "left",
+      "pageTitle": {
+        "text": "加热器产品",
+        "box": {
+          "left": 677,
+          "top": 29,
+          "width": 155,
+          "height": 42
+        }
+      },
+      "cards": [
+        {
+          "title": "三维展示_风道加热器（DN65）",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/video-3.html",
+          "frame": {
+            "left": 151,
+            "top": 114,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 152,
+            "top": 448,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_箱式管道加热器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/video-2.html",
+          "frame": {
+            "left": 826,
+            "top": 112,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 826,
+            "top": 444,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_立式管道加热器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/video-4.html",
+          "frame": {
+            "left": 151,
+            "top": 547,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 152,
+            "top": 881,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_气体管道加热器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/video-1.html",
+          "frame": {
+            "left": 827,
+            "top": 545,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 826,
+            "top": 877,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_液体管道加热器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/video-6.html",
+          "frame": {
+            "left": 151,
+            "top": 956,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 152,
+            "top": 1290,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_卧式电加热罐",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/video-5.html",
+          "frame": {
+            "left": 827,
+            "top": 954,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 826,
+            "top": 1286,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_电加热箱",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/video-9.html",
+          "frame": {
+            "left": 150,
+            "top": 1364,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 151,
+            "top": 1698,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_立式电加热罐",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/video-10.html",
+          "frame": {
+            "left": 826,
+            "top": 1362,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 825,
+            "top": 1694,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_工业烘箱",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/video-8.html",
+          "frame": {
+            "left": 150,
+            "top": 1764,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 151,
+            "top": 2098,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_1500KW导热油炉加热器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/jiareqi/video-7.html",
+          "frame": {
+            "left": 825,
+            "top": 1759,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 826,
+            "top": 2093,
+            "width": 450,
+            "height": 41
+          }
+        }
+      ]
+    },
+    "water": {
+      "contentOffset": 30,
+      "contentHeight": 1870,
+      "cardTitleAlign": "left",
+      "pageTitle": {
+        "text": "水处理系列产品",
+        "box": {
+          "left": 648,
+          "top": 17,
+          "width": 216,
+          "height": 39
+        }
+      },
+      "cards": [
+        {
+          "title": "三维展示_机械过滤器",
+          "iframeUrl": "https://v.qq.com/txp/iframe/player.html?vid=a3544rlrs5c&tiny=0&auto=0",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 148,
+            "top": 119,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 147,
+            "top": 455,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_集水器",
+          "iframeUrl": "https://v.qq.com/txp/iframe/player.html?vid=k3544ium9h0&tiny=0&auto=0",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 824,
+            "top": 117,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 825,
+            "top": 453,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_快速除污器",
+          "iframeUrl": "https://v.qq.com/txp/iframe/player.html?vid=b3544ai916f&tiny=0&auto=0",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 148,
+            "top": 552,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 147,
+            "top": 888,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_大型分集水器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/water/video-5.html",
+          "frame": {
+            "left": 824,
+            "top": 550,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 826,
+            "top": 884,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_机械过滤器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/water/video-4.html",
+          "frame": {
+            "left": 146,
+            "top": 954,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 145,
+            "top": 1290,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_精密过滤器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/water/video-3.html",
+          "frame": {
+            "left": 822,
+            "top": 952,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 823,
+            "top": 1288,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_篮式除污器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/water/video-1.html",
+          "frame": {
+            "left": 146,
+            "top": 1387,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 145,
+            "top": 1723,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_卧式直通除污器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/water/video-2.html",
+          "frame": {
+            "left": 822,
+            "top": 1385,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 824,
+            "top": 1719,
+            "width": 450,
+            "height": 41
+          }
+        }
+      ]
+    },
+    "mixing": {
+      "contentOffset": 40,
+      "contentHeight": 1799,
+      "cardTitleAlign": "center",
+      "pageTitle": {
+        "text": "搅拌系列产品",
+        "box": {
+          "left": 656,
+          "top": 31,
+          "width": 188,
+          "height": 41
+        }
+      },
+      "cards": [
+        {
+          "title": "三维展示_第一主标题第一主标题",
+          "iframeUrl": "https://player.youku.com/embed/XNDU1MTM4MDUwNA==",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 146,
+            "top": 120,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 147,
+            "top": 462,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_第一主标题第一主标题",
+          "iframeUrl": "https://player.youku.com/embed/XNDU1MTM4MDA3Mg==",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 822,
+            "top": 118,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 821,
+            "top": 462,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_第一主标题第一主标题",
+          "iframeUrl": "https://player.youku.com/embed/XNDU1MTM4MDUwNA==",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 146,
+            "top": 553,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 147,
+            "top": 895,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_第一主标题第一主标题",
+          "iframeUrl": "https://player.youku.com/embed/XNDU1MTM4MDA3Mg==",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 822,
+            "top": 551,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 821,
+            "top": 895,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_第一主标题第一主标题",
+          "iframeUrl": "https://player.youku.com/embed/XNDU1MTM4MDUwNA==",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 146,
+            "top": 962,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 147,
+            "top": 1304,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_第一主标题第一主标题",
+          "iframeUrl": "https://player.youku.com/embed/XNDU1MTM4MDA3Mg==",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 822,
+            "top": 960,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 821,
+            "top": 1304,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_第一主标题第一主标题",
+          "iframeUrl": "https://player.youku.com/embed/XNDU1MTM4MDUwNA==",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 146,
+            "top": 1395,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 147,
+            "top": 1737,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_第一主标题第一主标题",
+          "iframeUrl": "https://player.youku.com/embed/XNDU1MTM4MDA3Mg==",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 822,
+            "top": 1393,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 821,
+            "top": 1737,
+            "width": 450,
+            "height": 41
+          }
+        }
+      ]
+    },
+    "expansion": {
+      "contentOffset": 45,
+      "contentHeight": 1815,
+      "cardTitleAlign": "left",
+      "pageTitle": {
+        "text": "膨胀节系列产品",
+        "box": {
+          "left": 642,
+          "top": 34,
+          "width": 217,
+          "height": 40
+        }
+      },
+      "cards": [
+        {
+          "title": "三维展示_通用型补偿器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/pengzhang/video-7.html",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 142,
+            "top": 127,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 141,
+            "top": 468,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_单式铰链膨胀节",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/pengzhang/video-6.html",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 818,
+            "top": 125,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 818,
+            "top": 468,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_圆形非金属膨胀节",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/pengzhang/video-3.html",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 142,
+            "top": 560,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 141,
+            "top": 901,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_风道橡胶膨胀节",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/pengzhang/video-8.html",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 818,
+            "top": 558,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 818,
+            "top": 901,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_免维护旋转补偿器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/pengzhang/video-4.html",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 142,
+            "top": 969,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 141,
+            "top": 1310,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_第复式铰链补偿器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/pengzhang/video-2.html",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 818,
+            "top": 967,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 818,
+            "top": 1310,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_单式金属波纹管",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/pengzhang/video-5.html",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 143,
+            "top": 1402,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 141,
+            "top": 1743,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "三维展示_复式金属波纹管",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/pengzhang/video-1.html",
+          "allow": "autoplay; fullscreen; encrypted-media; picture-in-picture",
+          "frame": {
+            "left": 818,
+            "top": 1400,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 818,
+            "top": 1743,
+            "width": 450,
+            "height": 41
+          }
+        }
+      ]
+    }
+  }
+}
