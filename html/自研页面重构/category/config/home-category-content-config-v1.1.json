@@ -1,0 +1,274 @@
+{
+  "version": "2026-02-28",
+  "configName": "home-category-content-config",
+  "topBannerBg": "https://static.jsss999.com/upload/zrsite/category/bg/header-2.jpg",
+  "applicationScenes": [
+    "https://static.jsss999.com/upload/zrsite/category/yingyong/1.jpg",
+    "https://static.jsss999.com/upload/zrsite/category/yingyong/2.jpg",
+    "https://static.jsss999.com/upload/zrsite/category/yingyong/3.jpg",
+    "https://static.jsss999.com/upload/zrsite/category/yingyong/4.jpg",
+    "https://static.jsss999.com/upload/zrsite/category/yingyong/5.jpg"
+  ],
+  "applicationSceneLabels": [
+    "化工",
+    "石油",
+    "制药",
+    "食品",
+    "纺织"
+  ],
+  "categories": [
+    {
+      "categoryKey": "heater",
+      "categoryName": "加热器",
+      "categoryDisplayName": "加热器系列产品",
+      "wpParentCategoryId": 37,
+      "wpChildCategoryIds": [
+        42,
+        43,
+        44,
+        45,
+        46
+      ],
+      "defaultCopy": "加热器系列产品包含导热油炉、风道加热器、管道加热器、电加热器等等，种类繁多，可根据具体工况具体设计。",
+      "defaultImage": "https://static.jsss999.com/upload/zrsite/category/jiareqi/%E5%8A%A0%E7%83%AD%E5%99%A8%E4%B8%BB%E5%9B%BE.png",
+      "subCategories": [
+        {
+          "key": "thermal_oil_heater",
+          "name": "导热油加热器系列产品",
+          "shortName": "导热油加热器",
+          "shortTitle": "环保、节能、低压",
+          "wpCategoryId": 42,
+          "imageUrl": "https://static.jsss999.com/upload/zrsite/category/jiareqi/%E5%AF%BC%E7%83%AD%E6%B2%B9%E5%8A%A0%E7%83%AD%E5%99%A8.jpg",
+          "defaultCopy": {
+            "summary": "导热油加热器，热量是由浸入导热油的电加热元件产生和传输的，以导热油为介质，利用循环泵，强制导热油进行液相循环，将热量传递给一个或多个用热设备。",
+            "paragraphs": [
+              "经用热设备卸载后，重新通过循环泵回到加热器，再吸收热量并传递给用热设备，如此周而复始，实现热量的连续传递，使被加热物体温度升高，达到加热的工艺要求。"
+            ],
+            "featuresTitle": "导热油加热器特点",
+            "features": [
+              "导热油电加热器具有低压、高温、节能的特点。",
+              "导热油电加热器具有完备的运行控制和安全监测装置，可以准确地控制工作温度。",
+              "导热油电加热器结构合理、配套齐全、安装周期短，运行和维修方便，便于锅炉布置。",
+              "由于电加热有机热载体炉采用先进的防爆结构，可应用于工厂Ⅱ区防爆，防爆等级可达 C 级。"
+            ]
+          }
+        },
+        {
+          "key": "pipeline_heater",
+          "name": "管道加热器系列产品",
+          "shortName": "管道加热器",
+          "shortTitle": "升温快、效率高",
+          "aliasNames": [
+            "导管加热器"
+          ],
+          "wpCategoryId": 43,
+          "imageUrl": "https://static.jsss999.com/upload/zrsite/category/jiareqi/%E7%AE%A1%E9%81%93%E5%8A%A0%E7%83%AD%E5%99%A8.png",
+          "defaultCopy": {
+            "summary": "管道加热器是一种对物质预先加热的节能设备，它安装在物质设备之前，实现对物质直接加温，使其在高温中循环加热，达到节约能源的目的。",
+            "paragraphs": [
+              "它广泛应用于重油、沥青、清油等燃料油的预先加热场合。",
+              "管道加热器有本体和控制系统两部分组成。发热元件采用不锈钢钢管做保护套管，高温电阻合金丝、结晶氧化镁粉，经压缩工艺成型。控制部分采用先进的数字电路、集成电路触发器、高压可控硅等组成可调测温、恒温系统，保证了电加热器的正常运行。",
+              "管道加热器分为两种模式：一种是采用法兰式管状电热元件倒插在反应釜夹套中加热导热油，将热能传输给反应釜中的化工原料；另一种是直接在反应釜中插入管状电热元件，或在反应釜壁四周均匀分布电热管。这种模式称为内热式，升温快、热效率高。"
+            ]
+          }
+        },
+        {
+          "key": "air_duct_heater",
+          "name": "风道加热器系列产品",
+          "shortName": "风道加热器",
+          "shortTitle": "加热均匀、性能好",
+          "wpCategoryId": 44,
+          "imageUrl": "https://static.jsss999.com/upload/zrsite/category/jiareqi/%E9%A3%8E%E9%81%93%E5%8A%A0%E7%83%AD%E5%99%A8.png",
+          "defaultCopy": {
+            "summary": "风道加热器主要用于风道中的空气加热，规格分低温、中温、高温三种形式。",
+            "paragraphs": [
+              "在结构上的共同之处是采用钢板支撑电热管，以减少风机停止时电热管的振动，在接线盒中都装有超温控制装置。",
+              "低温型可直接安装在风道上，而中温型、高温型由于结构不同，在通道外壁至加热器接线盒夹有 100mm 厚保温材料，一方面减少整个通道的对外散热，另一方面也减少接线腔内温度。"
+            ]
+          }
+        },
+        {
+          "key": "electric_heater",
+          "name": "电加热器系列产品",
+          "shortName": "电加热器",
+          "shortTitle": "适应性强、种类多",
+          "wpCategoryId": 45,
+          "imageUrl": "https://static.jsss999.com/upload/zrsite/category/jiareqi/%E7%94%B5%E5%8A%A0%E7%83%AD%E5%99%A8.png",
+          "defaultCopy": {
+            "summary": "电加热器系列产品适应性强、种类多。",
+            "paragraphs": [
+              "电加热器系列产品包含了烘道、烘箱、烘房、干燥箱、水箱加热器、重油加热器、电加热罐、加热箱、电蒸汽锅炉、暖风机等设备，可根据实际工况条件进行设计定制。"
+            ]
+          }
+        },
+        {
+          "key": "electric_heating_element",
+          "name": "电加热元件系列产品",
+          "shortName": "电加热元件",
+          "shortTitle": "热效性高、散热快",
+          "wpCategoryId": 46,
+          "imageUrl": "https://static.jsss999.com/upload/zrsite/category/jiareqi/%E7%94%B5%E5%8A%A0%E7%83%AD%E5%85%83%E4%BB%B6.png",
+          "defaultCopy": {
+            "summary": "电加热元件系列产品热效性高、散热快。",
+            "paragraphs": [
+              "电加热管（电热管）是由金属管作外壳，装入高电阻电热合金丝作发热材料，在电热丝周围填充并压实绝缘性能良好的高纯氧化镁作填充料。该产品固有功率大，热效性高，散热快等特点。",
+              "常用于塑料包装、小型模具加热、分析仪器、卷烟业、制鞋业、半导体共晶焊接、压铸件输入道加热以及各种气体膨胀时的制冷效应等加热。",
+              "规格有：U 型、W 型、异形、带散热翅片电加热管、辐射管等，可定制非标电加热器。"
+            ]
+          }
+        }
+      ],
+      "type": 1
+    },
+    {
+      "categoryKey": "mixer",
+      "categoryName": "搅拌设备",
+      "categoryDisplayName": "搅拌设备系列产品",
+      "wpParentCategoryId": 38,
+      "wpChildCategoryIds": [
+        47,
+        48
+      ],
+      "defaultCopy": "搅拌系列产品具有可加热自动控温、保温、搅拌功能；传热快、适应温差大、清洗方便等优点。广泛应用于食(乳)品、制药、日化、饮料、油脂、化工、颜料等行业作为加热、混合调配或杀菌处理。特别适合于无蒸汽热源单位与科研机构的小、中试使用，并可按工艺需要采用全封闭式结构。",
+      "defaultImage": "https://static.jsss999.com/upload/zrsite/category/jiaoban/%E4%B8%BB%E5%88%86%E7%B1%BB%E5%9B%BE.jpg",
+      "subCategories": [
+        {
+          "key": "mixing_tank",
+          "name": "搅拌罐系列产品",
+          "shortName": "搅拌罐",
+          "wpCategoryId": 47,
+          "imageUrl": "https://static.jsss999.com/upload/zrsite/category/jiaoban/%E6%90%85%E6%8B%8C%E7%BD%90.jpg",
+          "defaultCopy": {
+            "summary": "搅拌罐用于对物料进行搅拌、混配、调和、均质等，不锈钢搅拌罐可根据生产工艺要求实现结构及配置标准化与人性化，搅拌过程中可实现进料控制、出料控制、搅拌控制及其他手动自动控制。",
+            "paragraphs": [
+              "概述：搅拌罐又名搅拌缸、配料罐，广泛应用于涂料、医药、建材、化工、颜料、树脂、食品、科研等行业。",
+              "设备可根据工艺要求选用碳钢、不锈钢等材料，并设置加热、冷却装置以满足不同工艺和生产需要。加热形式包括夹套电加热、盘管加热、蒸汽加热等。",
+              "搅拌罐由搅拌罐体、上下端头、搅拌器、支承、传动装置、轴封装置等组成，还可根据工艺要求配置加热装置或冷却装置。",
+              "搅拌罐体、搅拌罐盖、搅拌器、轴封等可根据工艺要求选用碳钢或不锈钢等材料制作。",
+              "搅拌罐体与搅拌罐盖可采用法兰密封联结或焊接联结，并可按工艺要求开进料、出料、观察、测温、测压、蒸汽分馏、放空等工艺管孔。",
+              "搅拌罐盖上部配置传动装置（电机或减速器），由传动轴驱动罐内搅拌器。",
+              "轴封装置可采用机封、填料、迷宫密封等多种形式（根据用户需要确定）。",
+              "由于用户生产工艺要求不同，搅拌器可配置浆式、锚式、框式、螺旋式等多种形式，如有其他要求可联系定制设计制作。"
+            ]
+          }
+        },
+        {
+          "key": "agitator",
+          "name": "搅拌器系列产品",
+          "shortName": "搅拌器",
+          "wpCategoryId": 48,
+          "imageUrl": "https://static.jsss999.com/upload/zrsite/category/jiaoban/%E6%90%85%E6%8B%8C%E5%99%A8.jpg",
+          "defaultCopy": {
+            "summary": "搅拌器系列一般分为旋桨式搅拌器、涡轮式搅拌器、桨式搅拌器、锚式搅拌器、折叶式搅拌器、侧入式搅拌器、推进式搅拌器、磁力加热搅拌器、螺带式搅拌器等。"
+          }
+        }
+      ],
+      "type": 2
+    },
+    {
+      "categoryKey": "water_treatment",
+      "categoryName": "水处理设备",
+      "categoryDisplayName": "水处理系列产品",
+      "wpParentCategoryId": 39,
+      "wpChildCategoryIds": [
+        49,
+        50,
+        51,
+        67
+      ],
+      "defaultCopy": "水处理系列产品包含过滤器系列、除污器系列、软水器系列、分集水器系列等等，种类繁多，可根据具体工况具体设计。",
+      "defaultImage": "https://static.jsss999.com/upload/zrsite/category/water/%E4%B8%BB%E5%88%86%E7%B1%BB.png",
+      "subCategories": [
+        {
+          "key": "filter",
+          "name": "过滤器系列产品",
+          "shortName": "过滤器",
+          "wpCategoryId": 49,
+          "imageUrl": "https://static.jsss999.com/upload/zrsite/category/water/%E8%BF%87%E6%BB%A4%E5%99%A8.png",
+          "defaultCopy": {
+            "summary": "机械过滤器也称为压力式过滤器，是纯水制备前期预处理、水净化系统的重要组成部分。",
+            "paragraphs": [
+              "材质有钢制衬胶或不锈钢，根据过滤介质不同分为天然石英砂过滤器、多介质过滤器、活性炭过滤器、锰砂过滤器等。",
+              "根据进水方式可分为单流式过滤器、双流式过滤器，根据实际情况可联合使用也可以单独使用。"
+            ]
+          }
+        },
+        {
+          "key": "strainer",
+          "name": "除污器系列产品",
+          "shortName": "除污器",
+          "wpCategoryId": 50,
+          "imageUrl": "https://static.jsss999.com/upload/zrsite/category/water/%E9%99%A4%E6%B1%A1%E5%99%A8.png",
+          "defaultCopy": {
+            "summary": "除污器系列产品按安装方式可分为立式除污器和卧式除污器，按进出水口位置可分为直通式和角通式除污器。",
+            "paragraphs": [
+              "除污器包含旋流除污器、篮式除污器、旋流除砂器等设备。"
+            ]
+          }
+        },
+        {
+          "key": "water_manifold",
+          "name": "分集水器系列产品",
+          "shortName": "分集水器",
+          "wpCategoryId": 51,
+          "imageUrl": "https://static.jsss999.com/upload/zrsite/category/water/%E5%88%86%E9%9B%86%E6%B0%B4%E5%99%A8.png",
+          "defaultCopy": {
+            "summary": "分集水器主要由分水器、集水器和固定支架三部分组成。",
+            "paragraphs": [
+              "分水器的作用是将热源热水分开导入每一路地面辐射供暖所铺设的管内，实现分室供暖和调节温度。",
+              "集水器是将分开散热后的每一路低温水汇集到一起，并固定到墙体或地面的作用。"
+            ]
+          }
+        },
+        {
+          "key": "ion_exchanger",
+          "name": "离子交换器系列产品",
+          "shortName": "离子交换器",
+          "wpCategoryId": 67,
+          "imageUrl": "https://static.jsss999.com/upload/zrsite/other/0_7.png",
+          "defaultCopy": {
+            "summary": "离子交换器是利用离子交换树脂的交换作用，去除水中导致硬度和导电性的离子，是水处理系统中的核心设备。",
+            "paragraphs": [
+              "水的软化是离子交换器最常见的应用。通过钠离子交换器去除水中的钙离子（Ca²⁺）和镁离子（Mg²⁺），并以钠离子（Na⁺）替换，可显著减少锅炉、热交换器、管道及热水系统结垢，提升运行效率和设备寿命。",
+              "在除盐及纯水/高纯水制备中，阳离子交换器与阴离子交换器（或混合床）串联使用，可深度去除水中阴阳离子，制得高纯水，满足电子、医药、化工等行业对水质的高标准需求。",
+              "离子交换工艺还可定向去除硝酸盐、氟化物、砷、重金属离子等特定污染物，广泛应用于饮用水净化及工业废水处理场景。"
+            ]
+          }
+        }
+      ],
+      "type": 3
+    }
+  ],
+  "typeCategoryMap": {
+    "1": {
+      "categoryKey": "heater",
+      "categoryName": "加热器",
+      "wpChildCategoryIds": [
+        42,
+        43,
+        44,
+        45,
+        46
+      ]
+    },
+    "2": {
+      "categoryKey": "mixer",
+      "categoryName": "搅拌设备",
+      "wpChildCategoryIds": [
+        47,
+        48
+      ]
+    },
+    "3": {
+      "categoryKey": "water_treatment",
+      "categoryName": "水处理设备",
+      "wpChildCategoryIds": [
+        49,
+        50,
+        51,
+        67
+      ]
+    }
+  },
+  "applicationTopImage": "https://static.jsss999.com/upload/zrsite/common/VCG41N867423914.jpg"
+}

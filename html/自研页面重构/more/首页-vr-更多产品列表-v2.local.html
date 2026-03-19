@@ -1,0 +1,164 @@
+<link rel="stylesheet" href="./vr-more-products-v2.css" />
+<link rel="stylesheet" href="https://static.jsss999.com/upload/zrsite/ai_platform/sidebar02.css" />
+  <main
+    class="vr-more-page"
+    data-api-base="https://www.zgzonre.com/wp-json/wp/v2/posts"
+    data-category-id="66"
+    data-per-page="6"
+    data-default-cover="https://www.zgzonre.com/wp-content/uploads/2026/03/wysm.png"
+  >
+    <section class="vr-top" aria-label="顶部视觉区域">
+      <div class="vr-top-bg"></div>
+      <div class="vr-player-shell">
+        <img
+          class="vr-player-frame"
+          src="https://static.jsss999.com/upload/zrsite/index/vr/more/jtym.png"
+          alt="VR展示背景"
+          loading="lazy"
+        />
+        <div class="vr-player-wrap">
+          <iframe
+            class="vr-player"
+            src="https://static.jsss999.com/upload/zrsite/index/vr/more/chtml_1653716090.html"
+            title="VR播放器"
+            frameborder="0"
+            allow="fullscreen; xr-spatial-tracking; gyroscope; accelerometer; magnetometer; autoplay"
+            referrerpolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+      </div>
+    </section>
+
+    <section class="vr-list-section" aria-label="更多产品列表">
+      <header class="vr-list-header">
+        <h1>更多产品</h1>
+        <p id="vr-result-meta" class="vr-result-meta">正在加载...</p>
+      </header>
+
+      <div id="vr-loading" class="vr-state-card">正在加载列表数据...</div>
+      <div id="vr-error" class="vr-state-card vr-state-error" hidden></div>
+      <div id="vr-empty" class="vr-state-card" hidden>当前分类暂无文章。</div>
+
+      <div id="vr-grid" class="vr-grid" hidden></div>
+      <nav id="vr-pagination" class="vr-pagination" aria-label="列表分页" hidden></nav>
+    </section>
+  </main>
+
+  <div class="wpsidebar-fkf wpsidebar02" aria-label="侧边栏">
+    <ul class="fkf">
+      <li class="fkf-item">
+        <img src="https://static.jsss999.com/upload/zrsite/common/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png" alt="电话咨询" />
+        <img class="hover" src="https://static.jsss999.com/upload/zrsite/common/b7705060bd6d51bcb345c568b992f1835f56bf10a12f-XnFoLp_fw1200.png" alt="电话咨询" />
+        <div class="fkf-item-right">
+          <div class="fkf-item-right-content right-content-tele">
+            <img class="arrow" src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/arrow-r.png" alt="" />
+            <div class="fkf-item-right-content-top">
+              <img src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-4.png" style="width:25px;height:25px;" alt="" />
+              <h2 class="txt_fam">180 6619 0606</h2>
+              <p class="txt_fam"></p>
+            </div>
+            <div class="fkf-item-right-content-top">
+              <img src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-4.png" style="width:25px;height:25px;" alt="" />
+              <h2 class="txt_fam">189 6208 2198</h2>
+              <p class="txt_fam"></p>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li class="fkf-item">
+        <img src="https://static.jsss999.com/upload/zrsite/common/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg" alt="微信咨询" />
+        <img class="hover" src="https://static.jsss999.com/upload/zrsite/common/20c08a0fe8953915c2f4fbe3f7013b9b1.jpg" alt="微信咨询" />
+        <div class="fkf-item-right fkf-item-right-ewm">
+          <div class="right-content-ewm">
+            <img class="arrow" src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/arrow-r.png" alt="" />
+            <div class="ewm">
+              <div><img src="https://static.jsss999.com/upload/zrsite/common/1_moxe.jpg" alt="微信二维码1" /></div>
+              <p>微信扫一扫</p>
+            </div>
+            <div class="ewm">
+              <div><img src="https://static.jsss999.com/upload/zrsite/common/2_7gzi.jpg" alt="微信二维码2" /></div>
+              <p>微信扫一扫</p>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li class="fkf-item sgotop">
+        <img src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-8.png" alt="返回顶部" />
+        <img class="hover" src="https://static.ysjianzhan.cn/website/plugin/sidebar/images/fkf-88.png" alt="返回顶部" />
+      </li>
+    </ul>
+  </div>
+
+  <script src="./vr-more-products-v2.1.js"></script>
+  <script>
+    (function () {
+      var goTopSelector = [
+        ".wpsidebar02 li.sgotop",
+        ".wpsidebar02 li.sgotop img",
+        ".wpsidebar03 .sgotop",
+        ".wpsidebar03 .sgotop img",
+        "li.sgotopdd",
+        "li.sgotopdd img",
+        ".wp_celan_content p.ptop"
+      ].join(", ");
+
+      function scrollToTopNow() {
+        var sc = document.getElementById("scroll_container");
+        if (sc) {
+          sc.scrollTop = 0;
+        }
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        if (window.scrollTo) {
+          try {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } catch (err) {
+            window.scrollTo(0, 0);
+          }
+        }
+      }
+
+      document.addEventListener("click", function (e) {
+        var target = e.target && e.target.closest ? e.target.closest(goTopSelector) : null;
+        if (!target) return;
+        e.preventDefault();
+        e.stopPropagation();
+        scrollToTopNow();
+      }, true);
+    })();
+  </script>
+  <script>
+    (function () {
+      function unlockScroll() {
+        var de = document.documentElement;
+        var body = document.body;
+        var sc = document.getElementById("scroll_container");
+
+        if (de) {
+          de.style.overflowY = "auto";
+          de.style.overflowX = "hidden";
+          de.style.height = "auto";
+        }
+        if (body) {
+          body.style.overflowY = "auto";
+          body.style.overflowX = "hidden";
+          body.style.height = "auto";
+        }
+        if (sc) {
+          sc.style.height = "auto";
+          sc.style.overflow = "visible";
+          sc.style.overflowY = "visible";
+          sc.style.overflowX = "hidden";
+        }
+      }
+
+      unlockScroll();
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", unlockScroll);
+      }
+      window.addEventListener("load", unlockScroll);
+      setTimeout(unlockScroll, 300);
+      setTimeout(unlockScroll, 1200);
+      setTimeout(unlockScroll, 2500);
+    })();
+  </script>

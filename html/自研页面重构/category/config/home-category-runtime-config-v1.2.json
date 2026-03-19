@@ -1,0 +1,50 @@
+{
+  "version": "2026-03-10",
+  "configName": "home-category-runtime-config",
+  "topBannerBg": "https://static.jsss999.com/upload/zrsite/category/bg/header-2.jpg",
+  "applicationScenes": [
+    "https://static.jsss999.com/upload/zrsite/category/yingyong/1.jpg",
+    "https://static.jsss999.com/upload/zrsite/category/yingyong/2.jpg",
+    "https://static.jsss999.com/upload/zrsite/category/yingyong/3.jpg",
+    "https://static.jsss999.com/upload/zrsite/category/yingyong/4.jpg",
+    "https://static.jsss999.com/upload/zrsite/category/yingyong/5.jpg"
+  ],
+  "applicationSceneLabels": [
+    "化工",
+    "石油",
+    "制药",
+    "食品",
+    "纺织"
+  ],
+  "applicationTopImage": "https://static.jsss999.com/upload/zrsite/common/VCG41N867423914.jpg",
+  "mainCategories": [
+    {
+      "type": "1",
+      "parentId": 37,
+      "label": "加热器",
+      "displayName": "加热器系列产品",
+      "childCategoryIds": [42, 43, 44, 45, 46]
+    },
+    {
+      "type": "2",
+      "parentId": 38,
+      "label": "搅拌设备",
+      "displayName": "搅拌设备系列产品",
+      "childCategoryIds": [47, 48]
+    },
+    {
+      "type": "3",
+      "parentId": 39,
+      "label": "水处理设备",
+      "displayName": "水处理系列产品",
+      "childCategoryIds": [49, 50, 51, 67]
+    }
+  ],
+  "shortTitleMap": {
+    "42": "环保、节能、低压",
+    "43": "升温快、效率高",
+    "44": "加热均匀、性能好",
+    "45": "适应性强、种类多",
+    "46": "热效性高、散热快"
+  }
+}

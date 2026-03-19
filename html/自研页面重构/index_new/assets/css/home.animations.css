@@ -1,0 +1,89 @@
+@keyframes case-enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes case-enter-down {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes case-enter-right {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes case-enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes case-enter-left-scale {
+  from {
+    opacity: 0;
+    transform: translateX(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes case-enter-right-scale {
+  from {
+    opacity: 0;
+    transform: translateX(50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.featured-case-item.is-animating {
+  opacity: 0;
+  animation-duration: 1.2s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+.featured-case-item.anim-1 { animation-name: case-enter-left; }
+.featured-case-item.anim-2 { animation-name: case-enter-down; }
+.featured-case-item.anim-3 { animation-name: case-enter-right; }
+.featured-case-item.anim-4 { animation-name: case-enter-up; }
+.featured-case-item.anim-5 { animation-name: case-enter-left-scale; }
+.featured-case-item.anim-6 { animation-name: case-enter-right-scale; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide,
+  .featured-case-item.is-animating {
+    transition: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
