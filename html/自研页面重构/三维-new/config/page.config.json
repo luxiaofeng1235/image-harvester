@@ -1,0 +1,251 @@
+{
+  "contentHeight": 1843,
+  "slider": {
+    "interval": 3000,
+    "effect": "fade",
+    "slides": [
+      {
+        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/slider/myo1.jpg",
+        "alt": "三维展示页轮播图一"
+      },
+      {
+        "imageUrl": "https://static.jsss999.com/upload/zrsite/index/slider/wysm.png",
+        "alt": "三维展示页轮播图二"
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "heater",
+      "top": 36,
+      "height": 436,
+      "label": {
+        "text": "加热器系列",
+        "left": 14,
+        "top": 7,
+        "width": 150,
+        "height": 33
+      },
+      "guide": {
+        "left": 149,
+        "top": 4,
+        "width": 498
+      },
+      "button": {
+        "left": 671,
+        "top": 0,
+        "text": "查看更多>",
+        "href": "https://www.zgzonre.com/three-jiareqi",
+        "target": "_self"
+      },
+      "cards": [
+        {
+          "title": "导热油炉加热器（撬装）",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/slider/video-7.html",
+          "frame": {
+            "left": 169,
+            "top": 59,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 169,
+            "top": 387.5,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "1500KW导热油炉加热器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/slider/video-6.html",
+          "frame": {
+            "left": 776,
+            "top": 58,
+            "width": 540,
+            "height": 319
+          },
+          "titleBox": {
+            "left": 780,
+            "top": 391,
+            "width": 450,
+            "height": 41
+          }
+        }
+      ]
+    },
+    {
+      "id": "water",
+      "top": 495,
+      "height": 433,
+      "label": {
+        "text": "水处理系列",
+        "left": 16,
+        "top": 15,
+        "width": 150,
+        "height": 33
+      },
+      "guide": {
+        "left": 150,
+        "top": 11,
+        "width": 484
+      },
+      "button": {
+        "left": 670,
+        "top": 0,
+        "text": "查看更多>",
+        "href": "https://www.zgzonre.com/three-water",
+        "target": "_self"
+      },
+      "cards": [
+        {
+          "title": "精密过滤器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/slider/video-8.html",
+          "frame": {
+            "left": 168,
+            "top": 57,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 168,
+            "top": 385,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "旋流除污器",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/slider/video-1.html",
+          "frame": {
+            "left": 778,
+            "top": 57,
+            "width": 540,
+            "height": 319
+          },
+          "titleBox": {
+            "left": 783,
+            "top": 388,
+            "width": 450,
+            "height": 41
+          }
+        }
+      ]
+    },
+    {
+      "id": "mixing",
+      "top": 920,
+      "height": 430,
+      "label": {
+        "text": "搅拌系列",
+        "left": 31,
+        "top": 15,
+        "width": 111,
+        "height": 33
+      },
+      "guide": {
+        "left": 149,
+        "top": 10,
+        "width": 476
+      },
+      "button": {
+        "left": 672,
+        "top": 0,
+        "text": "查看更多>",
+        "href": "https://www.zgzonre.com/three-jiaoban",
+        "target": "_self"
+      },
+      "cards": [
+        {
+          "title": "搅拌罐（带平台）",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/slider/video-5.html",
+          "frame": {
+            "left": 168,
+            "top": 58,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 168,
+            "top": 386,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "锚式搅拌罐",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/slider/video-2.html",
+          "frame": {
+            "left": 780,
+            "top": 58,
+            "width": 540,
+            "height": 319
+          },
+          "titleBox": {
+            "left": 783,
+            "top": 386,
+            "width": 450,
+            "height": 41
+          }
+        }
+      ]
+    },
+    {
+      "id": "expansion",
+      "top": 1359,
+      "height": 438,
+      "label": {
+        "text": "膨胀节系列",
+        "left": 18,
+        "top": 1,
+        "width": 150,
+        "height": 33
+      },
+      "guide": {
+        "left": 153,
+        "top": 3,
+        "width": 486
+      },
+      "button": {
+        "left": 680,
+        "top": 0,
+        "text": "查看更多>",
+        "href": "https://www.zgzonre.com/three-pengzhangjie",
+        "target": "_self"
+      },
+      "cards": [
+        {
+          "title": "单式铰链型膨胀节",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/slider/video-4.html",
+          "frame": {
+            "left": 170,
+            "top": 68,
+            "width": 540,
+            "height": 320
+          },
+          "titleBox": {
+            "left": 170,
+            "top": 396,
+            "width": 450,
+            "height": 41
+          }
+        },
+        {
+          "title": "复式铰链型膨胀节",
+          "iframeUrl": "https://static.jsss999.com/upload/zrsite/index/slider/video-3.html",
+          "frame": {
+            "left": 780,
+            "top": 68,
+            "width": 540,
+            "height": 319
+          },
+          "titleBox": {
+            "left": 785,
+            "top": 396,
+            "width": 450,
+            "height": 41
+          }
+        }
+      ]
+    }
+  ]
+}

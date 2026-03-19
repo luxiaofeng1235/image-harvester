@@ -1,0 +1,222 @@
+.zr-3dnew-page {
+  width: 100%;
+  min-width: 1500px;
+  background: #ffffff;
+  color: #000000;
+  font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+}
+
+.zr-3dnew-page,
+.zr-3dnew-page * {
+  box-sizing: border-box;
+}
+
+.zr-3dnew-page p:empty,
+.zr-3dnew-page br {
+  display: none !important;
+  margin: 0 !important;
+}
+
+.zr-3dnew-page + br {
+  display: none !important;
+}
+
+.zr-3dnew-page a {
+  text-decoration: none;
+}
+
+.zr-3dnew-hero {
+  padding: 0;
+}
+
+.zr-3dnew-slider {
+  position: relative;
+  width: 100vw;
+  min-width: 1500px;
+  height: 780px;
+  margin-left: calc(50% - 50vw);
+  overflow: hidden;
+  background: #111111;
+}
+
+.zr-3dnew-page .zr-more-slider-arrow {
+  width: 32px;
+  height: 32px;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 32px 32px;
+  color: transparent;
+  font-size: 0;
+  line-height: 0;
+  opacity: 0.85;
+}
+
+.zr-3dnew-page .zr-more-slider-arrow:hover {
+  opacity: 1;
+}
+
+.zr-3dnew-page .zr-more-slider-arrow-prev {
+  left: 25px;
+  background-image: url("https://static.jsss999.com/upload/zrsite/index/slider/left_arrow.png");
+}
+
+.zr-3dnew-page .zr-more-slider-arrow-next {
+  right: 25px;
+  background-image: url("https://static.jsss999.com/upload/zrsite/index/slider/right_arrow.png");
+}
+
+.zr-3dnew-page .zr-more-slider-dots {
+  bottom: 20px;
+  gap: 10px;
+}
+
+.zr-3dnew-page .zr-more-slider-dot {
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.zr-3dnew-page .zr-more-slider-dot:hover,
+.zr-3dnew-page .zr-more-slider-dot:focus-visible {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.zr-3dnew-page .zr-more-slider-dot.is-active {
+  background: #ffffff;
+}
+
+.zr-3dnew-content-shell {
+  width: 1500px;
+  margin: 0 auto;
+}
+
+.zr-3dnew-content {
+  position: relative;
+  width: 1500px;
+  height: 1843px;
+  background: #ffffff;
+}
+
+.zr-3dnew-section {
+  position: absolute;
+  left: 0;
+  width: 1500px;
+}
+
+.zr-3dnew-section-label {
+  position: absolute;
+  margin: 0;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 33px;
+  color: #000000;
+  white-space: nowrap;
+}
+
+.zr-3dnew-guide {
+  position: absolute;
+  height: 46px;
+}
+
+.zr-3dnew-guide-wrap {
+  position: absolute;
+  top: 15px;
+  left: 0;
+  width: 100%;
+  height: 16px;
+}
+
+.zr-3dnew-guide-line {
+  position: absolute;
+  top: 7px;
+  left: 0;
+  right: 6px;
+  border-top: 2px solid #000000;
+}
+
+.zr-3dnew-guide-arrow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 8px solid #000000;
+}
+
+.zr-3dnew-button {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 50px;
+  padding-right: 16px;
+  color: #ffffff !important;
+  font-family: "SimHei", "Microsoft YaHei", sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 50px;
+  isolation: isolate;
+}
+
+.zr-3dnew-button::before {
+  content: "";
+  position: absolute;
+  inset: 0 50px 0 0;
+  background: rgba(102, 102, 102, 1);
+  border-radius: 3px 0 0 3px;
+  z-index: -1;
+}
+
+.zr-3dnew-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50px;
+  height: 50px;
+  background: rgba(102, 102, 102, 1);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  z-index: -1;
+}
+
+.zr-3dnew-button:hover::before,
+.zr-3dnew-button:hover::after {
+  background: rgba(109, 158, 235, 1);
+}
+
+.zr-3dnew-button-label {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.zr-3dnew-media {
+  position: absolute;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.zr-3dnew-media iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+.zr-3dnew-media-title {
+  position: absolute;
+  margin: 0;
+  font-family: "SimSun", "Songti SC", serif;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 41px;
+  color: #000000;
+  white-space: nowrap;
+}
