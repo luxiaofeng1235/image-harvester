@@ -1,0 +1,73 @@
+<link rel="stylesheet" href="./assets/css/vr-category.css?v=20260313-vr-8" />
+<link rel="stylesheet" href="https://static.ysjianzhan.cn/website/plugin/sidebar/css/sidebar.css?v=16860282" />
+<link rel="stylesheet" href="https://static.jsss999.com/upload/zrsite/slider/category-sidebar-v1.css?v=20260313-2" />
+
+<div
+  class="zr-cat-page zr-vr-page"
+  data-config-url="https://static.jsss999.com/upload/zrsite/category/common/dynamic/home-category-runtime-config-v1.2.json"
+  data-category-api-base="https://www.zgzonre.com/wp-json/wp/v2/categories"
+  data-post-api-base="https://www.zgzonre.com/wp-json/wp/v2/posts"
+  data-detail-base="https://www.zgzonre.com/detail-base"
+  data-root-category-id="66"
+>
+  <div class="zr-cat-main">
+    <div class="zr-cat-top-hero-strip" aria-label="顶部背景图">
+      <div id="zr-vr-top-hero-bg" class="zr-cat-top-hero-bg"></div>
+    </div>
+
+    <div class="zr-vr-classify-panel zr-cat-container" aria-label="VR分类区域">
+      <div id="zr-vr-root-category-section" class="zr-vr-classify-row" aria-label="VR一级分类">
+        <div class="zr-vr-section-label">一级分类</div>
+        <div id="zr-vr-root-category-tabs" class="zr-cat-main-tabs"></div>
+      </div>
+
+      <div
+        id="zr-vr-main-category-section"
+        class="zr-vr-classify-row"
+        aria-label="VR二级分类切换"
+        hidden
+      >
+        <div class="zr-vr-section-label">二级分类</div>
+        <div id="zr-vr-main-category-tabs" class="zr-cat-main-tabs"></div>
+      </div>
+
+      <div
+        id="zr-vr-sub-category-section"
+        class="zr-vr-classify-row"
+        aria-label="VR子分类切换"
+        hidden
+      >
+        <div class="zr-vr-section-label">三级分类</div>
+        <div id="zr-vr-sub-category-tabs" class="zr-cat-sub-tabs"></div>
+      </div>
+    </div>
+
+    <div class="zr-cat-products-section zr-cat-container" aria-label="产品列表">
+      <div class="zr-cat-section-head">
+        <h2>产品列表</h2>
+        <p id="zr-vr-result-meta" class="zr-cat-result-meta"></p>
+      </div>
+
+      <div id="zr-vr-loading-state" class="zr-cat-state-card">正在加载产品数据...</div>
+      <div id="zr-vr-error-state" class="zr-cat-state-card zr-cat-state-error" hidden></div>
+      <div id="zr-vr-empty-state" class="zr-cat-state-card" hidden>当前分类暂无文章。</div>
+
+      <div id="zr-vr-product-grid" class="zr-cat-product-grid" hidden></div>
+      <nav id="zr-vr-pagination" class="zr-cat-pagination" aria-label="分页" hidden></nav>
+    </div>
+
+    <div class="zr-cat-scene-top-image-section zr-cat-container" aria-label="应用范围顶部图">
+      <img id="zr-vr-scene-top-image" src="" alt="应用范围顶部图" loading="lazy" />
+    </div>
+
+    <div class="zr-cat-scenes-section zr-cat-container" aria-label="应用范围">
+      <h2>应用范围</h2>
+      <div id="zr-vr-scene-grid" class="zr-cat-scene-grid"></div>
+    </div>
+  </div>
+</div>
+
+<script src="./assets/js/vr-category-api.js?v=20260313-vr-1"></script>
+<script src="./assets/js/vr-category-render.js?v=20260313-vr-6"></script>
+<script src="./assets/js/vr-category-page.js?v=20260313-vr-9"></script>
+<script src="https://static.jsss999.com/upload/zrsite/slider/category-sidebar-v1.js?v=20260313-2"></script>
