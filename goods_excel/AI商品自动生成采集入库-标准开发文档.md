@@ -1,7 +1,7 @@
 # AI商品自动生成采集入库-标准开发文档
 
 ## 1. 文档信息
-- 文档版本: `v1.3`
+- 文档版本: `v1.4`
 - 创建日期: `2026-03-04`
 - 更新日期: `2026-03-19`
 - 适用项目: `image-harvester/goods_excel`
@@ -118,13 +118,19 @@ Prompt组装(全局+分类+任务+输出Schema)
 
 ## 7. 数据契约与字段映射
 ### 7.1 AI输出契约(JSON数组)
-每个对象最少字段:
-- `title` (string)
-- `subtitle` (string)
-- `price` (number/string，可转 decimal)
-- `selling_points` (array[string] 或 string)
-- `attrs` (object 或 array)
-- `image_keywords` (array[string]，用于图片搜索，允许为空)
+为保证稳定解析，AI 端默认输出固定结构，不再采用宽松多态字段:
+- `title` (string，必填，非空)
+- `subtitle` (string，必填，非空)
+- `price` (number，必填，正数，最多两位小数)
+- `selling_points` (array[string]，必填，建议 `3 ~ 5` 条)
+- `attrs` (object<string, string|number>，必填，默认不接受 array)
+- `image_keywords` (array[string]，必填，建议 `1 ~ 3` 个非空关键词)
+
+固定输出要求:
+- `selling_points` 中不允许嵌套对象、数组或空字符串。
+- `attrs` 的 value 应为标量，禁止再嵌套对象或数组。
+- `image_keywords` 去重后至少保留 `1` 个有效词，不允许返回空数组。
+- 除明确扩展字段外，默认禁止输出 schema 外字段，避免模型自由发散。
 
 ### 7.2 数据库映射
 目标表: `jiujie_shop.jj_wangyi_goods`
@@ -153,6 +159,15 @@ Prompt组装(全局+分类+任务+输出Schema)
   <p><img src="{{detail_img_3}}" /></p>
 </div>
 ```
+
+### 7.4 图片映射与降级规则
+- 主图默认取首个通过校验的静态图片 URL，优先 `jpg/jpeg/png/webp`，默认不使用 `gif` 作为主图。
+- 详情图按去重后的有效图片顺序取后续 `1 ~ 3` 张，数量不足时允许只写入已有张数，不得输出空 `img` 标签。
+- 若仅有 `1` 张有效图片，则该图片作为主图，`description` 仅保留文案区块，可不拼接详情图区块。
+- 若存在 `gif` 但没有静态图，`gif` 可作为详情图候选，不建议作为主图；连续重试后仍无静态图则判为图片失败。
+- `128 AI科技` 优先使用项目内预置素材、静态效果图或与交付场景匹配的系统界面图；预置素材不足时再回退图片接口。
+- `129 苏超纪念品` 应优先使用不含官方 logo、球员肖像、受保护视觉元素的通用场景图或自有风格图，避免侵权风险。
+- 详情图 HTML 应根据实际可用图片数量动态拼接，禁止保留模板占位符或空链接。
 
 ## 8. Prompt工程标准
 ### 8.1 组装结构
@@ -326,9 +341,10 @@ Prompt工程目标:
 - 价格校验: 不在分类范围内则重试。
 - 去重校验:
   - 与本批次 title 去重。
-  - 与库内历史商品 `goods_name` 做精确去重。
-  - 与库内近似标题去重(建议相似度阈值 `>0.88` 拦截)。
+  - 默认与库内全表历史商品 `goods_name` 做精确去重，不仅限同分类。
+  - 与库内近似标题去重(建议相似度阈值 `>=0.88` 拦截)。
   - 对标题做标准化后再比对，至少包括: 去空格、统一全半角、统一常见标点、大小写归一。
+  - 近似匹配建议优先使用 `rapidfuzz.fuzz.ratio`；无第三方依赖时可回退 `difflib.SequenceMatcher.ratio`。
   - 若命中库内重复或高相似商品，则该候选商品直接丢弃并补生成，直到满足目标数量或达到重试上限。
 - 地域校验: 批次内城市分布不能过于集中。
 
@@ -342,11 +358,14 @@ Prompt工程目标:
 - HEAD/GET 可访问且状态码 `200`。
 - `Content-Type` 为图片。
 - 长度建议 `>1KB`。
+- 主图优先过滤 `gif`，除非业务明确允许。
+- 同一商品的主图和详情图 URL 不重复计入。
 
 ### 9.3 重试策略
 - 千问接口: 最多 `3` 次，指数退避 `1s/2s/4s`。
 - 图片接口: 最多 `3` 次，指数退避 `1s/2s/4s`。
 - 单条商品最大处理次数: `2` 轮，超限入失败队列。
+- 任务级总候选处理上限建议为 `count * 3`，至少 `30` 条；超过上限仍未补足数量时，任务按“部分成功”或“失败”收敛，不无限循环。
 
 ## 10. 配置规范(.env)
 建议配置项:
@@ -365,10 +384,17 @@ QW_MODEL_DEEP=qwen-max
 QW_TEMPERATURE=0.7
 QW_MAX_TOKENS=4096
 QW_SYSTEM_PROMPT=你是电商商品策划助手...
+QW_BATCH_SIZE=15
 
 IMG_API_URL=https://ptapi.jsss999.com/api/fetch/getImages
 IMG_TIMEOUT=20
 IMG_RETRY=3
+IMG_MIN_BYTES=1024
+IMG_ALLOW_GIF_AS_MAIN=0
+
+TITLE_SIMILARITY_THRESHOLD=0.88
+TASK_MAX_ATTEMPTS_MULTIPLIER=3
+AI_TECH_PRESET_IMAGE_FILE=AI科技商品整理.txt
 ```
 
 说明:
@@ -403,6 +429,12 @@ python3 generate_goods.py \
 - `--export-excel 1` 导出审稿文件
 - `--city-strategy balanced` 按13市均衡分布
 
+参数语义补充:
+- `--count` 表示最终通过校验并成功入库或成功导出的商品数量，不是模型一次返回的候选数量。
+- 若候选商品因重复、价格越界、图片失效、字段缺失等原因被丢弃，程序应自动继续补生成，直到凑满 `count` 或达到任务级总尝试上限。
+- `--dry-run 1` 下也应严格执行去重、图片校验和失败记录，只是不落库。
+- `--export-excel 1` 建议导出“通过候选 + 失败原因 + 审稿备注”三类信息，便于人工复审。
+
 ## 13. 测试与验收
 ### 13.1 功能验收
 - 能按分类稳定生成指定数量商品。
@@ -431,6 +463,39 @@ python3 generate_goods.py \
   - `logs/run_YYYYMMDD_HHMMSS.log`
   - `logs/failures_*.jsonl`
 
+### 14.1 失败队列字段建议
+`logs/failures_*.jsonl` 每条建议至少包含:
+- `run_id`
+- `category_id`
+- `keywords`
+- `target_count`
+- `candidate_title`
+- `normalized_title`
+- `fail_stage`
+- `fail_reason`
+- `retry_count`
+- `similarity_score`
+- `matched_history_title`
+- `image_keywords`
+- `raw_model_output`
+- `created_at`
+
+### 14.2 审稿导出字段建议
+若启用 `--export-excel 1`，建议导出以下列:
+- `row_no`
+- `status`
+- `category_id`
+- `goods_name`
+- `sub_title`
+- `price`
+- `selling_points`
+- `attrs_json`
+- `image_keywords`
+- `main_image`
+- `detail_images`
+- `duplicate_check`
+- `review_notes`
+
 ## 15. 风险与应对
 - 风险: 模型返回非 JSON。
   - 应对: JSON schema 校验 + 自动重试 + 修复器。
@@ -450,6 +515,7 @@ python3 generate_goods.py \
 ## 17. 变更记录
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| v1.4 | 2026-03-19 | 补齐实现级细节，明确 `count` 语义、固定 JSON Schema、图片映射降级规则、去重算法范围、失败日志与审稿导出字段 |
 | v1.3 | 2026-03-19 | 按真实业务场景补强 127/128/129 分类提示词约束，统一四类商品的高质量生成标准与自检规则 |
 | v1.2 | 2026-03-19 | 强化 Prompt 工程标准，新增高质量输出约束、126 江苏特产专属提示词规则、自检与历史防重约束 |
 | v1.1 | 2026-03-19 | 新增“库内历史数据去重”要求，明确应用层去重责任与补生成策略 |
