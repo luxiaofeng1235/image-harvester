@@ -154,6 +154,22 @@ IMAGE_URL_PATH_BLOCKLIST = [
 ]
 
 
+IMAGE_BING_META_BLOCKLIST = [
+    "解放军",
+    "军事",
+    "演习",
+    "战机",
+    "坦克",
+    "部队",
+    "海军",
+    "空军",
+    "陆军",
+    "火箭军",
+    "军舰",
+    "武器",
+]
+
+
 IMAGE_MAIN_COUNT = 1
 IMAGE_DETAIL_COUNT = 3
 IMAGE_REQUIRED_TOTAL = IMAGE_MAIN_COUNT + IMAGE_DETAIL_COUNT

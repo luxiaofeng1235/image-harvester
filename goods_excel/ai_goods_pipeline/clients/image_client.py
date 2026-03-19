@@ -9,11 +9,10 @@ import requests
 
 from ai_goods_pipeline.clients.bing_image_client import BingImageClient
 from ai_goods_pipeline.constants import (
+    IMAGE_BING_META_BLOCKLIST,
     IMAGE_BING_FETCH_LIMIT,
     IMAGE_CANDIDATE_POOL_TARGET,
     IMAGE_DETAIL_COUNT,
-    IMAGE_FALLBACK_QUERY_MAX_LEN,
-    IMAGE_QUERY_LIMIT,
     IMAGE_REQUIRED_TOTAL,
     IMAGE_TITLE_QUERY_MAX_LEN,
     IMAGE_URL_HOST_BLOCKLIST,
@@ -167,6 +166,8 @@ class ImageClient:
             return []
         urls: list[str] = []
         for item in items:
+            if self._is_blocked_bing_result(item):
+                continue
             url = str(item.get("image_url") or "").strip()
             if url and url not in urls:
                 urls.append(url)
@@ -178,15 +179,20 @@ class ImageClient:
         image_keywords: list[str],
         keywords: list[str],
     ) -> list[str]:
-        queries: list[str] = []
-        ordered_terms = [title] + image_keywords + keywords
-        for index, item in enumerate(ordered_terms):
-            value = str(item).strip()
-            if not value or value in queries:
-                continue
-            max_len = IMAGE_TITLE_QUERY_MAX_LEN if index == 0 else IMAGE_FALLBACK_QUERY_MAX_LEN
-            queries.append(value[:max_len])
-        return queries[:IMAGE_QUERY_LIMIT]
+        del image_keywords, keywords
+        value = str(title).strip()
+        if not value:
+            return []
+        return [value[:IMAGE_TITLE_QUERY_MAX_LEN]]
+
+    def _is_blocked_bing_result(self, item: dict[str, str]) -> bool:
+        meta_text = " ".join(
+            str(item.get(field) or "").strip().lower()
+            for field in ("title", "desc", "source_page")
+        )
+        if not meta_text:
+            return False
+        return any(token in meta_text for token in IMAGE_BING_META_BLOCKLIST)
 
     def _validate_urls(self, urls: list[str]) -> list[ImageProbe]:
         valid_images: list[ImageProbe] = []
