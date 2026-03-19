@@ -212,24 +212,27 @@
   align-items: center;
   justify-content: center;
   width: 150px;
-  min-height: 50px;
-  padding: 4px 0 8px;
+  height: 50px;
+  padding: 0;
   border-radius: 30px;
-  background: var(--zr-more-button-bg);
+  overflow: hidden;
+  background-color: var(--zr-more-button-bg);
+  background-image: url("https://static.ysjianzhan.cn/website/plugin/buttons/view/skins/btnoval/ovalbg.png");
+  background-repeat: repeat-x;
+  background-position: 50% 50%;
   color: #ffffff !important;
   font-family: "SimHei", "Microsoft YaHei", sans-serif;
   font-size: 18px;
   font-weight: 700;
+  line-height: 50px;
   text-decoration: none;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
   transition:
-    background 0.2s ease,
-    transform 0.2s ease,
+    background-color 0.2s ease,
     box-shadow 0.2s ease;
 }
 
 #zr-more-root .zr-more-more-button:hover {
-  background: var(--zr-more-button-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.16);
+  background-color: var(--zr-more-button-hover);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
