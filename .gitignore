@@ -17,3 +17,4 @@ goods_excel/.env.*
 !goods_excel/.env.example
 /html/__pycache__/
 /html/out
+/goods_excel/ai_goods_pipeline/logs
