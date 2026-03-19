@@ -1,0 +1,4 @@
+2026-03-19 23:07:54 [INFO] Start pipeline: category=126(江苏特产) count=1 keywords=江苏特产,盐城特产,地方礼盒 dry_run=False
+2026-03-19 23:08:23 [INFO] Accepted item 1/1: 盐城阜宁大糕礼盒装
+2026-03-19 23:08:23 [INFO] Inserted 1 rows into jj_wangyi_goods
+2026-03-19 23:08:23 [INFO] Pipeline done: success=1 failures=0 inserted=1 attempted=1

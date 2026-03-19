@@ -1,0 +1,4 @@
+2026-03-19 22:31:27 [INFO] Start pipeline: category=128(AI科技) count=1 keywords=AI网站,企业服务 dry_run=True
+2026-03-19 22:31:34 [INFO] Accepted item 1/1: AI网站企业智能客服标准版服务
+2026-03-19 22:31:34 [INFO] Skip DB insert: write_db=False dry_run=True
+2026-03-19 22:31:34 [INFO] Pipeline done: success=1 failures=0 inserted=0 attempted=1
