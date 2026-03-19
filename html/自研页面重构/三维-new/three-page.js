@@ -4,7 +4,6 @@ var root = document.getElementById("zr-3dnew-root");
 
 if (root) {
   root.setAttribute("data-zr-3dnew-page", "1");
-  initStandalonePreview();
   initPage();
 }
 
@@ -16,15 +15,6 @@ async function initPage() {
   } catch (error) {
     console.error("Failed to render three-dimensional page.", error);
   }
-}
-
-function initStandalonePreview() {
-  if (!document.body || root.parentElement !== document.body) {
-    return;
-  }
-
-  document.body.style.margin = "0";
-  document.body.style.backgroundColor = "#ffffff";
 }
 
 async function loadConfig(url) {

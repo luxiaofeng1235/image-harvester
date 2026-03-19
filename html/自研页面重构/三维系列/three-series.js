@@ -4,7 +4,6 @@ var root = document.getElementById("zr-3dseries-root");
 
 if (root) {
   root.setAttribute("data-zr-3dseries-page", "1");
-  initStandalonePreview();
   initPage();
 }
 
@@ -22,16 +21,6 @@ async function initPage() {
   } catch (error) {
     console.error("Failed to render three series page.", error);
   }
-}
-
-function initStandalonePreview() {
-  if (!document.body || root.parentElement !== document.body) {
-    return;
-  }
-
-  document.documentElement.style.backgroundColor = "#ffffff";
-  document.body.style.margin = "0";
-  document.body.style.backgroundColor = "#ffffff";
 }
 
 async function loadConfig(url) {
