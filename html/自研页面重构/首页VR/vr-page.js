@@ -4,18 +4,7 @@ var root = document.getElementById("zr-vr-root");
 
 if (root) {
   root.setAttribute("data-zr-vr-page", "1");
-  initStandalonePreview();
   initPage();
-}
-
-function initStandalonePreview() {
-  if (!document.body || root.parentElement !== document.body) {
-    return;
-  }
-
-  document.documentElement.style.backgroundColor = "#ffffff";
-  document.body.style.margin = "0";
-  document.body.style.backgroundColor = "#ffffff";
 }
 
 async function initPage() {
