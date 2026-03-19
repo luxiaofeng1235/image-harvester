@@ -17,7 +17,7 @@
       "label": "加热器系列",
       "button": {
         "text": "查看更多>",
-        "href": "https://www.zgzonre.com/three-jiareqi",
+        "href": "https://www.zgzonre.com/3d-cate?type=1",
         "target": "_self"
       },
       "cards": [
@@ -36,7 +36,7 @@
       "label": "水处理系列",
       "button": {
         "text": "查看更多>",
-        "href": "https://www.zgzonre.com/three-water",
+        "href": "https://www.zgzonre.com/3d-cate?type=3",
         "target": "_self"
       },
       "cards": [
@@ -55,7 +55,7 @@
       "label": "搅拌系列",
       "button": {
         "text": "查看更多>",
-        "href": "https://www.zgzonre.com/three-jiaoban",
+        "href": "https://www.zgzonre.com/3d-cate?type=2",
         "target": "_self"
       },
       "cards": [
@@ -74,7 +74,7 @@
       "label": "膨胀节系列",
       "button": {
         "text": "查看更多>",
-        "href": "https://www.zgzonre.com/three-pengzhangjie",
+        "href": "https://www.zgzonre.com/3d-cate?type=4",
         "target": "_self"
       },
       "cards": [
