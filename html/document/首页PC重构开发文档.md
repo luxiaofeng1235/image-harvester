@@ -56,8 +56,8 @@
 6. 首页与分类页共用同一套侧边栏外链资源，禁止在首页内再维护单独的侧边栏挂载适配脚本。
 7. 侧边栏统一资源：
    - 基础样式：`https://static.ysjianzhan.cn/website/plugin/sidebar/css/sidebar.css?v=16860282`
-   - 站点侧边栏样式：`https://static.jsss999.com/upload/zrsite/slider/category-sidebar-v1.css`
-   - 站点侧边栏脚本：`https://static.jsss999.com/upload/zrsite/slider/category-sidebar-v1.js`
+   - 站点侧边栏样式：`https://static.jsss999.com/upload/zrsite/plugin/scroll_sidebar.css`
+   - 站点侧边栏脚本：`https://static.jsss999.com/upload/zrsite/plugin/scroll_sidebar.js`
 8. 后期若调整电话、二维码、返回顶部等侧边栏逻辑，只更新 OSS 外链文件，不重复改 `home.html` / `category.html` 页面结构。
 
 ## 3. 页面信息架构
