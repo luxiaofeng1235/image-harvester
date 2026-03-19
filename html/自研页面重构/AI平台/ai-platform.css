@@ -196,16 +196,19 @@
 .zr-aiplat-feature-left-3 .zr-aiplat-feature-title { top: -30px; }
 .zr-aiplat-feature-left-4 .zr-aiplat-feature-title { top: -37px; }
 
-.zr-aiplat-feature-right-1 { left: 885px; top: 159px; }
-.zr-aiplat-feature-right-2 { left: 886px; top: 331px; }
-.zr-aiplat-feature-right-3 { left: 884px; top: 506px; }
-.zr-aiplat-feature-right-4 { left: 884px; top: 651px; }
+.zr-aiplat-feature-right-1 { left: 885px; top: 167px; }
+.zr-aiplat-feature-right-2 { left: 886px; top: 338px; }
+.zr-aiplat-feature-right-3 { left: 884px; top: 522px; }
+.zr-aiplat-feature-right-4 { left: 884px; top: 672px; }
 
 .zr-aiplat-feature-right .zr-aiplat-feature-plate { left: 0; }
 .zr-aiplat-feature-right .zr-aiplat-feature-icon { left: 260px; }
 .zr-aiplat-feature-right .zr-aiplat-feature-plate span {
   left: 29px;
-  top: 53px;
+  top: 43px;
+  display: block;
+  text-align: center;
+  line-height: 31px !important;
 }
 
 .zr-aiplat-section {
@@ -335,7 +338,7 @@
   color: #ffffff !important;
   font-family: "HarmonyOSSansCNMedium", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif !important;
   font-size: 18px !important;
-  line-height: 1.2 !important;
+  line-height: 31px !important;
 }
 
 .zr-aiplat-page .zr-aiplat-section-head p {
