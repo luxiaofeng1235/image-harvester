@@ -29,6 +29,7 @@ export function initSharedSlider(root, options) {
 
   root.innerHTML = "";
   root.classList.add("zr-shared-slider");
+  root.setAttribute("data-zr-shared-slider", "1");
 
   var stage = document.createElement("div");
   stage.className = "zr-more-slider-stage";

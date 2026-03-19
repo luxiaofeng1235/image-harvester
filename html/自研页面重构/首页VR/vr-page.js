@@ -1,14 +1,21 @@
-import { initSharedSlider } from "../plugin/shared-slider.js?v=20260319-1";
+import { initSharedSlider } from "../plugin/shared-slider.js?v=20260319-2";
 
 var root = document.getElementById("zr-vr-root");
 
 if (root) {
-  document.documentElement.style.backgroundColor = "#ffffff";
-  if (document.body) {
-    document.body.style.margin = "0";
-    document.body.style.backgroundColor = "#ffffff";
-  }
+  root.setAttribute("data-zr-vr-page", "1");
+  initStandalonePreview();
   initPage();
+}
+
+function initStandalonePreview() {
+  if (!document.body || root.parentElement !== document.body) {
+    return;
+  }
+
+  document.documentElement.style.backgroundColor = "#ffffff";
+  document.body.style.margin = "0";
+  document.body.style.backgroundColor = "#ffffff";
 }
 
 async function initPage() {
@@ -46,6 +53,7 @@ function renderSections(sections) {
 function createSection(section) {
   var wrapper = document.createElement("section");
   wrapper.className = "zr-vr-section";
+  wrapper.setAttribute("data-zr-vr-section", "1");
   wrapper.setAttribute("aria-label", section.title || "");
 
   var heading = document.createElement("div");
@@ -71,6 +79,7 @@ function createSection(section) {
 function createCard(item) {
   var card = document.createElement("article");
   card.className = "zr-vr-card";
+  card.setAttribute("data-zr-vr-card", "1");
 
   var media = document.createElement("div");
   media.className = "zr-vr-card-media";
@@ -115,6 +124,7 @@ function renderMoreButton(buttonConfig) {
 
   button.href = buttonConfig.href || "#";
   button.setAttribute("target", buttonConfig.target || "_self");
+  button.setAttribute("rel", buttonConfig.target === "_blank" ? "noopener noreferrer" : "");
 
   var label = button.querySelector(".zr-vr-more-button-label");
   if (label) {

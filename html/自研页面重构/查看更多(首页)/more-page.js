@@ -1,8 +1,9 @@
-import { initSharedSlider } from "../plugin/shared-slider.js?v=20260319-1";
+import { initSharedSlider } from "../plugin/shared-slider.js?v=20260319-2";
 
 var root = document.getElementById("zr-more-root");
 
 if (root) {
+  root.setAttribute("data-zr-more-page", "1");
   initPage();
 }
 
@@ -50,6 +51,7 @@ function renderSections(sections) {
 function createSection(section) {
   var wrapper = document.createElement("section");
   wrapper.className = "zr-more-section";
+  wrapper.setAttribute("data-zr-more-section", "1");
 
   var shell = document.createElement("div");
   shell.className = "zr-more-shell";
@@ -98,6 +100,7 @@ function createSection(section) {
 function createCard(card) {
   var link = document.createElement("a");
   link.className = "zr-more-card zr-more-card-" + (card.variant || "large");
+  link.setAttribute("data-zr-more-card", "1");
   link.href = card.href || "#";
   link.setAttribute("aria-label", card.title || "");
 

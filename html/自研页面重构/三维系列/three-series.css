@@ -1,35 +1,49 @@
-.zr-3dseries-page {
+#zr-3dseries-root {
+  display: block;
   width: 100%;
   min-width: 1500px;
+  margin: 0;
+  padding: 0;
   background: #ffffff;
   color: #000000;
   font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
 }
 
-.zr-3dseries-page,
-.zr-3dseries-page * {
+#zr-3dseries-root,
+#zr-3dseries-root * {
   box-sizing: border-box;
 }
 
-.zr-3dseries-page p:empty,
-.zr-3dseries-page br {
+#zr-3dseries-root section,
+#zr-3dseries-root article,
+#zr-3dseries-root h1 {
+  margin: 0;
+  padding: 0;
+}
+
+#zr-3dseries-root p:empty,
+#zr-3dseries-root br {
   display: none !important;
   margin: 0 !important;
 }
 
-.zr-3dseries-page + br {
+#zr-3dseries-root + br {
   display: none !important;
 }
 
-.zr-3dseries-page a {
+#zr-3dseries-root a,
+#zr-3dseries-root a:visited,
+#zr-3dseries-root a:hover,
+#zr-3dseries-root a:focus {
+  color: inherit;
   text-decoration: none;
 }
 
-.zr-3dseries-hero {
+#zr-3dseries-root .zr-3dseries-hero {
   padding: 0;
 }
 
-.zr-3dseries-slider {
+#zr-3dseries-root .zr-3dseries-slider {
   position: relative;
   width: 100vw;
   min-width: 1500px;
@@ -39,7 +53,7 @@
   background: #111111;
 }
 
-.zr-3dseries-page .zr-more-slider-arrow {
+#zr-3dseries-root [data-zr-shared-slider] .zr-more-slider-arrow {
   width: 32px;
   height: 32px;
   background-color: transparent;
@@ -52,59 +66,60 @@
   opacity: 0.85;
 }
 
-.zr-3dseries-page .zr-more-slider-arrow:hover {
+#zr-3dseries-root [data-zr-shared-slider] .zr-more-slider-arrow:hover {
   opacity: 1;
 }
 
-.zr-3dseries-page .zr-more-slider-arrow-prev {
+#zr-3dseries-root [data-zr-shared-slider] .zr-more-slider-arrow-prev {
   left: 25px;
   background-image: var(--zr-3dseries-arrow-left);
 }
 
-.zr-3dseries-page .zr-more-slider-arrow-next {
+#zr-3dseries-root [data-zr-shared-slider] .zr-more-slider-arrow-next {
   right: 25px;
   background-image: var(--zr-3dseries-arrow-right);
 }
 
-.zr-3dseries-page .zr-more-slider-dots {
+#zr-3dseries-root [data-zr-shared-slider] .zr-more-slider-dots {
   bottom: 25px;
   gap: 10px;
 }
 
-.zr-3dseries-page .zr-more-slider-dot {
+#zr-3dseries-root [data-zr-shared-slider] .zr-more-slider-dot {
   width: 10px;
   height: 10px;
   border: 1px solid rgba(255, 255, 255, 0.88);
   background: rgba(0, 0, 0, 0.3);
 }
 
-.zr-3dseries-page .zr-more-slider-dot:hover,
-.zr-3dseries-page .zr-more-slider-dot:focus-visible {
+#zr-3dseries-root [data-zr-shared-slider] .zr-more-slider-dot:hover,
+#zr-3dseries-root [data-zr-shared-slider] .zr-more-slider-dot:focus-visible {
   background: rgba(255, 255, 255, 0.45);
 }
 
-.zr-3dseries-page .zr-more-slider-dot.is-active {
+#zr-3dseries-root [data-zr-shared-slider] .zr-more-slider-dot.is-active {
   background: #ffffff;
 }
 
-.zr-3dseries-content-shell {
+#zr-3dseries-root .zr-3dseries-content-shell {
   width: 1500px;
   margin: 0 auto;
+  padding: 0;
 }
 
-.zr-3dseries-content {
+#zr-3dseries-root .zr-3dseries-content {
   position: relative;
   width: 1500px;
   background: #ffffff;
 }
 
-.zr-3dseries-items {
+#zr-3dseries-root .zr-3dseries-items {
   position: relative;
   width: 1500px;
   height: 100%;
 }
 
-.zr-3dseries-page-title {
+#zr-3dseries-root .zr-3dseries-page-title {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -117,27 +132,32 @@
   white-space: nowrap;
 }
 
-.zr-3dseries-item {
+#zr-3dseries-root .zr-3dseries-item {
   position: absolute;
   width: 540px;
+  z-index: 1;
 }
 
-.zr-3dseries-card {
+#zr-3dseries-root .zr-3dseries-card {
   overflow: hidden;
   background: transparent;
   width: 540px;
   height: 320px;
 }
 
-.zr-3dseries-card iframe {
+#zr-3dseries-root .zr-3dseries-card iframe {
   display: block;
   width: 100%;
   height: 100%;
+  max-width: none;
+  margin: 0;
   border: 0;
+  border-radius: 0;
   background: transparent;
+  vertical-align: top;
 }
 
-.zr-3dseries-card-title {
+#zr-3dseries-root .zr-3dseries-card-title {
   margin: 0;
   font-family: "SimSun", "Songti SC", serif;
   font-size: 24px;

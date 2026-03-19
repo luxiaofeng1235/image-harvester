@@ -1,8 +1,9 @@
-import { initSharedSlider } from "../plugin/shared-slider.js?v=20260319-1";
+import { initSharedSlider } from "../plugin/shared-slider.js?v=20260319-2";
 
 var root = document.getElementById("zr-3dnew-root");
 
 if (root) {
+  root.setAttribute("data-zr-3dnew-page", "1");
   initStandalonePreview();
   initPage();
 }
@@ -40,6 +41,7 @@ function renderSections(config) {
     return;
   }
 
+  container.setAttribute("data-zr-3dnew-content", "1");
   container.innerHTML = "";
 
   (config.sections || []).forEach(function (sectionConfig) {
@@ -50,6 +52,7 @@ function renderSections(config) {
 function createSection(sectionConfig) {
   var section = document.createElement("section");
   section.className = "zr-3dnew-section";
+  section.setAttribute("data-zr-3dnew-section", "1");
   section.setAttribute("data-section-id", sectionConfig.id || "");
 
   if (sectionConfig.label) {
@@ -83,6 +86,7 @@ function createLabel(labelText) {
 function createGuide() {
   var guide = document.createElement("div");
   guide.className = "zr-3dnew-guide";
+  guide.setAttribute("aria-hidden", "true");
 
   var wrap = document.createElement("div");
   wrap.className = "zr-3dnew-guide-wrap";
@@ -102,9 +106,12 @@ function createGuide() {
 function createButton(buttonConfig) {
   var button = document.createElement("a");
   button.className = "zr-3dnew-button";
+  button.setAttribute("data-zr-3dnew-button", "1");
   button.href = buttonConfig.href || "#";
   button.target = buttonConfig.target || "_self";
-  button.rel = button.target === "_blank" ? "noopener noreferrer" : "";
+  if (button.target === "_blank") {
+    button.rel = "noopener noreferrer";
+  }
 
   var label = document.createElement("span");
   label.className = "zr-3dnew-button-label";
@@ -117,6 +124,7 @@ function createButton(buttonConfig) {
 function createMediaItem(cardConfig) {
   var item = document.createElement("article");
   item.className = "zr-3dnew-media-item";
+  item.setAttribute("data-zr-3dnew-media-item", "1");
 
   var media = document.createElement("article");
   media.className = "zr-3dnew-media";

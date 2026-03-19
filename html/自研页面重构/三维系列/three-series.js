@@ -1,8 +1,9 @@
-import { initSharedSlider } from "../plugin/shared-slider.js?v=20260319-1";
+import { initSharedSlider } from "../plugin/shared-slider.js?v=20260319-2";
 
 var root = document.getElementById("zr-3dseries-root");
 
 if (root) {
+  root.setAttribute("data-zr-3dseries-page", "1");
   initStandalonePreview();
   initPage();
 }
@@ -27,6 +28,7 @@ function initStandalonePreview() {
     return;
   }
 
+  document.documentElement.style.backgroundColor = "#ffffff";
   document.body.style.margin = "0";
   document.body.style.backgroundColor = "#ffffff";
 }
@@ -71,6 +73,7 @@ function renderType(typeConfig) {
     return;
   }
 
+  container.setAttribute("data-zr-3dseries-content", "1");
   container.innerHTML = "";
 
   container.appendChild(createPageTitle(typeConfig.pageTitle || ""));
@@ -80,6 +83,7 @@ function renderType(typeConfig) {
 function createPageTitle(titleText) {
   var title = document.createElement("h1");
   title.className = "zr-3dseries-page-title";
+  title.setAttribute("data-zr-3dseries-title", "1");
   title.textContent = titleText || "";
   return title;
 }
@@ -87,6 +91,7 @@ function createPageTitle(titleText) {
 function createItems(cards) {
   var items = document.createElement("div");
   items.className = "zr-3dseries-items";
+  items.setAttribute("data-zr-3dseries-items", "1");
 
   cards.forEach(function (cardConfig) {
     items.appendChild(createItem(cardConfig));
@@ -98,6 +103,7 @@ function createItems(cards) {
 function createItem(cardConfig) {
   var item = document.createElement("article");
   item.className = "zr-3dseries-item";
+  item.setAttribute("data-zr-3dseries-item", "1");
 
   var card = document.createElement("div");
   card.className = "zr-3dseries-card";
