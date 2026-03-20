@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import time
 from typing import Any
 
 import pymysql
+from pymysql.cursors import DictCursor
 
 
 class DBWriter:
@@ -73,4 +75,87 @@ class DBWriter:
                 cursor.executemany(sql, params)
             conn.commit()
         return len(params)
+
+    def fetch_goods_for_enrichment(
+        self,
+        *,
+        category_id: int | None = None,
+        limit: int = 20,
+        missing_mode: str = "either",
+        ids: list[int] | None = None,
+    ) -> list[dict[str, Any]]:
+        where_clauses = ["1=1"]
+        params: list[Any] = []
+
+        if category_id is not None:
+            where_clauses.append("category_id = %s")
+            params.append(category_id)
+
+        if ids:
+            placeholders = ",".join(["%s"] * len(ids))
+            where_clauses.append(f"id IN ({placeholders})")
+            params.extend(ids)
+
+        missing_sql = self._build_missing_condition(missing_mode)
+        if missing_sql:
+            where_clauses.append(missing_sql)
+
+        sql = f"""
+            SELECT id, goods_name, sub_title, category_id, image, price, description, en_name, create_time, update_time
+            FROM `{self.table}`
+            WHERE {' AND '.join(where_clauses)}
+            ORDER BY id ASC
+            LIMIT %s
+        """
+        params.append(limit)
+
+        with self._connect() as conn:
+            with conn.cursor(DictCursor) as cursor:
+                cursor.execute(sql, params)
+                rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+
+    def update_goods_enrichment(
+        self,
+        *,
+        goods_id: int,
+        sub_title: str | None = None,
+        image: str | None = None,
+        description: str | None = None,
+    ) -> int:
+        fields: list[str] = []
+        params: list[Any] = []
+
+        if sub_title is not None:
+            fields.append("sub_title = %s")
+            params.append(sub_title)
+        if image is not None:
+            fields.append("image = %s")
+            params.append(image)
+        if description is not None:
+            fields.append("description = %s")
+            params.append(description)
+
+        fields.append("update_time = %s")
+        params.append(int(time.time()))
+        params.append(goods_id)
+
+        sql = f"UPDATE `{self.table}` SET {', '.join(fields)} WHERE id = %s"
+        with self._connect() as conn:
+            with conn.cursor() as cursor:
+                affected = cursor.execute(sql, params)
+            conn.commit()
+        return int(affected)
+
+    def _build_missing_condition(self, missing_mode: str) -> str:
+        image_empty = "(image IS NULL OR image = '')"
+        description_empty = "(description IS NULL OR description = '')"
+        mode = (missing_mode or "either").strip().lower()
+        if mode == "image":
+            return image_empty
+        if mode == "description":
+            return description_empty
+        if mode == "both":
+            return f"{image_empty} AND {description_empty}"
+        return f"({image_empty} OR {description_empty})"
 
