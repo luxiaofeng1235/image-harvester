@@ -91,6 +91,12 @@ class AIGoodsPipeline:
             prefix=settings.oss_prefix,
             timeout=settings.image_timeout,
         )
+        self._runtime_logged = False
+
+    def close(self) -> None:
+        self.image_client.close()
+        self.qwen_client.close()
+        self.oss_uploader.close()
 
     def run(self, task: GenerationTask) -> PipelineResult:
         profile = get_category_profile(task.category_id)
@@ -102,6 +108,7 @@ class AIGoodsPipeline:
             ",".join(task.keywords),
             task.dry_run,
         )
+        self._log_runtime_status()
         history_titles = self.db_writer.fetch_existing_titles()
         validator = GoodsValidator(
             category_id=task.category_id,
@@ -262,6 +269,7 @@ class AIGoodsPipeline:
                 raw_model_output=json.dumps(item, ensure_ascii=False),
             )
             entry["source_queries"] = image_result.source_queries
+            entry["all_valid_urls"] = image_result.all_valid_urls
             return None, entry
         available_total = 1 + len(image_result.detail_images)
         if len(image_result.detail_images) < IMAGE_DETAIL_COUNT or available_total < IMAGE_REQUIRED_TOTAL:
@@ -275,6 +283,7 @@ class AIGoodsPipeline:
                 raw_model_output=json.dumps(item, ensure_ascii=False),
             )
             entry["source_queries"] = image_result.source_queries
+            entry["all_valid_urls"] = image_result.all_valid_urls
             return None, entry
 
         now = int(time.time())
@@ -294,6 +303,7 @@ class AIGoodsPipeline:
                 raw_model_output=json.dumps(item, ensure_ascii=False),
             )
             entry["source_queries"] = image_result.source_queries
+            entry["all_valid_urls"] = image_result.all_valid_urls
             return None, entry
 
         description = self._build_description_html(
@@ -318,6 +328,25 @@ class AIGoodsPipeline:
             "model_used": generation.model,
             "source_queries": image_result.source_queries,
         }, None
+
+    def _log_runtime_status(self) -> None:
+        if self._runtime_logged:
+            return
+        self._runtime_logged = True
+        runtime_status = self.image_client.runtime_status()
+        self.logger.info(
+            "Image runtime status: baidu_render_ready=%s bing_render_ready=%s",
+            runtime_status["baidu_render_ready"],
+            runtime_status["bing_render_ready"],
+        )
+        if not runtime_status["baidu_render_ready"]:
+            self.logger.warning(
+                "Baidu first-screen rendering unavailable; Baidu source may return empty results."
+            )
+        if not runtime_status["bing_render_ready"]:
+            self.logger.warning(
+                "Bing first-screen rendering unavailable; Bing may fallback to static HTML order."
+            )
 
     def _build_description_html(
         self,

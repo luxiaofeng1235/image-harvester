@@ -50,6 +50,12 @@ class OSSImageUploader:
             auth = oss2.Auth(self.access_key_id, self.access_key_secret)
             self.bucket = oss2.Bucket(auth, self.endpoint, self.bucket_name)
 
+    def close(self) -> None:
+        try:
+            self.session.close()
+        except Exception:
+            pass
+
     def upload_url(self, url: str) -> str:
         url = (url or "").strip()
         if not url:

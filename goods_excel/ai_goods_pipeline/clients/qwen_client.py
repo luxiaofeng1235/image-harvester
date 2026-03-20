@@ -46,6 +46,12 @@ class QwenClient:
         self.timeout = timeout
         self.session = requests.Session()
 
+    def close(self) -> None:
+        try:
+            self.session.close()
+        except Exception:
+            pass
+
     def generate(
         self,
         *,

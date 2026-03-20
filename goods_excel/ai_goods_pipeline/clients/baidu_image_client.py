@@ -30,6 +30,9 @@ class BaiduImageClient:
         return self._fetch_images_rendered(url, limit)
 
     def close(self) -> None:
+        self.close_browser()
+
+    def close_browser(self) -> None:
         if self._browser is not None:
             try:
                 self._browser.close()
@@ -42,6 +45,9 @@ class BaiduImageClient:
             except Exception:
                 pass
             self._playwright = None
+
+    def can_render(self) -> bool:
+        return self._get_browser() is not None
 
     def __del__(self) -> None:  # pragma: no cover - cleanup best effort
         self.close()

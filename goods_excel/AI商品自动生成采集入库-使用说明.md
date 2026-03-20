@@ -7,6 +7,7 @@
 - 直接写入 MySQL，不再导出 Excel。
 - 图片搜索默认只按生成后的商品标题 `title` 搜图，当前顺序为 `百度图片 -> Bing 图片`。
 - 百度图片和 Bing 图片首屏抓取当前都依赖 Playwright 渲染后的 DOM。
+- 图片候选会额外经过分类感知过滤，优先拦截明显跨城市、跨品类的错图结果。
 - 每条商品必须满足 `1` 张主图 + `3` 张详情图后才允许入库。
 - 当前可通过 `OSS_ENABLED=0` 关闭 OSS 上传，直接写入原图 URL。
 
@@ -18,6 +19,7 @@
 - 映射: 过滤失效图、离题图、重复图后，固定组装 `1 主图 + 3 详情图`。
 - 入库: 满足图片与字段要求后写入 `jj_wangyi_goods`，否则继续补生成。
 - 排查: 首屏顺序问题优先用 `verify_baidu_order.py` 或 `verify_bing_order.py` 单独验证。
+- 自检: 可通过 `--check-runtime 1` 快速确认百度/Bing 的 Playwright 渲染能力。
 
 ## 2. 代码位置
 - 主目录: `goods_excel/ai_goods_pipeline/`
@@ -175,6 +177,12 @@ python3 ai_goods_pipeline/generate_goods.py \
 - `--dry-run`: `1` 只跑流程不写库，`0` 正式写库
 - `--export-excel`: 当前保留参数，但 DB-first 实现下不使用
 - `--city-strategy`: 城市分布策略，默认 `balanced`
+- `--check-runtime`: 只做图片运行环境自检，不生成、不入库
+
+自检示例:
+```bash
+python3 ai_goods_pipeline/generate_goods.py --check-runtime 1
+```
 
 ## 10. 结果输出
 成功执行后，控制台会输出:
