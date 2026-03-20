@@ -1,0 +1,93 @@
+from __future__ import annotations
+
+import json
+
+
+SEED_CATEGORY_HINTS = {
+    126: [
+        "这是人工已确认的地方特产/江苏特产种子商品，不要改写标题，只补全可销售文案。",
+        "允许覆盖江苏不同城市的食品、熟食、茶品、酒水、干货、水果、礼盒等真实特产场景。",
+        "subtitle 要补充产地、规格、风味、包装或送礼场景，不要重复标题。",
+        "attrs 至少包含 产地城市、规格、包装形式、适用场景。",
+        "image_keywords 首个词优先写成“城市名 + 核心商品名”，方便搜图。",
+    ],
+    127: [
+        "这是人工已确认的农副产品种子商品，不要改写标题，只补全可销售文案。",
+        "subtitle 要补充产地、原料、净含量、储存方式或食用场景。",
+        "attrs 至少包含 产地城市、规格、包装形式、储存方式。",
+        "image_keywords 首个词优先写成“城市名 + 品类名”。",
+    ],
+    128: [
+        "这是人工已确认的苏超纪念品种子商品，不要改写标题，只补全可销售文案。",
+        "禁止补充官方授权、俱乐部联名、球员合作、赛事指定等高风险表述。",
+        "subtitle 要补充材质、尺寸、便携性、使用场景中的至少一项。",
+        "attrs 至少包含 城市主题、材质、规格尺寸、适用场景。",
+        "image_keywords 至少包含城市名、足球/苏超语义和具体载体名。",
+    ],
+    129: [
+        "这是人工已确认的工艺产品种子商品，不要改写标题，只补全可销售文案。",
+        "禁止臆造国家级非遗、大师监制、传承人、馆藏同款等无法核验的背书。",
+        "subtitle 要补充工艺、材质、器型、用途或送礼场景中的至少一项。",
+        "attrs 至少包含 工艺类别、核心材质、规格尺寸、适用场景。",
+        "image_keywords 首个词优先写成“工艺名 + 材质 + 器物名”或“城市名 + 工艺名 + 器物名”。",
+    ],
+}
+
+
+def get_seed_category_label(category_id: int) -> str:
+    return {
+        126: "江苏特产种子商品",
+        127: "农副产品种子商品",
+        128: "苏超纪念品种子商品",
+        129: "工艺产品种子商品",
+    }.get(category_id, f"{category_id} 类种子商品")
+
+
+def build_seed_enrichment_prompts(
+    *,
+    category_id: int,
+    title: str,
+    price: float,
+    system_prompt_base: str,
+) -> tuple[str, str]:
+    category_label = get_seed_category_label(category_id)
+    schema = [
+        {
+            "title": title,
+            "subtitle": "string",
+            "price": round(float(price), 2),
+            "selling_points": ["卖点1", "卖点2", "卖点3"],
+            "attrs": {"字段1": "值1", "字段2": "值2"},
+            "image_keywords": ["关键词1", "关键词2"],
+        }
+    ]
+    category_rules = SEED_CATEGORY_HINTS.get(category_id, [])
+    system_prompt = "\n".join(
+        [
+            system_prompt_base.strip(),
+            "你现在做的是“已有商品标题补全文案”任务，不是重新起标题。",
+            "你必须严格返回 JSON 数组，不要返回 Markdown，不要返回解释说明。",
+            "必须保留原始标题和价格，不得擅自改写标题，不得调整价格。",
+            "不得虚构认证、官方背书、联名关系、非遗名录、传承人、大师头衔、销量数据、客户案例。",
+            "若无法确认具体细节，使用保守且真实的通用表述。",
+        ]
+    )
+    user_prompt = "\n".join(
+        [
+            f"任务类型: {category_label}",
+            f"标题(必须原样保留): {title}",
+            f"价格(必须保持一致): {round(float(price), 2)}",
+            "补全要求:",
+            "- 只补全 subtitle、selling_points、attrs、image_keywords。",
+            "- title 必须与输入标题完全一致。",
+            "- price 必须与输入价格完全一致。",
+            "- selling_points 固定输出 3~5 条，必须是具体卖点。",
+            "- attrs 固定输出对象，value 只能是字符串或数字。",
+            "- image_keywords 固定输出 1~3 个关键词，必须适合图片搜索。",
+            *[f"- {rule}" for rule in category_rules],
+            "输出 schema 示例:",
+            json.dumps(schema, ensure_ascii=False),
+            "只返回 JSON 数组。",
+        ]
+    )
+    return system_prompt, user_prompt
