@@ -78,9 +78,11 @@ def main() -> int:
                 f"run_id={result.run_id} requested={result.requested_count} "
                 f"success={result.success_count} inserted={result.inserted_count} "
                 f"failures={result.failure_count} "
-                f"log={result.log_path} failures_log={result.failure_log_path}"
+                f"log={result.log_path} failures_log={result.failure_log_path} "
+                f"report={result.report_path}"
             )
         )
+        print("quality_report=" + json.dumps(result.quality_report, ensure_ascii=False))
     finally:
         pipeline.close()
     return 0

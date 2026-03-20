@@ -193,9 +193,22 @@ python3 ai_goods_pipeline/generate_goods.py --check-runtime 1
 - 失败数量 `failures`
 - 运行日志路径 `log`
 - 失败日志路径 `failures_log`
+- 质量报表路径 `report`
+- 质量报表摘要 `quality_report`
 
 日志目录:
 - `goods_excel/ai_goods_pipeline/logs/`
+
+质量报表文件:
+- `goods_excel/ai_goods_pipeline/logs/report_*.json`
+
+当前质量报表默认包含:
+- 成功率 `success_rate`
+- 失败原因分布 `failure_reason_distribution`
+- 图片来源分布 `image_source_distribution`
+- 搜图来源分布 `search_source_distribution`
+- 平均耗时 `avg_duration_per_success_seconds`
+- 平均候选处理耗时 `avg_candidate_processing_seconds`
 
 ## 11. 常见开关
 ### 11.1 关闭 OSS 上传

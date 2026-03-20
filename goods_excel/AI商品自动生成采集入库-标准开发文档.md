@@ -1,7 +1,7 @@
 # AI商品自动生成采集入库-标准开发文档
 
 ## 1. 文档信息
-- 文档版本: `v1.21`
+- 文档版本: `v1.23`
 - 创建日期: `2026-03-04`
 - 更新日期: `2026-03-20`
 - 适用项目: `image-harvester/goods_excel`
@@ -541,13 +541,30 @@ https://image.baidu.com/search/index?tn=baiduimage&fm=result&ie=utf-8&word=<关�
   - 生成总数、成功数、失败数
   - 千问请求次数/失败次数
   - 图片请求次数/失败次数
-  - 平均单条耗时
+  - 成功率、失败原因分布、图片来源分布
+  - 平均单条耗时、平均候选处理耗时、平均模型批次耗时
 - 输出建议:
   - 控制台摘要
   - `logs/run_YYYYMMDD_HHMMSS.log`
   - `logs/failures_*.jsonl`
+  - `logs/report_*.json`
 
-### 14.1 失败队列字段建议
+### 14.1 批量质量报表
+- 主流程每次运行结束后，默认额外生成 `logs/report_<run_id>.json`。
+- 该报表用于批量运行后的快速复盘，当前至少包含以下指标:
+  - `success_rate`
+  - `attempted_success_rate`
+  - `failure_reason_distribution`
+  - `fail_stage_distribution`
+  - `image_source_distribution`
+  - `search_source_distribution`
+  - `total_duration_seconds`
+  - `avg_duration_per_success_seconds`
+  - `avg_candidate_processing_seconds`
+  - `avg_model_batch_duration_seconds`
+- 控制台和运行日志会同步输出质量报表摘要，便于不打开 JSON 文件时快速判断本次批量效果。
+
+### 14.2 失败队列字段建议
 `logs/failures_*.jsonl` 每条建议至少包含:
 - `run_id`
 - `category_id`
@@ -562,9 +579,10 @@ https://image.baidu.com/search/index?tn=baiduimage&fm=result&ie=utf-8&word=<关�
 - `matched_history_title`
 - `image_keywords`
 - `raw_model_output`
+- `candidate_duration_seconds`
 - `created_at`
 
-### 14.2 审稿导出字段建议
+### 14.3 审稿导出字段建议
 若启用 `--export-excel 1`，建议导出以下列:
 - `row_no`
 - `status`
@@ -596,16 +614,18 @@ https://image.baidu.com/search/index?tn=baiduimage&fm=result&ie=utf-8&word=<关�
 - M2 核心规则落地: 已完成标题去重、价格校验、分类约束、城市均衡、`1 主图 + 3 详情图`、OSS 开关、失败收敛等核心业务规则。
 - M3 图片抓取收敛: 已完成百度图片新增接入、Bing 大图搜索、仅按 `title` 搜图、显式离题文本过滤，以及“按浏览器首屏顺序抓图”的修复；同时移除 `ptapi` 图片接口与预置素材兜底，并补齐百度/Bing 最小闭环验证脚本。
 - M4 Prompt 与分类基线: 已完成 `126/127/128/129` 四类商品的分类画像、价格带、真实性约束和结构化输出基线。
+- M5 图片质量与运行时收口: 已完成分类感知图片过滤、城市冲突拦截、`--check-runtime` 运行时自检、百度/Bing 浏览器实例串扰修复，以及图片失败日志补充 `all_valid_urls` 便于排查。
+- M6 批量运行质量报表: 已完成按任务维度输出成功率、失败原因分布、图片来源分布、搜图来源分布和平均耗时，并落盘 `report_*.json`。
 
-### 16.2 当前进行中
-- M5 图片质量增强: 持续收紧图片相关性判断，减少“新闻配图、体育资讯图、文章封面图、素材预览图”进入最终候选的概率。
-- M6 运行验证标准化: 持续沉淀“最小闭环验证 + 主流程联调验证 + 数据库抽检”的排查手册，保证图片问题能快速定位到抓取层、校验层或回退层。
+### 16.2 当前重点
+- M7 批量质量验证: 以 `126/127/128/129` 四类为单位继续跑 `10~30` 条样本，重点抽查标题真实性、价格分布、图片相关性、城市覆盖和最终成功率。
+- M8 图片质量增强: 持续补充图片误判样本，收紧“新闻配图、体育资讯图、文章封面图、素材预览图、跨城错图、跨品类错图”过滤规则。
+- M9 运行验证标准化: 继续沉淀“最小闭环验证 + 主流程联调验证 + 数据库抽检”的排查手册，保证图片问题能快速定位到抓取层、过滤层、校验层或回退层。
 
 ### 16.3 下一阶段建议
-- M7 批量运行与质量报表: 增加按任务维度的成功率、失败原因分布、图片来源分布、平均耗时等汇总输出。
-- M8 失败任务重跑机制: 增加基于失败日志的定向重试能力，避免整批任务重复跑。
-- M9 审稿与人工复核: 补齐 `--export-excel` 或等价审稿导出能力，支持人工抽检标题、图片和价格。
-- M10 线上稳定性收口: 建立环境依赖检查、密钥有效性检查、Playwright/Chromium 可用性检查和数据库连通性自检。
+- M10 失败任务重跑机制: 增加基于失败日志的定向重试能力，避免整批任务重复跑。
+- M11 审稿与人工复核: 补齐 `--export-excel` 或等价审稿导出能力，支持人工抽检标题、图片和价格。
+- M12 线上稳定性收口: 建立环境依赖检查、密钥有效性检查、Playwright/Chromium 可用性检查和数据库连通性自检。
 
 ### 16.4 当前正式链路整理
 - 输入层: `generate_goods.py` 接收 `category_id + keywords + count + model + write_db + dry_run`，并从根目录 `.env` 读取数据库、千问、图片与 OSS 配置，目标表为 `jj_wangyi_goods`。
@@ -620,6 +640,8 @@ https://image.baidu.com/search/index?tn=baiduimage&fm=result&ie=utf-8&word=<关�
 ## 17. 变更记录
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| v1.23 | 2026-03-20 | 新增批量运行质量报表 `report_*.json`，输出成功率、失败原因分布、图片来源分布、搜图来源分布和平均耗时，并同步更新文档与里程碑 |
+| v1.22 | 2026-03-20 | 重整里程碑章节，按“已完成 / 当前重点 / 下一阶段”重新归类，并把图片质量与运行时收口纳入已完成范围 |
 | v1.21 | 2026-03-20 | 新增图片运行时自检参数 `--check-runtime`，并补充分类感知图片过滤与浏览器实例串扰修复说明 |
 | v1.20 | 2026-03-20 | 补充“当前正式链路整理”，按输入、生成、校验、图片、映射、入库、验证串联今日实现状态，便于交接与排查 |
 | v1.19 | 2026-03-20 | 按线上新分类重定义 `126/127/128/129` 为 `苏州特产/农副产品/苏超纪念品/工艺产品`，同步更新分类画像、Prompt 约束、价带、示例命令与校验规则 |

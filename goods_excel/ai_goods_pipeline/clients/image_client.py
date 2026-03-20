@@ -47,6 +47,8 @@ class ImageProbe:
 class ImageResolutionResult:
     main_image: str
     detail_images: list[str]
+    main_image_source: str
+    detail_image_sources: list[str]
     source_queries: list[str]
     all_valid_urls: list[str]
 
@@ -86,6 +88,7 @@ class ImageClient:
         keywords: list[str],
     ) -> ImageResolutionResult:
         candidate_urls: list[str] = []
+        candidate_sources: dict[str, str] = {}
         source_queries: list[str] = []
         search_context = self._build_search_context(
             title=title,
@@ -102,6 +105,7 @@ class ImageClient:
                 for url in baidu_urls:
                     if url not in candidate_urls:
                         candidate_urls.append(url)
+                    candidate_sources.setdefault(url, "baidu")
             if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
                 break
 
@@ -111,6 +115,7 @@ class ImageClient:
                 for url in bing_urls:
                     if url not in candidate_urls:
                         candidate_urls.append(url)
+                    candidate_sources.setdefault(url, "bing")
             if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
                 break
 
@@ -131,9 +136,13 @@ class ImageClient:
                 if len(details_pool) >= IMAGE_DETAIL_COUNT:
                     break
         detail_images = details_pool[:IMAGE_DETAIL_COUNT]
+        main_image_source = candidate_sources.get(main_image, "") if main_image else ""
+        detail_image_sources = [candidate_sources.get(url, "") for url in detail_images]
         return ImageResolutionResult(
             main_image=main_image,
             detail_images=detail_images,
+            main_image_source=main_image_source,
+            detail_image_sources=detail_image_sources,
             source_queries=source_queries,
             all_valid_urls=[img.url for img in valid_images],
         )
