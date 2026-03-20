@@ -232,6 +232,50 @@ OSS_ENABLED=1
 - `OSS_ENDPOINT`
 - `OSS_VIEW_DOMAIN`
 
+### 11.3 种子商品异步补全脚本
+适用场景:
+- 已经有人工导入的种子商品，仅需从数据库中补 `sub_title / image / description`
+- 查询条件固定按 `image` 为空或 `description` 为空筛选
+- 适合作为主批量生成链路之外的第二补录方案
+
+脚本路径:
+- `goods_excel/ai_goods_pipeline/enrich_seed_goods_from_db.py`
+
+核心参数:
+- `--category-id`: 必填，分类 ID，例如 `126/127/128/129`
+- `--limit`: 本次最多处理多少条，方便先跑 `1` 条验证
+- `--ids`: 指定单条或多条商品 ID，逗号分隔
+- `--missing-mode`: `either/image/description/both`
+- `--concurrency`: 异步并发数，默认 `3`
+- `--dry-run`: `1` 只预览不写库，`0` 正式写库
+
+干跑一条:
+```bash
+python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
+  --category-id 129 \
+  --limit 1 \
+  --missing-mode either \
+  --concurrency 1 \
+  --dry-run 1
+```
+
+指定 ID 正式写库:
+```bash
+python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
+  --category-id 129 \
+  --ids 571 \
+  --limit 1 \
+  --missing-mode either \
+  --concurrency 1 \
+  --dry-run 0
+```
+
+说明:
+- 当前链路默认仍只使用百度图片，不走 Bing 主流程
+- 文案补全与图片抓取均为异步实现；仅当开启 OSS 上传时，OSS SDK 仍通过 `asyncio.to_thread` 包一层同步上传
+- 若商品已有主图但缺描述，脚本会保留现有主图，只补详情图与描述
+- 控制台会输出 `selected/success/updated/failed/log/run_id/summary`
+
 ## 12. 常见问题
 ### 12.1 为什么商品生成了但没有入库
 常见原因:

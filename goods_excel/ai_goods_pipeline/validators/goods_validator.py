@@ -283,6 +283,9 @@ class GoodsValidator:
             return "苏州"
         return ""
 
+    def _contains_any(self, text: str, words: list[str]) -> bool:
+        return any(word in text for word in words if word)
+
     def _validate_category_rules(self, item: dict[str, Any], city: str) -> str:
         title = item["title"]
         subtitle = item["subtitle"]
@@ -300,12 +303,13 @@ class GoodsValidator:
             return "empty_image_keywords"
 
         if self.category_id == 126:
-            if self._as_text(attrs.get("产地城市")) != "苏州":
-                return "invalid_suzhou_origin_city"
-            if not any(hint in joined for hint in SUZHOU_HINTS):
-                return "missing_suzhou_locality"
+            origin_city = self._as_text(attrs.get("产地城市"))
+            if not self._contains_any(origin_city, CITY_POOL + SUZHOU_HINTS + JIANGSU_HINTS):
+                return "invalid_jiangsu_origin_city"
+            if not self._contains_any(joined, CITY_POOL + SUZHOU_HINTS + JIANGSU_HINTS):
+                return "missing_jiangsu_locality"
             if any(word in joined for word in GENERIC_BANNED_126):
-                return "invalid_non_suzhou_hint"
+                return "invalid_non_local_hint"
             return ""
 
         if self.category_id == 127:
@@ -329,8 +333,6 @@ class GoodsValidator:
         if self.category_id == 129:
             if not any(word in joined for word in CRAFT_KEYWORDS):
                 return "missing_craft_signal"
-            if not city and not any(hint in joined for hint in JIANGSU_HINTS):
-                return "missing_local_craft_origin"
             if any(word in joined for word in FOOTBALL_KEYWORDS):
                 return "wrong_category_football_signal"
             return ""

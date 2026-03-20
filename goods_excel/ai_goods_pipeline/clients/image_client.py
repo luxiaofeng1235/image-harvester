@@ -320,9 +320,6 @@ class ImageClient:
     def _extract_expected_cities(
         self, parts: list[str], category_id: int
     ) -> list[str]:
-        if category_id == 126:
-            return [city.lower() for city in SUZHOU_HINTS]
-
         source_text = " ".join(str(part).lower() for part in parts if part)
         matches: list[str] = []
         for city in CITY_POOL + SUZHOU_HINTS:
