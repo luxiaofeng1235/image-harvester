@@ -51,14 +51,12 @@ class Settings:
     qwen_max_tokens: int
     qwen_system_prompt: str
     qwen_batch_size: int
-    image_api_url: str
     image_timeout: int
     image_retry: int
     image_min_bytes: int
     image_allow_gif_as_main: bool
     title_similarity_threshold: float
     task_max_attempts_multiplier: int
-    ai_tech_preset_image_file: Path
     oss_enabled: bool
     oss_access_key_id: str
     oss_access_key_secret: str
@@ -137,10 +135,6 @@ def load_settings(env_file: Path | None = None) -> Settings:
             "你是资深电商商品策划与文案助手，仅返回 JSON 数组。",
         ),
         qwen_batch_size=_as_int(os.getenv("QW_BATCH_SIZE"), 15),
-        image_api_url=os.getenv(
-            "IMAGE_API_URL",
-            os.getenv("IMG_API_URL", "https://ptapi.jsss999.com/api/fetch/getImages"),
-        ),
         image_timeout=_as_int(os.getenv("IMG_TIMEOUT"), 20),
         image_retry=_as_int(os.getenv("IMG_RETRY"), 3),
         image_min_bytes=_as_int(os.getenv("IMG_MIN_BYTES"), 1024),
@@ -151,8 +145,6 @@ def load_settings(env_file: Path | None = None) -> Settings:
         task_max_attempts_multiplier=_as_int(
             os.getenv("TASK_MAX_ATTEMPTS_MULTIPLIER"), 3
         ),
-        ai_tech_preset_image_file=PROJECT_DIR
-        / os.getenv("AI_TECH_PRESET_IMAGE_FILE", "AI科技商品整理.txt"),
         oss_enabled=_as_bool(os.getenv("OSS_ENABLED"), True),
         oss_access_key_id=os.getenv("OSS_ACCESS_KEY_ID", ""),
         oss_access_key_secret=os.getenv("OSS_ACCESS_KEY_SECRET", ""),

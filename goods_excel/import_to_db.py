@@ -12,10 +12,10 @@ DB_CONFIG = {
 }
 
 FILES = [
-    (126, "goods_江苏特产.xlsx"),
-    (127, "goods_非遗.xlsx"),
-    (128, "goods_AI科技.xlsx"),
-    (129, "goods_苏超纪念品.xlsx"),
+    (126, "goods_苏州特产.xlsx"),
+    (127, "goods_农副产品.xlsx"),
+    (128, "goods_苏超纪念品.xlsx"),
+    (129, "goods_工艺产品.xlsx"),
 ]
 
 SQL = """INSERT INTO jj_wangyi_goods

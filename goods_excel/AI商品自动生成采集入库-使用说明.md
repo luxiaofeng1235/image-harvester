@@ -5,10 +5,19 @@
 
 当前实现特点:
 - 直接写入 MySQL，不再导出 Excel。
-- 图片搜索默认只按生成后的商品标题 `title` 去 Bing 搜索。
-- Bing 默认使用大图搜索参数。
+- 图片搜索默认只按生成后的商品标题 `title` 搜图，当前顺序为 `百度图片 -> Bing 图片`。
+- 百度图片和 Bing 图片首屏抓取当前都依赖 Playwright 渲染后的 DOM。
 - 每条商品必须满足 `1` 张主图 + `3` 张详情图后才允许入库。
 - 当前可通过 `OSS_ENABLED=0` 关闭 OSS 上传，直接写入原图 URL。
+
+## 1.1 当前链路速览
+- 输入: 命令行传入 `category_id + keywords + count`，并读取根目录 `.env`。
+- 生成: `qwen-plus/qwen-max` 按分类 Prompt 生成结构化商品数据。
+- 校验: 先做 JSON、分类、价格、字段完整性、标题去重和历史库去重。
+- 图片: 固定按 `title` 走 `百度图片 -> Bing 图片`，按浏览器首屏顺序抓取。
+- 映射: 过滤失效图、离题图、重复图后，固定组装 `1 主图 + 3 详情图`。
+- 入库: 满足图片与字段要求后写入 `jj_wangyi_goods`，否则继续补生成。
+- 排查: 首屏顺序问题优先用 `verify_baidu_order.py` 或 `verify_bing_order.py` 单独验证。
 
 ## 2. 代码位置
 - 主目录: `goods_excel/ai_goods_pipeline/`
@@ -34,7 +43,7 @@ pip3 install requests lxml PyMySQL python-dotenv playwright
 ```
 
 说明:
-- Bing 图片首屏顺序抓取当前依赖 Playwright 渲染后的 DOM。
+- 百度图片与 Bing 图片首屏顺序抓取当前都依赖 Playwright 渲染后的 DOM。
 - 新环境首次安装后需执行一次 `playwright install chromium`，否则会缺少浏览器内核。
 
 ### 4.2 按需安装
@@ -68,7 +77,6 @@ QW_MAX_TOKENS=4096
 QW_BATCH_SIZE=15
 QW_SYSTEM_PROMPT=你是资深电商商品策划与文案助手。仅返回 JSON 数组。
 
-IMAGE_API_URL=https://ptapi.jsss999.com/api/fetch/getImages
 IMG_TIMEOUT=20
 IMG_RETRY=3
 IMG_MIN_BYTES=1024
@@ -76,7 +84,6 @@ IMG_ALLOW_GIF_AS_MAIN=0
 
 TITLE_SIMILARITY_THRESHOLD=0.88
 TASK_MAX_ATTEMPTS_MULTIPLIER=3
-AI_TECH_PRESET_IMAGE_FILE=AI科技商品整理.txt
 
 OSS_ENABLED=0
 OSS_ACCESS_KEY_ID=
@@ -118,41 +125,41 @@ https://cn.bing.com/images/search?q=<title>&qft=+filterui:imagesize-large&form=I
 ## 8. 启动方式
 在 `goods_excel/` 目录下执行:
 
-### 8.1 江苏特产
+### 8.1 苏州特产
 ```bash
 python3 ai_goods_pipeline/generate_goods.py \
   --category-id 126 \
-  --keywords "江苏特产,南京盐水鸭,地方伴手礼" \
+  --keywords "苏州特产,苏州碧螺春,苏式糕点,阳澄湖伴手礼" \
   --count 1 \
   --write-db 1 \
   --dry-run 0
 ```
 
-### 8.2 非遗
+### 8.2 农副产品
 ```bash
 python3 ai_goods_pipeline/generate_goods.py \
   --category-id 127 \
-  --keywords "江苏非遗,苏绣团扇,文化礼品" \
+  --keywords "江苏农副产品,盐城大米,南通海苔,水产干货" \
   --count 1 \
   --write-db 1 \
   --dry-run 0
 ```
 
-### 8.3 AI科技
+### 8.3 苏超纪念品
 ```bash
 python3 ai_goods_pipeline/generate_goods.py \
   --category-id 128 \
-  --keywords "AI科技,企业知识库,数字化服务" \
+  --keywords "苏超纪念品,南京助威围巾,球迷伴手礼" \
   --count 1 \
   --write-db 1 \
   --dry-run 0
 ```
 
-### 8.4 苏超纪念品
+### 8.4 工艺产品
 ```bash
 python3 ai_goods_pipeline/generate_goods.py \
   --category-id 129 \
-  --keywords "苏超纪念品,南京助威围巾,球迷伴手礼" \
+  --keywords "江苏工艺产品,宜兴紫砂杯,苏绣团扇,云锦礼品" \
   --count 1 \
   --write-db 1 \
   --dry-run 0

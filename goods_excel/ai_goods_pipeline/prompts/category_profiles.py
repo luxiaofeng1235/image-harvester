@@ -47,6 +47,71 @@ def select_history_guard_titles(
     return selected
 
 
+def _build_category_extra_rules(
+    *, category_id: int, target_count: int, city_strategy: str
+) -> list[str]:
+    if category_id == 126:
+        rules = [
+            "126 专属硬约束:",
+            "- attrs.产地城市 必须固定填写为 苏州。",
+            "- title 或 subtitle 至少一处出现“苏州/姑苏/阳澄湖/洞庭山/昆山/太仓/常熟/张家港/吴江”等苏州稳定地域词。",
+            "- 只生成可食用的苏州特产，优先苏式糕点、茶礼、蜜饯果脯、酱菜、熟食卤味、水产干货、节令伴手礼。",
+            "- image_keywords 必须服务搜图，首个关键词优先写成“苏州地域词 + 核心商品名”，不要只写抽象词或营销词。",
+            "- subtitle 要补充风味、原料、规格、包装或送礼场景信息，避免只写空泛修饰词。",
+            "- 禁止写成其他城市特产，禁止混入工艺摆件、茶具香器、服务商品或无法判断来源的全国通货。",
+            "126 可优先参考的安全方向:",
+            "- 苏州碧螺春茶礼盒、苏式糕点礼盒、苏州蜜饯果脯、阳澄湖水产干货、苏州酱菜伴手礼。",
+            "- 对不够确定的苏州特产，宁可采用保守的“苏式糕点/苏州风味熟食/苏州伴手礼”表达，也不要虚构老字号、地理标志或历史典故。",
+        ]
+        if target_count >= 8:
+            rules.append("- 批量生成时优先拉开糕点、茶品、熟食、干货、蜜饯、礼盒等品类维度，不要只反复生成同一种茶礼盒。")
+        return rules
+
+    if category_id == 127:
+        rules = [
+            "127 专属硬约束:",
+            f"- attrs.产地城市 必须填写以下城市之一: {', '.join(CITY_POOL)}。",
+            "- 必须是可食用的农副产品或农副加工品，优先粮油杂粮、菌菇干货、水产干货、禽肉制品、酱菜调味品、果干蜜饯、茶品。",
+            "- title 应体现“产地 + 品类 + 状态/包装”，不要只写空泛礼盒，不要只有故事感没有商品形态。",
+            "- subtitle 要补充原料、风味、净含量、储存方式或适用场景中的至少一项。",
+            "- image_keywords 首个关键词优先写成“城市名 + 品类名”，提高搜图匹配度。",
+            "- 禁止输出工艺摆件、服务套餐、纯文创纪念品、纯进口跨境商品。",
+        ]
+        if city_strategy == "balanced" and target_count >= 8:
+            rules.append("- 若批量生成，优先覆盖 6 个以上不同江苏城市，再考虑同城扩展第二个农副品。")
+        return rules
+
+    if category_id == 128:
+        rules = [
+            "128 专属硬约束:",
+            f"- 城市主题必须来自以下江苏城市之一: {', '.join(CITY_POOL)}。",
+            "- 每条商品都要同时出现城市元素与足球/苏超/助威/纪念语义，不能只是普通旅游纪念品。",
+            "- 载体优先冰箱贴、钥匙扣、徽章、贴纸、水杯、帆布袋、挂件、亚克力摆件、小旗帜等低客单纪念品。",
+            "- image_keywords 至少包含城市名、足球/苏超语义和具体载体名。",
+            "- 禁止输出官方授权、俱乐部联名、球员姓名、logo 复刻、赛事官方视觉等高风险表述。",
+        ]
+        if city_strategy == "balanced" and target_count >= 8:
+            rules.append("- 批量生成时尽量覆盖更多江苏城市，不要整批集中在南京、苏州两三个热点城市。")
+        return rules
+
+    if category_id == 129:
+        rules = [
+            "129 专属硬约束:",
+            "- 工艺产品不等于非遗，拿不准时不要写非遗、大师、传承人，只写可确认的工艺、材质、器型和用途。",
+            "- title 应体现“工艺/材质 + 器型/载体 + 使用或礼赠场景”，不能只剩空泛装饰词。",
+            "- attrs 至少包含 工艺类别、核心材质、规格尺寸、适用场景，字段之间必须互相匹配。",
+            "- image_keywords 首个关键词优先写成“工艺名 + 材质 + 器物名”或“城市名 + 工艺名 + 器物名”。",
+            "- 禁止输出食品礼盒、苏超周边、服务套餐、纯装饰无工艺说明的普通摆件。",
+            "129 可优先参考的安全方向:",
+            "- 宜兴紫砂杯、苏绣团扇、南京云锦领带、扬州漆器摆盘、常州梳篦礼盒。",
+        ]
+        if target_count >= 8:
+            rules.append("- 批量生成时至少覆盖 3 种以上工艺方向，不要全部集中在同一种材质或器型。")
+        return rules
+
+    return []
+
+
 def build_prompts(
     *,
     category_id: int,
@@ -81,6 +146,11 @@ def build_prompts(
             "image_keywords": ["关键词1", "关键词2"],
         }
     ]
+    extra_rules = _build_category_extra_rules(
+        category_id=category_id,
+        target_count=target_count,
+        city_strategy=city_strategy,
+    )
     user_prompt = "\n".join(
         [
             f"当前任务分类: {category_id} - {category_name}",
@@ -101,6 +171,7 @@ def build_prompts(
             "- 城市、产地、工艺、材质、风味、交付方式之间必须彼此匹配，禁止生硬拼接。",
             "- 不要编造具体非遗名录、认证、老字号、官方合作、客户案例、传承人或大师背书。",
             "- 拿不准时使用保守表述，例如“地方风味”“传统工艺”“礼赠场景”“标准交付版”，不要写死无法核验的细节。",
+            *extra_rules,
             "历史标题黑名单（必须避开重复或高相似命名）:",
             json.dumps(history_titles, ensure_ascii=False),
             "输出 schema 示例:",

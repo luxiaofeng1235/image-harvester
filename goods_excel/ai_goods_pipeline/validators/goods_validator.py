@@ -9,14 +9,16 @@ from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from ai_goods_pipeline.constants import (
+    AGRI_KEYWORDS,
     ATTR_SYNONYMS,
-    BANNED_129,
+    BANNED_128,
     CITY_POOL,
     CRAFT_KEYWORDS,
     FOOTBALL_KEYWORDS,
     GENERIC_BANNED_126,
+    GENERIC_BANNED_127,
     JIANGSU_HINTS,
-    SERVICE_KEYWORDS,
+    SUZHOU_HINTS,
 )
 from ai_goods_pipeline.prompts.category_profiles import get_category_profile
 from ai_goods_pipeline.utils.text import normalize_title, similarity_ratio
@@ -277,6 +279,8 @@ class GoodsValidator:
         for city in CITY_POOL:
             if city in haystack:
                 return city
+        if any(hint in haystack for hint in SUZHOU_HINTS):
+            return "苏州"
         return ""
 
     def _validate_category_rules(self, item: dict[str, Any], city: str) -> str:
@@ -296,41 +300,46 @@ class GoodsValidator:
             return "empty_image_keywords"
 
         if self.category_id == 126:
-            if not any(hint in joined for hint in JIANGSU_HINTS):
-                return "missing_jiangsu_locality"
+            if self._as_text(attrs.get("产地城市")) != "苏州":
+                return "invalid_suzhou_origin_city"
+            if not any(hint in joined for hint in SUZHOU_HINTS):
+                return "missing_suzhou_locality"
             if any(word in joined for word in GENERIC_BANNED_126):
-                return "invalid_non_jiangsu_hint"
+                return "invalid_non_suzhou_hint"
             return ""
 
         if self.category_id == 127:
-            if not any(word in joined for word in CRAFT_KEYWORDS):
-                return "missing_craft_signal"
-            if not city and not any(word in joined for word in ["宜兴", "南京", "苏州", "扬州", "镇江"]):
-                return "missing_local_craft_origin"
+            if not any(word in joined for word in AGRI_KEYWORDS):
+                return "missing_agri_signal"
+            if not any(hint in joined for hint in JIANGSU_HINTS):
+                return "missing_jiangsu_origin"
+            if any(word in joined for word in GENERIC_BANNED_127):
+                return "invalid_non_local_hint"
             return ""
 
         if self.category_id == 128:
-            if len(title) < 8 or len(normalize_title(title)) < 4:
-                return "title_too_generic"
-            if not any(word.lower() in joined.lower() for word in [token.lower() for token in SERVICE_KEYWORDS]):
-                return "missing_service_signal"
-            deliverable_text = " ".join(item["selling_points"]) + " " + json.dumps(attrs, ensure_ascii=False)
-            if not any(char.isdigit() for char in deliverable_text):
-                return "missing_quantified_delivery"
-            return ""
-
-        if self.category_id == 129:
             if not city:
                 return "missing_city_theme"
             if not any(word in joined for word in FOOTBALL_KEYWORDS):
                 return "missing_football_signal"
-            if any(word in joined for word in BANNED_129):
+            if any(word in joined for word in BANNED_128):
                 return "high_risk_ip_wording"
+            return ""
+
+        if self.category_id == 129:
+            if not any(word in joined for word in CRAFT_KEYWORDS):
+                return "missing_craft_signal"
+            if not city and not any(hint in joined for hint in JIANGSU_HINTS):
+                return "missing_local_craft_origin"
+            if any(word in joined for word in FOOTBALL_KEYWORDS):
+                return "wrong_category_football_signal"
             return ""
 
         return ""
 
     def _validate_city_distribution(self, city: str) -> str:
+        if self.category_id == 126:
+            return ""
         if self.city_strategy != "balanced" or not city or self.target_count < 8:
             return ""
         current = self.city_counter[city]

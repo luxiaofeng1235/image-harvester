@@ -67,12 +67,10 @@ class AIGoodsPipeline:
             max_tokens=settings.qwen_max_tokens,
         )
         self.image_client = ImageClient(
-            api_url=settings.image_api_url,
             timeout=settings.image_timeout,
             retries=settings.image_retry,
             min_bytes=settings.image_min_bytes,
             allow_gif_as_main=settings.image_allow_gif_as_main,
-            preset_file=settings.ai_tech_preset_image_file,
         )
         self.db_writer = DBWriter(
             host=settings.db_host,
