@@ -1,0 +1,4 @@
+2026-03-19 22:36:31 [INFO] Start pipeline: category=128(AI科技) count=1 keywords=AI网站,企业服务 dry_run=False
+2026-03-19 22:36:50 [INFO] Accepted item 1/1: AI企业官网定制服务
+2026-03-19 22:36:50 [INFO] Inserted 1 rows into jj_wangyi_goods
+2026-03-19 22:36:50 [INFO] Pipeline done: success=1 failures=0 inserted=1 attempted=1

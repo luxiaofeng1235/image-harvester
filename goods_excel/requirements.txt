@@ -1,0 +1,8 @@
+# Core runtime dependencies
+requests>=2.31.0
+lxml>=5.0.0
+PyMySQL>=1.1.0
+python-dotenv>=1.0.0
+
+# Optional in logic, but included here for full deployment convenience
+oss2>=2.18.0
