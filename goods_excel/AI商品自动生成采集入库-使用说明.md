@@ -25,12 +25,17 @@
 ### 4.1 必装依赖
 ```bash
 pip3 install -r requirements.txt
+playwright install chromium
 ```
 
 如需手动安装，等价命令为:
 ```bash
-pip3 install requests lxml PyMySQL python-dotenv
+pip3 install requests lxml PyMySQL python-dotenv playwright
 ```
+
+说明:
+- Bing 图片首屏顺序抓取当前依赖 Playwright 渲染后的 DOM。
+- 新环境首次安装后需执行一次 `playwright install chromium`，否则会缺少浏览器内核。
 
 ### 4.2 按需安装
 如果需要开启 OSS 上传，再安装:
