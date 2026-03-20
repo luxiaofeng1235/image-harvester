@@ -75,6 +75,7 @@ class AIGoodsPipeline:
             retries=settings.image_retry,
             min_bytes=settings.image_min_bytes,
             allow_gif_as_main=settings.image_allow_gif_as_main,
+            enable_bing=settings.image_enable_bing,
         )
         self.db_writer = DBWriter(
             host=settings.db_host,
@@ -375,15 +376,18 @@ class AIGoodsPipeline:
         self._runtime_logged = True
         runtime_status = self.image_client.runtime_status()
         self.logger.info(
-            "Image runtime status: baidu_render_ready=%s bing_render_ready=%s",
+            "Image runtime status: baidu_render_ready=%s bing_enabled=%s bing_render_ready=%s",
             runtime_status["baidu_render_ready"],
+            runtime_status["bing_enabled"],
             runtime_status["bing_render_ready"],
         )
         if not runtime_status["baidu_render_ready"]:
             self.logger.warning(
                 "Baidu first-screen rendering unavailable; Baidu source may return empty results."
             )
-        if not runtime_status["bing_render_ready"]:
+        if not runtime_status["bing_enabled"]:
+            self.logger.info("Bing image search disabled by config; current pipeline uses Baidu only.")
+        elif not runtime_status["bing_render_ready"]:
             self.logger.warning(
                 "Bing first-screen rendering unavailable; Bing may fallback to static HTML order."
             )

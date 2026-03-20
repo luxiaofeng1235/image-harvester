@@ -69,11 +69,13 @@ class ImageClient:
         retries: int,
         min_bytes: int,
         allow_gif_as_main: bool,
+        enable_bing: bool,
     ) -> None:
         self.timeout = timeout
         self.retries = retries
         self.min_bytes = min_bytes
         self.allow_gif_as_main = allow_gif_as_main
+        self.enable_bing = enable_bing
         self.session = requests.Session()
         self.baidu_image_client = BaiduImageClient(timeout=timeout)
         self.bing_image_client = BingImageClient(timeout=timeout)
@@ -109,15 +111,16 @@ class ImageClient:
             if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
                 break
 
-            bing_urls = self.fetch_bing_images(query, context=search_context)
-            if bing_urls:
-                source_queries.append(f"bing_images:{query}")
-                for url in bing_urls:
-                    if url not in candidate_urls:
-                        candidate_urls.append(url)
-                    candidate_sources.setdefault(url, "bing")
-            if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
-                break
+            if self.enable_bing:
+                bing_urls = self.fetch_bing_images(query, context=search_context)
+                if bing_urls:
+                    source_queries.append(f"bing_images:{query}")
+                    for url in bing_urls:
+                        if url not in candidate_urls:
+                            candidate_urls.append(url)
+                        candidate_sources.setdefault(url, "bing")
+                if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
+                    break
 
         valid_images = self._validate_urls(candidate_urls)
         static_images = [img.url for img in valid_images if not img.is_gif]
@@ -153,6 +156,8 @@ class ImageClient:
         *,
         context: SearchRelevanceContext | None = None,
     ) -> list[str]:
+        if not self.enable_bing:
+            return []
         query = query.strip()
         if not query:
             return []
@@ -206,9 +211,12 @@ class ImageClient:
     def runtime_status(self) -> dict[str, bool]:
         baidu_render_ready = self.baidu_image_client.can_render()
         self.baidu_image_client.close_browser()
-        bing_render_ready = self.bing_image_client.can_render()
-        self.bing_image_client.close_browser()
+        bing_render_ready = False
+        if self.enable_bing:
+            bing_render_ready = self.bing_image_client.can_render()
+            self.bing_image_client.close_browser()
         return {
+            "bing_enabled": self.enable_bing,
             "baidu_render_ready": baidu_render_ready,
             "bing_render_ready": bing_render_ready,
         }

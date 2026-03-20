@@ -55,6 +55,7 @@ class Settings:
     image_retry: int
     image_min_bytes: int
     image_allow_gif_as_main: bool
+    image_enable_bing: bool
     title_similarity_threshold: float
     task_max_attempts_multiplier: int
     oss_enabled: bool
@@ -139,6 +140,7 @@ def load_settings(env_file: Path | None = None) -> Settings:
         image_retry=_as_int(os.getenv("IMG_RETRY"), 3),
         image_min_bytes=_as_int(os.getenv("IMG_MIN_BYTES"), 1024),
         image_allow_gif_as_main=_as_bool(os.getenv("IMG_ALLOW_GIF_AS_MAIN"), False),
+        image_enable_bing=_as_bool(os.getenv("IMG_ENABLE_BING"), False),
         title_similarity_threshold=_as_float(
             os.getenv("TITLE_SIMILARITY_THRESHOLD"), 0.88
         ),

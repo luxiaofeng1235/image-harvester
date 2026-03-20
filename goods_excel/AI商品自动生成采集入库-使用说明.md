@@ -5,8 +5,9 @@
 
 当前实现特点:
 - 直接写入 MySQL，不再导出 Excel。
-- 图片搜索默认只按生成后的商品标题 `title` 搜图，当前顺序为 `百度图片 -> Bing 图片`。
-- 百度图片和 Bing 图片首屏抓取当前都依赖 Playwright 渲染后的 DOM。
+- 图片搜索默认只按生成后的商品标题 `title` 搜图，当前主流程仅使用 `百度图片`。
+- 百度图片首屏抓取当前依赖 Playwright 渲染后的 DOM。
+- Bing 抓取实现和验证脚本仍保留，但主流程默认关闭，可通过 `IMG_ENABLE_BING=1` 恢复。
 - 图片候选会额外经过分类感知过滤，优先拦截明显跨城市、跨品类的错图结果。
 - 每条商品必须满足 `1` 张主图 + `3` 张详情图后才允许入库。
 - 当前可通过 `OSS_ENABLED=0` 关闭 OSS 上传，直接写入原图 URL。
@@ -15,11 +16,11 @@
 - 输入: 命令行传入 `category_id + keywords + count`，并读取根目录 `.env`。
 - 生成: `qwen-plus/qwen-max` 按分类 Prompt 生成结构化商品数据。
 - 校验: 先做 JSON、分类、价格、字段完整性、标题去重和历史库去重。
-- 图片: 固定按 `title` 走 `百度图片 -> Bing 图片`，按浏览器首屏顺序抓取。
+- 图片: 固定按 `title` 走百度图片，按浏览器首屏顺序抓取；如后续打开 `IMG_ENABLE_BING=1`，再追加 Bing 补图。
 - 映射: 过滤失效图、离题图、重复图后，固定组装 `1 主图 + 3 详情图`。
 - 入库: 满足图片与字段要求后写入 `jj_wangyi_goods`，否则继续补生成。
-- 排查: 首屏顺序问题优先用 `verify_baidu_order.py` 或 `verify_bing_order.py` 单独验证。
-- 自检: 可通过 `--check-runtime 1` 快速确认百度/Bing 的 Playwright 渲染能力。
+- 排查: 当前主流程图片问题优先看百度抓取，必要时再单独用 `verify_bing_order.py` 验证 Bing。
+- 自检: 可通过 `--check-runtime 1` 快速确认当前图片运行环境，输出是否启用 Bing 及对应渲染状态。
 
 ## 2. 代码位置
 - 主目录: `goods_excel/ai_goods_pipeline/`
@@ -45,7 +46,8 @@ pip3 install requests lxml PyMySQL python-dotenv playwright
 ```
 
 说明:
-- 百度图片与 Bing 图片首屏顺序抓取当前都依赖 Playwright 渲染后的 DOM。
+- 百度图片首屏顺序抓取当前依赖 Playwright 渲染后的 DOM。
+- 若后续需要恢复 Bing 主流程补图，Bing 同样依赖 Playwright 渲染后的 DOM。
 - 新环境首次安装后需执行一次 `playwright install chromium`，否则会缺少浏览器内核。
 
 ### 4.2 按需安装
@@ -83,6 +85,7 @@ IMG_TIMEOUT=20
 IMG_RETRY=3
 IMG_MIN_BYTES=1024
 IMG_ALLOW_GIF_AS_MAIN=0
+IMG_ENABLE_BING=0
 
 TITLE_SIMILARITY_THRESHOLD=0.88
 TASK_MAX_ATTEMPTS_MULTIPLIER=3
@@ -102,18 +105,19 @@ OSS_VIEW_DOMAIN=
 
 ## 6. 当前图片规则
 ### 6.1 搜图规则
-- Bing 搜索固定只使用生成后的商品标题 `title`。
+- 当前主流程只使用百度图片搜索，且固定只使用生成后的商品标题 `title`。
 - 不再补 `image_keywords`。
 - 不再补任务关键词。
-- 搜索 URL 逻辑等价于:
+- 百度搜索 URL 逻辑等价于:
 ```text
-https://cn.bing.com/images/search?q=<title>&qft=+filterui:imagesize-large&form=IRFLTR&first=1
+https://image.baidu.com/search/index?tn=baiduimage&fm=result&ie=utf-8&word=<title>
 ```
+- 如需恢复 Bing 补图，可在 `.env` 中设置 `IMG_ENABLE_BING=1`。
 
 ### 6.2 图片筛选规则
 - 优先取静态图 `jpg/jpeg/png/webp` 作为主图。
 - 详情图固定取后续 `3` 张有效图。
-- 明显离题的 Bing 结果会被过滤，例如军事、演习、武器相关文本结果。
+- 明显离题结果、跨城市错图、跨品类错图会被过滤。
 - 只有满足 `1` 主图 + `3` 详情图时才允许入库。
 
 ## 7. 模型策略
@@ -242,7 +246,7 @@ OSS_ENABLED=1
 ### 12.3 为什么运行时间忽快忽慢
 主要受以下外部链路影响:
 - 千问接口响应时间
-- Bing 图片搜索页面响应时间
+- 百度图片搜索页面响应时间
 - 图片源站可访问性
 - OSS 上传是否开启
 
@@ -251,6 +255,6 @@ OSS_ENABLED=1
 1. 先看 `.env` 是否正确
 2. 再看数据库连通性
 3. 再看千问接口是否可用
-4. 再看 Bing 图片搜索是否可访问
+4. 再看百度图片搜索是否可访问
 5. 如任务变慢，先关闭 `OSS_ENABLED`
 6. 最后查看 `ai_goods_pipeline/logs/` 下日志
