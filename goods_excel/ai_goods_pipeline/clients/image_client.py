@@ -13,11 +13,13 @@ from ai_goods_pipeline.constants import (
     CRAFT_KEYWORDS,
     FOOD_KEYWORDS,
     FOOTBALL_KEYWORDS,
+    IMAGE_CARRIER_KEYWORDS,
     IMAGE_BAIDU_FETCH_LIMIT,
     IMAGE_BING_META_BLOCKLIST,
     IMAGE_BING_FETCH_LIMIT,
     IMAGE_CANDIDATE_POOL_TARGET,
     IMAGE_DETAIL_COUNT,
+    IMAGE_MATERIAL_HINTS,
     IMAGE_QUERY_LIMIT,
     IMAGE_QUERY_TERM_BLOCKLIST,
     IMAGE_TITLE_QUERY_MAX_LEN,
@@ -99,7 +101,7 @@ class ImageClient:
             keywords=keywords,
         )
 
-        search_queries = self._build_queries(title, image_keywords, keywords)
+        search_queries = self._build_queries(title, image_keywords, keywords, category_id)
         for query in search_queries:
             baidu_urls = self.fetch_baidu_images(query, context=search_context)
             if baidu_urls:
@@ -234,21 +236,86 @@ class ImageClient:
         title: str,
         image_keywords: list[str],
         keywords: list[str],
+        category_id: int,
     ) -> list[str]:
         queries: list[str] = []
         seen: set[str] = set()
-        for raw in [title, *image_keywords, *keywords]:
+        derived_queries = self._build_derived_queries(title, image_keywords, keywords, category_id)
+
+        def _push(raw: str) -> None:
+            value = str(raw or "").strip()
+            if not value:
+                return
+            query = value[:IMAGE_TITLE_QUERY_MAX_LEN]
+            if query in seen:
+                return
+            queries.append(query)
+            seen.add(query)
+
+        for raw in derived_queries:
+            _push(raw)
+            if len(queries) >= IMAGE_QUERY_LIMIT:
+                return queries
+        _push(title)
+        if len(queries) >= IMAGE_QUERY_LIMIT:
+            return queries
+
+        for raw in [*image_keywords, *keywords]:
             value = str(raw or "").strip()
             if not value:
                 continue
-            query = value[:IMAGE_TITLE_QUERY_MAX_LEN]
-            if query in seen:
-                continue
-            queries.append(query)
-            seen.add(query)
+            _push(value)
             if len(queries) >= IMAGE_QUERY_LIMIT:
                 break
         return queries
+
+    def _build_derived_queries(
+        self,
+        title: str,
+        image_keywords: list[str],
+        keywords: list[str],
+        category_id: int,
+    ) -> list[str]:
+        source_text = " ".join([title, *image_keywords, *keywords])
+        city = next(iter(self._extract_expected_cities([source_text], category_id)), "")
+        quoted_terms = re.findall(r"[“\"]([^”\"]{2,12})[”\"]", title)
+        carrier_terms = [term for term in IMAGE_CARRIER_KEYWORDS if term in source_text]
+        material_terms = [term for term in IMAGE_MATERIAL_HINTS if term in source_text]
+
+        variants: list[str] = []
+        if category_id == 128 and carrier_terms:
+            if city and quoted_terms:
+                variants.append(f"{city} {quoted_terms[0]} {carrier_terms[0]}")
+            if quoted_terms:
+                variants.append(f"{quoted_terms[0]} {carrier_terms[0]}")
+            if city:
+                variants.append(f"{city} {carrier_terms[0]}")
+        elif category_id == 129 and carrier_terms:
+            display_hint = "实物"
+            if carrier_terms[0] in {"长方丝巾", "丝巾", "方巾", "围巾", "手帕", "折扇", "丝带"}:
+                display_hint = "平铺"
+            elif carrier_terms[0] in {"屏风", "挂画", "摆件"}:
+                display_hint = "成品"
+            if material_terms:
+                variants.append(f"{material_terms[0]} {carrier_terms[0]} {display_hint}")
+            if quoted_terms:
+                variants.append(f"{quoted_terms[0]} {carrier_terms[0]} {display_hint}")
+            if "屏风" in carrier_terms[0]:
+                variants.append("苏绣 屏风 成品")
+        elif category_id in {126, 127}:
+            food_terms = [term for term in FOOD_KEYWORDS if term in source_text]
+            if city and food_terms:
+                variants.append(f"{city} {food_terms[0]}")
+
+        deduped: list[str] = []
+        seen = set()
+        for item in variants:
+            value = item.strip()
+            if not value or value in seen:
+                continue
+            deduped.append(value)
+            seen.add(value)
+        return deduped[:3]
 
     def _build_search_context(
         self,

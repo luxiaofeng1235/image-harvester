@@ -66,10 +66,13 @@ def main() -> int:
     for index, item in enumerate(baidu_items, 1):
         print(f"#{index}")
         print(f"title={item.get('title', '')}")
+        print(f"pn={item.get('pn', '')}")
         print(f"image_url={item.get('image_url', '')}")
+        print(f"raw_image_url={item.get('raw_image_url', '')}")
         print(f"thumbnail_url={item.get('thumbnail_url', '')}")
         print(f"source_page={item.get('source_page', '')}")
         print(f"bdtype={item.get('bdtype', '')}")
+        print(f"resolved_from={item.get('resolved_from', '')}")
         print()
 
     baidu_client.close()

@@ -38,12 +38,13 @@ def parse_args() -> argparse.Namespace:
         "--missing-mode",
         type=str,
         default="either",
-        choices=["either", "image", "description", "both"],
+        choices=["either", "image", "description", "both", "none"],
         help="Which missing fields should be queried from DB.",
     )
     parser.add_argument("--model", type=str, default="")
     parser.add_argument("--concurrency", type=int, default=3)
     parser.add_argument("--dry-run", type=int, default=0)
+    parser.add_argument("--force-image-refresh", type=int, default=0)
     return parser.parse_args()
 
 
@@ -170,6 +171,7 @@ async def process_one_row(
     settings,
     model: str,
     dry_run: bool,
+    force_image_refresh: bool,
     qwen_client: AsyncQwenClient,
     image_client: AsyncImageClient,
     db_writer: AsyncDBWriter,
@@ -182,7 +184,7 @@ async def process_one_row(
     existing_image = str(row.get("image") or "").strip()
     existing_description = str(row.get("description") or "").strip()
 
-    need_image = not existing_image
+    need_image = force_image_refresh or not existing_image
     need_description = not existing_description
     need_subtitle = not existing_sub_title
     started_at = time.time()
@@ -195,26 +197,29 @@ async def process_one_row(
     source_queries: list[str] = []
 
     if need_image or need_description or need_subtitle:
-        system_prompt, user_prompt = build_seed_enrichment_prompts(
-            category_id=category_id,
-            title=title,
-            price=price,
-            system_prompt_base=settings.qwen_system_prompt,
-        )
-        generation = await qwen_client.generate(
-            system_prompt=system_prompt,
-            user_prompt=user_prompt,
-            model=model,
-        )
-        if not generation.items:
-            raise ValueError("empty_qwen_items")
-        qwen_payload = sanitize_enrichment_item(
-            generation.items[0],
-            expected_title=title,
-            expected_price=price,
-        )
-        if need_subtitle:
-            final_sub_title = qwen_payload["subtitle"]
+        if force_image_refresh and need_image and not need_description and not need_subtitle:
+            qwen_payload = {"image_keywords": [title]}
+        else:
+            system_prompt, user_prompt = build_seed_enrichment_prompts(
+                category_id=category_id,
+                title=title,
+                price=price,
+                system_prompt_base=settings.qwen_system_prompt,
+            )
+            generation = await qwen_client.generate(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                model=model,
+            )
+            if not generation.items:
+                raise ValueError("empty_qwen_items")
+            qwen_payload = sanitize_enrichment_item(
+                generation.items[0],
+                expected_title=title,
+                expected_price=price,
+            )
+            if need_subtitle:
+                final_sub_title = qwen_payload["subtitle"]
 
     if need_image or need_description:
         if qwen_payload is None:
@@ -274,6 +279,7 @@ async def process_rows(
     model: str,
     concurrency: int,
     dry_run: bool,
+    force_image_refresh: bool,
     logger,
 ) -> list[dict[str, Any]]:
     semaphore = asyncio.Semaphore(max(1, concurrency))
@@ -309,6 +315,7 @@ async def process_rows(
                     settings=settings,
                     model=model,
                     dry_run=dry_run,
+                    force_image_refresh=force_image_refresh,
                     qwen_client=qwen_client,
                     image_client=image_client,
                     db_writer=db_writer,
@@ -365,6 +372,7 @@ def build_summary(
     category_id: int,
     model: str,
     dry_run: bool,
+    force_image_refresh: bool,
     rows: list[dict[str, Any]],
     results: list[dict[str, Any]],
     started_at: float,
@@ -377,6 +385,7 @@ def build_summary(
         "category_id": category_id,
         "model": model,
         "dry_run": dry_run,
+        "force_image_refresh": force_image_refresh,
         "concurrency": concurrency,
         "selected_count": len(rows),
         "success_count": success_count,
@@ -436,12 +445,14 @@ async def amain() -> int:
         model=model,
         concurrency=args.concurrency,
         dry_run=bool(args.dry_run),
+        force_image_refresh=bool(args.force_image_refresh),
         logger=logger,
     )
     summary = build_summary(
         category_id=args.category_id,
         model=model,
         dry_run=bool(args.dry_run),
+        force_image_refresh=bool(args.force_image_refresh),
         rows=rows,
         results=results,
         started_at=started_at,

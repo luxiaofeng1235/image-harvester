@@ -139,6 +139,8 @@ class AsyncDBWriter:
         image_empty = "(image IS NULL OR image = '')"
         description_empty = "(description IS NULL OR description = '')"
         mode = (missing_mode or "either").strip().lower()
+        if mode == "none":
+            return ""
         if mode == "image":
             return image_empty
         if mode == "description":

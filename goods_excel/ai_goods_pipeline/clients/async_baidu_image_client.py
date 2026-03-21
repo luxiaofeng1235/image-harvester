@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import asyncio
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
+
+from ai_goods_pipeline.constants import IMAGE_URL_EMBED_UNSTABLE_HOSTS
 
 try:
     from playwright.async_api import async_playwright
@@ -169,21 +171,89 @@ class AsyncBaiduImageClient:
         results: list[dict[str, str]] = []
         seen = set()
         for item in items or []:
-            image_url = str(item.get("image_url") or "").strip()
+            image_url = self._select_candidate_image_url(item)
             if not image_url or image_url in seen:
                 continue
             seen.add(image_url)
             results.append(
                 {
                     "image_url": image_url,
+                    "raw_image_url": str(item.get("image_url") or "").strip(),
                     "thumbnail_url": str(item.get("thumbnail_url") or "").strip(),
                     "source_page": str(item.get("source_page") or "").strip(),
                     "title": str(item.get("title") or "").strip(),
                     "desc": str(item.get("desc") or "").strip(),
                     "bdtype": str(item.get("bdtype") or "").strip(),
+                    "resolved_from": self._resolve_from(item, image_url),
                     "pn": str(item.get("pn") or "").strip(),
                 }
             )
             if len(results) >= limit:
                 break
         return results
+
+    def _resolve_from(self, item: dict[str, str], image_url: str) -> str:
+        raw_image_url = str(item.get("image_url") or "").strip()
+        if image_url and image_url == raw_image_url:
+            return "objurl"
+        return "thumbnail"
+
+    def _select_candidate_image_url(self, item: dict[str, str]) -> str:
+        raw_image_url = str(item.get("image_url") or "").strip()
+        thumbnail_url = str(item.get("thumbnail_url") or "").strip()
+        bdtype = str(item.get("bdtype") or "").strip()
+
+        if self._should_prefer_thumbnail_url(
+            raw_image_url=raw_image_url,
+            thumbnail_url=thumbnail_url,
+            bdtype=bdtype,
+        ):
+            return thumbnail_url
+        return raw_image_url or thumbnail_url
+
+    def _should_prefer_thumbnail_url(
+        self,
+        *,
+        raw_image_url: str,
+        thumbnail_url: str,
+        bdtype: str,
+    ) -> bool:
+        if not thumbnail_url:
+            return False
+        if not raw_image_url:
+            return True
+        if self._is_embed_unstable_url(raw_image_url):
+            return True
+        if not self._looks_like_direct_image_url(raw_image_url):
+            return True
+        if bdtype == "14" and not self._looks_like_direct_image_url(raw_image_url):
+            return True
+        return False
+
+    def _is_embed_unstable_url(self, url: str) -> bool:
+        host = (urlparse(url).netloc or "").lower()
+        return any(token in host for token in IMAGE_URL_EMBED_UNSTABLE_HOSTS)
+
+    def _looks_like_direct_image_url(self, url: str) -> bool:
+        parsed = urlparse(url)
+        host = (parsed.netloc or "").lower()
+        path = (parsed.path or "").lower()
+        full = url.lower()
+
+        if not host:
+            return False
+        if path.endswith((".html", ".htm", ".php", ".aspx", ".jsp")):
+            return False
+        if any(path.endswith(ext) for ext in (".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".svg")):
+            return True
+        if "image_search/src=" in full:
+            return True
+        if "/it/" in path and "f=jpeg" in full:
+            return True
+        if "/it/" in path and "f=png" in full:
+            return True
+        if "/it/" in path and "f=webp" in full:
+            return True
+        if host.endswith(".baidu.com") and ("fmt=auto" in full or "f=jpeg" in full):
+            return True
+        return False

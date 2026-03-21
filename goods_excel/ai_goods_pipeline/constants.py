@@ -141,6 +141,60 @@ CRAFT_KEYWORDS = [
     "漆器",
     "器物",
 ]
+IMAGE_CARRIER_KEYWORDS = [
+    "帆布袋",
+    "冰箱贴",
+    "钥匙扣",
+    "脸贴纸",
+    "边角贴",
+    "贴纸",
+    "车贴",
+    "徽章",
+    "吧唧",
+    "笔记本",
+    "抱枕",
+    "公仔",
+    "玩偶",
+    "盲盒",
+    "挂件",
+    "摆件",
+    "相框",
+    "水杯",
+    "啤酒",
+    "方巾",
+    "长方丝巾",
+    "丝巾",
+    "围巾",
+    "手帕",
+    "丝带",
+    "屏风",
+    "挂画",
+    "折扇",
+    "书签",
+    "提梁壶",
+    "石瓢壶",
+    "西施壶",
+    "合欢壶",
+    "井栏壶",
+    "龙蛋壶",
+    "秦权壶",
+    "掇球壶",
+    "茶壶",
+]
+IMAGE_MATERIAL_HINTS = [
+    "真丝",
+    "桑蚕丝",
+    "苏绣",
+    "刺绣",
+    "双面绣",
+    "紫砂",
+    "实木",
+    "榉木",
+    "木质",
+    "亚克力",
+    "棉质",
+    "帆布",
+]
 IMAGE_QUERY_TERM_BLOCKLIST = [
     "江苏",
     "苏州",
@@ -216,6 +270,15 @@ ATTR_SYNONYMS = {
 IMAGE_URL_HOST_BLOCKLIST = [
     "hdslb.com",
     "miaobi-lite.bj.bcebos.com",
+]
+
+IMAGE_URL_EMBED_UNSTABLE_HOSTS = [
+    "image.cnhnb.com",
+    "a.zdmimg.com",
+    "resources.xdkb.net",
+    "inews.gtimg.com",
+    "bkimg.cdn.bcebos.com",
+    "c-ssl.dtstatic.com",
 ]
 
 
