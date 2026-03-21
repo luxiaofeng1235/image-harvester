@@ -294,6 +294,11 @@ async def process_rows(
         retries=settings.image_retry,
         min_bytes=settings.image_min_bytes,
         allow_gif_as_main=settings.image_allow_gif_as_main,
+        enable_clip_rerank=settings.image_enable_clip_rerank,
+        clip_model_name=settings.image_clip_model,
+        clip_min_score=settings.image_clip_min_score,
+        clip_max_candidates=settings.image_clip_max_candidates,
+        clip_category_ids=settings.image_clip_category_ids,
     )
     db_writer = AsyncDBWriter(
         host=settings.db_host,

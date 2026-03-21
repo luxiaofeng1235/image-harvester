@@ -75,6 +75,11 @@ class AIGoodsPipeline:
             min_bytes=settings.image_min_bytes,
             allow_gif_as_main=settings.image_allow_gif_as_main,
             enable_bing=settings.image_enable_bing,
+            enable_clip_rerank=settings.image_enable_clip_rerank,
+            clip_model_name=settings.image_clip_model,
+            clip_min_score=settings.image_clip_min_score,
+            clip_max_candidates=settings.image_clip_max_candidates,
+            clip_category_ids=settings.image_clip_category_ids,
         )
         self.db_writer = DBWriter(
             host=settings.db_host,
@@ -360,10 +365,13 @@ class AIGoodsPipeline:
         self._runtime_logged = True
         runtime_status = self.image_client.runtime_status()
         self.logger.info(
-            "Image runtime status: baidu_render_ready=%s bing_enabled=%s bing_render_ready=%s",
+            "Image runtime status: baidu_render_ready=%s bing_enabled=%s bing_render_ready=%s clip_rerank_enabled=%s clip_rerank_deps_ready=%s clip_rerank_model=%s",
             runtime_status["baidu_render_ready"],
             runtime_status["bing_enabled"],
             runtime_status["bing_render_ready"],
+            runtime_status["clip_rerank_enabled"],
+            runtime_status["clip_rerank_deps_ready"],
+            runtime_status["clip_rerank_model"],
         )
         if not runtime_status["baidu_render_ready"]:
             self.logger.warning(
@@ -374,6 +382,11 @@ class AIGoodsPipeline:
         elif not runtime_status["bing_render_ready"]:
             self.logger.warning(
                 "Bing first-screen rendering unavailable; Bing may fallback to static HTML order."
+            )
+        if runtime_status["clip_rerank_enabled"] and not runtime_status["clip_rerank_deps_ready"]:
+            self.logger.warning(
+                "CLIP rerank enabled but unavailable: %s",
+                runtime_status["clip_rerank_last_error"] or "dependency_missing",
             )
 
     def _build_description_html(

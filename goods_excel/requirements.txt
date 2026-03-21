@@ -9,3 +9,8 @@ aiomysql>=0.2.0
 
 # Optional in logic, but included here for full deployment convenience
 oss2>=2.18.0
+
+# Optional semantic rerank dependencies
+# transformers>=4.40.0
+# torch>=2.2.0
+# Pillow>=10.0.0

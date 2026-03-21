@@ -29,6 +29,18 @@ def _as_float(value: str | None, default: float) -> float:
     return float(value)
 
 
+def _as_int_tuple(value: str | None, default: tuple[int, ...]) -> tuple[int, ...]:
+    if value is None or not value.strip():
+        return default
+    items: list[int] = []
+    for chunk in value.split(","):
+        text = chunk.strip()
+        if not text:
+            continue
+        items.append(int(text))
+    return tuple(items) if items else default
+
+
 @dataclass(slots=True)
 class Settings:
     project_dir: Path
@@ -56,6 +68,11 @@ class Settings:
     image_min_bytes: int
     image_allow_gif_as_main: bool
     image_enable_bing: bool
+    image_enable_clip_rerank: bool
+    image_clip_model: str
+    image_clip_min_score: float
+    image_clip_max_candidates: int
+    image_clip_category_ids: tuple[int, ...]
     title_similarity_threshold: float
     task_max_attempts_multiplier: int
     oss_enabled: bool
@@ -141,6 +158,23 @@ def load_settings(env_file: Path | None = None) -> Settings:
         image_min_bytes=_as_int(os.getenv("IMG_MIN_BYTES"), 1024),
         image_allow_gif_as_main=_as_bool(os.getenv("IMG_ALLOW_GIF_AS_MAIN"), False),
         image_enable_bing=_as_bool(os.getenv("IMG_ENABLE_BING"), False),
+        image_enable_clip_rerank=_as_bool(
+            os.getenv("IMG_ENABLE_CLIP_RERANK"),
+            False,
+        ),
+        image_clip_model=os.getenv(
+            "IMG_CLIP_MODEL",
+            "OFA-Sys/chinese-clip-vit-base-patch16",
+        ),
+        image_clip_min_score=_as_float(os.getenv("IMG_CLIP_MIN_SCORE"), 0.22),
+        image_clip_max_candidates=_as_int(
+            os.getenv("IMG_CLIP_MAX_CANDIDATES"),
+            8,
+        ),
+        image_clip_category_ids=_as_int_tuple(
+            os.getenv("IMG_CLIP_CATEGORY_IDS"),
+            (128, 129),
+        ),
         title_similarity_threshold=_as_float(
             os.getenv("TITLE_SIMILARITY_THRESHOLD"), 0.88
         ),

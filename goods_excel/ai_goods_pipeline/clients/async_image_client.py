@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 import httpx
 
 from ai_goods_pipeline.clients.async_baidu_image_client import AsyncBaiduImageClient
+from ai_goods_pipeline.clients.clip_image_reranker import ClipImageReranker
 from ai_goods_pipeline.constants import (
     CITY_POOL,
     CRAFT_KEYWORDS,
@@ -69,6 +70,11 @@ class AsyncImageClient:
         retries: int,
         min_bytes: int,
         allow_gif_as_main: bool,
+        enable_clip_rerank: bool,
+        clip_model_name: str,
+        clip_min_score: float,
+        clip_max_candidates: int,
+        clip_category_ids: tuple[int, ...],
     ) -> None:
         self.timeout = timeout
         self.retries = retries
@@ -80,6 +86,15 @@ class AsyncImageClient:
             follow_redirects=True,
         )
         self.baidu_image_client = AsyncBaiduImageClient(timeout=timeout)
+        self.clip_reranker = ClipImageReranker(
+            enabled=enable_clip_rerank,
+            model_name=clip_model_name,
+            min_score=clip_min_score,
+            max_candidates=clip_max_candidates,
+            category_ids=clip_category_ids,
+            timeout=timeout,
+            user_agent=USER_AGENT,
+        )
         self.validation_cache: dict[str, AsyncImageProbe | None] = {}
 
     async def close(self) -> None:
@@ -116,6 +131,11 @@ class AsyncImageClient:
                 break
 
         valid_images = await self._validate_urls(candidate_urls)
+        valid_images = await self._rerank_valid_images(
+            title=title,
+            category_id=category_id,
+            valid_images=valid_images,
+        )
         static_images = [img.url for img in valid_images if not img.is_gif]
         gif_images = [img.url for img in valid_images if img.is_gif]
 
@@ -366,6 +386,40 @@ class AsyncImageClient:
 
         self.validation_cache[url] = probe
         return probe
+
+    async def _rerank_valid_images(
+        self,
+        *,
+        title: str,
+        category_id: int,
+        valid_images: list[AsyncImageProbe],
+    ) -> list[AsyncImageProbe]:
+        if len(valid_images) < 2:
+            return valid_images
+
+        static_images = [img for img in valid_images if not img.is_gif]
+        gif_images = [img for img in valid_images if img.is_gif]
+        if len(static_images) < 2:
+            return valid_images
+
+        rerank_result = await asyncio.to_thread(
+            self.clip_reranker.rerank_urls,
+            title=title,
+            category_id=category_id,
+            candidate_urls=[img.url for img in static_images],
+        )
+        if not rerank_result.applied:
+            return valid_images
+
+        static_map = {img.url: img for img in static_images}
+        reordered_static = [
+            static_map[url]
+            for url in rerank_result.ranked_urls
+            if url in static_map
+        ]
+        if len(reordered_static) != len(static_images):
+            return valid_images
+        return reordered_static + gif_images
 
     def _build_meta_text(self, item: dict[str, str]) -> str:
         parts = [
