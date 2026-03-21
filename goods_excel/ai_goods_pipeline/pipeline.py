@@ -17,7 +17,6 @@ from ai_goods_pipeline.clients.qwen_client import (
     QwenParseError,
 )
 from ai_goods_pipeline.config import Settings
-from ai_goods_pipeline.constants import IMAGE_DETAIL_COUNT, IMAGE_REQUIRED_TOTAL
 from ai_goods_pipeline.prompts.category_profiles import (
     build_prompts,
     choose_candidate_count,
@@ -310,21 +309,6 @@ class AIGoodsPipeline:
             entry["source_queries"] = image_result.source_queries
             entry["all_valid_urls"] = image_result.all_valid_urls
             return None, entry
-        available_total = 1 + len(image_result.detail_images)
-        if len(image_result.detail_images) < IMAGE_DETAIL_COUNT or available_total < IMAGE_REQUIRED_TOTAL:
-            entry = self._failure_entry(
-                task=task,
-                candidate_title=item["title"],
-                normalized_title=validation.normalized_title,
-                fail_stage="image",
-                fail_reason=f"insufficient_images:{available_total}/{IMAGE_REQUIRED_TOTAL}",
-                image_keywords=item["image_keywords"],
-                raw_model_output=json.dumps(item, ensure_ascii=False),
-            )
-            entry["source_queries"] = image_result.source_queries
-            entry["all_valid_urls"] = image_result.all_valid_urls
-            return None, entry
-
         now = int(time.time())
         main_image = image_result.main_image
         detail_images = image_result.detail_images

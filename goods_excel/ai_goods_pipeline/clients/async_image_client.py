@@ -17,6 +17,7 @@ from ai_goods_pipeline.constants import (
     IMAGE_BING_META_BLOCKLIST,
     IMAGE_CANDIDATE_POOL_TARGET,
     IMAGE_DETAIL_COUNT,
+    IMAGE_QUERY_LIMIT,
     IMAGE_QUERY_TERM_BLOCKLIST,
     IMAGE_TITLE_QUERY_MAX_LEN,
     IMAGE_URL_HOST_BLOCKLIST,
@@ -170,11 +171,20 @@ class AsyncImageClient:
         image_keywords: list[str],
         keywords: list[str],
     ) -> list[str]:
-        del image_keywords, keywords
-        value = str(title).strip()
-        if not value:
-            return []
-        return [value[:IMAGE_TITLE_QUERY_MAX_LEN]]
+        queries: list[str] = []
+        seen: set[str] = set()
+        for raw in [title, *image_keywords, *keywords]:
+            value = str(raw or "").strip()
+            if not value:
+                continue
+            query = value[:IMAGE_TITLE_QUERY_MAX_LEN]
+            if query in seen:
+                continue
+            queries.append(query)
+            seen.add(query)
+            if len(queries) >= IMAGE_QUERY_LIMIT:
+                break
+        return queries
 
     def _build_search_context(
         self,
@@ -208,6 +218,7 @@ class AsyncImageClient:
             return True
 
         city_hits = {city for city in JIANGSU_HINTS if city.lower() in meta_text}
+        query_hits = self._count_keyword_hits(meta_text, context.query_terms)
         if (
             context.expected_cities
             and city_hits
@@ -215,10 +226,14 @@ class AsyncImageClient:
         ):
             return False
 
+        # If the search result already strongly matches the query terms, keep it.
+        # This avoids treating food results that contain words like "手工" as craft-only noise.
+        if query_hits > 0:
+            return True
+
         football_hits = self._count_keyword_hits(meta_text, FOOTBALL_KEYWORDS)
         craft_hits = self._count_keyword_hits(meta_text, CRAFT_KEYWORDS)
         food_hits = self._count_keyword_hits(meta_text, FOOD_KEYWORDS)
-        query_hits = self._count_keyword_hits(meta_text, context.query_terms)
 
         if context.category_id == 128 and football_hits == 0 and (food_hits > 0 or craft_hits > 0):
             return False

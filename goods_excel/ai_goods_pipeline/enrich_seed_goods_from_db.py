@@ -22,7 +22,6 @@ from ai_goods_pipeline.clients.async_qwen_client import (
 )
 from ai_goods_pipeline.clients.oss_client import OSSImageUploader
 from ai_goods_pipeline.config import load_settings
-from ai_goods_pipeline.constants import IMAGE_DETAIL_COUNT, IMAGE_REQUIRED_TOTAL
 from ai_goods_pipeline.prompts.seed_enrichment import build_seed_enrichment_prompts
 from ai_goods_pipeline.utils.logger import setup_logger
 from ai_goods_pipeline.writers.async_db_writer import AsyncDBWriter
@@ -230,10 +229,6 @@ async def process_one_row(
         source_queries = image_result.source_queries
         if not image_result.main_image:
             raise ValueError("no_valid_main_image")
-        if len(image_result.detail_images) < IMAGE_DETAIL_COUNT:
-            raise ValueError(
-                f"insufficient_images:{1 + len(image_result.detail_images)}/{IMAGE_REQUIRED_TOTAL}"
-            )
 
         resolved_main_image = image_result.main_image
         detail_images = image_result.detail_images
