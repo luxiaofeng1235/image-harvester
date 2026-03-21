@@ -1,9 +1,9 @@
 # AI商品自动生成采集入库-标准开发文档
 
 ## 1. 文档信息
-- 文档版本: `v1.24`
+- 文档版本: `v1.26`
 - 创建日期: `2026-03-04`
-- 更新日期: `2026-03-20`
+- 更新日期: `2026-03-21`
 - 适用项目: `image-harvester/goods_excel`
 - 目标系统: `jiujie_shop.jj_wangyi_goods`
 
@@ -69,6 +69,9 @@ Prompt组装(全局+分类+任务+输出Schema)
         |
         v
 百度图片搜索抓取
+        |
+        v
+分类过滤 + 可选CLIP重排
         |
         v
 主图+详情图映射(description拼图文HTML)
@@ -143,6 +146,23 @@ Prompt组装(全局+分类+任务+输出Schema)
   - 百度图片静态 HTML 基本只返回前端壳页面，无法稳定直接解析首屏结果，因此当前实现不走 `requests + HTML` 解析。
   - 当前目标同样是“以浏览器首屏顺序为准”，也就是用户默认看到的前几张图，与程序抓到的前几张图保持一致。
 
+### 6.5 CLIP 图片重排
+- 作用位置: `图片抓取完成 -> URL 有效性校验完成 -> 主图/详情图映射前`
+- 当前实现文件:
+  - `ai_goods_pipeline/clients/clip_image_reranker.py`
+  - `ai_goods_pipeline/eval_clip_rerank.py`
+  - `ai_goods_pipeline/enums/image_semantics.py`
+- 默认状态: 关闭，需通过 `.env` 显式开启 `IMG_ENABLE_CLIP_RERANK=1`
+- 当前建议适用分类: `128 苏超纪念品`、`129 工艺产品`
+- 当前默认模型: `OFA-Sys/chinese-clip-vit-base-patch16`
+- 工作方式:
+  - 只对“已通过过滤和 URL 有效性校验的静态图片候选”做语义重排。
+  - 不新增搜图来源，不替代百度抓图，不绕过前置过滤。
+  - 当静态候选图少于 `2` 张、依赖缺失、模型不可用或分类未命中 `IMG_CLIP_CATEGORY_IDS` 时，自动跳过，不阻塞主流程。
+- 当前边界:
+  - `CLIP` 只能在已有候选池内排序，无法解决“候选池本身没有正确商品图”的问题。
+  - 现阶段更适合处理 `128/129` 这类“候选池里有对图，但顺序容易被人物图/风景图/泛场景图带偏”的问题。
+
 ## 7. 数据契约与字段映射
 ### 7.1 AI输出契约(JSON数组)
 为保证稳定解析，AI 端默认输出固定结构，不再采用宽松多态字段:
@@ -195,6 +215,8 @@ Prompt组装(全局+分类+任务+输出Schema)
 - 若存在 `gif` 但没有静态图，`gif` 可作为详情图候选，不建议作为主图；连续重试后仍无静态图则判为图片失败。
 - 所有分类当前默认只使用 Python 抓取百度图片搜索原图；如后续打开 `IMG_ENABLE_BING=1`，再追加 Bing 图片搜索原图补齐。
 - 图片候选在进入 URL 探测前，会先做一轮“分类感知 + 城市冲突 + 明显错域”过滤，优先剔除例如“苏州特产搜到南京特产图”“工艺产品搜到农副产品图”“苏超纪念品搜到工艺摆件图”这类明显错配结果。
+- 若开启 `IMG_ENABLE_CLIP_RERANK=1`，则在“静态候选图通过 URL 有效性校验后”增加一轮 `CLIP` 语义重排；当前推荐仅对 `128/129` 开启。
+- `CLIP` 语义词、载体词、材质词和查询屏蔽词当前统一维护在 `ai_goods_pipeline/enums/image_semantics.py`，同步图片客户端、异步图片客户端和 `CLIP` 重排器共用这一份枚举定义。
 - 当百度首屏前 `4` 张图都通过校验且未被过滤时，最终结果应表现为“第 `1` 张主图 + 第 `2~4` 张详情图”。
 - 若首屏图片存在失效、被显式文本过滤、不是有效图片、重复 URL 等情况，最终主图/详情图会顺延到后续百度候选；若后续重新开启 Bing，则也可能顺延到后续 Bing 候选。因此“首屏顺序一致”与“最终写库四张图完全等于首屏前四张”不是同一个约束层级。
 - 所有分类当前都不再使用项目内预置素材兜底，图片不足时直接判为图片失败并继续补生成。
@@ -398,6 +420,7 @@ Prompt工程目标:
 - 同一商品的主图和详情图 URL 不重复计入。
 - 应增加图片来源质量过滤，默认剔除明显新闻封面、视频封面、素材站预览图、文章配图等与商品主图不匹配的链接。
 - 图片搜索固定只使用完整商品标题，避免 `image_keywords` 或通用关键词把结果带偏。
+- 若开启 `CLIP`，其结果只作为候选排序增强，不替代有效性校验，也不放宽 `1 主图 + 3 详情图` 的入库标准。
 - 当主流程关闭 Bing 时，Bing 首屏顺序验证只作为独立排查工具保留；最终入库结果仍要经过文本过滤、图片有效性校验和去重，不应把“最终四张图顺序变化”误判为 Bing 抓取顺序错误。
 
 ### 9.3 重试策略
@@ -429,6 +452,12 @@ IMG_TIMEOUT=20
 IMG_RETRY=3
 IMG_MIN_BYTES=1024
 IMG_ALLOW_GIF_AS_MAIN=0
+IMG_ENABLE_BING=0
+IMG_ENABLE_CLIP_RERANK=0
+IMG_CLIP_MODEL=OFA-Sys/chinese-clip-vit-base-patch16
+IMG_CLIP_MIN_SCORE=0.22
+IMG_CLIP_MAX_CANDIDATES=8
+IMG_CLIP_CATEGORY_IDS=128,129
 
 TITLE_SIMILARITY_THRESHOLD=0.88
 TASK_MAX_ATTEMPTS_MULTIPLIER=3
@@ -444,6 +473,9 @@ OSS_VIEW_DOMAIN=https://static.example.com/
 说明:
 - `.env` 禁止入库，保留 `.env.example`。
 - 已泄露旧 key 需尽快轮换。
+- `IMG_ENABLE_CLIP_RERANK` 默认建议关闭，先保证候选池质量，再按需开启重排增强。
+- `IMG_CLIP_MODEL` 建议优先指向本地模型目录，避免运行时临时下载导致抖动。
+- `IMG_CLIP_CATEGORY_IDS` 当前建议保留为 `128,129`，暂不建议全分类开启。
 
 ## 11. 建议代码结构
 开发规范:
@@ -456,12 +488,15 @@ OSS_VIEW_DOMAIN=https://static.example.com/
 - `ai_goods_pipeline/generate_goods.py` 主入口
 - `ai_goods_pipeline/pipeline.py` 编排流程
 - `ai_goods_pipeline/config.py`
+- `ai_goods_pipeline/enums/image_semantics.py`
 - `ai_goods_pipeline/clients/qwen_client.py`
 - `ai_goods_pipeline/clients/image_client.py`
+- `ai_goods_pipeline/clients/clip_image_reranker.py`
 - `ai_goods_pipeline/validators/goods_validator.py`
 - `ai_goods_pipeline/writers/db_writer.py`
 - `ai_goods_pipeline/writers/excel_writer.py` (可选)
 - `ai_goods_pipeline/prompts/category_profiles.py`
+- `ai_goods_pipeline/eval_clip_rerank.py`
 - `ai_goods_pipeline/utils/retry.py`
 - `ai_goods_pipeline/utils/logger.py`
 - `ai_goods_pipeline/logs/`
@@ -526,11 +561,43 @@ https://image.baidu.com/search/index?tn=baiduimage&fm=result&ie=utf-8&word=<关�
 ```
 - 若脚本输出的前 `N` 条与浏览器首屏默认顺序一致，则说明“百度抓取顺序层”已正确；后续若主图/详情图不同，再排查图片校验、过滤和回退逻辑。
 
+### 13.1.3 CLIP 重排最小闭环验证
+- 为避免把“搜图顺序问题”和“重排增强问题”混在一起，`CLIP` 应单独做候选重排验证。
+- 验证脚本: `goods_excel/ai_goods_pipeline/eval_clip_rerank.py`
+- 推荐命令:
+```bash
+python3 ai_goods_pipeline/eval_clip_rerank.py \
+  --title '真丝长方丝巾 防晒百搭丝绸配饰' \
+  --category-id 129 \
+  --query '真丝 长方丝巾 平铺' \
+  --count 4 \
+  --enable-clip-rerank 1
+```
+- 该脚本会输出:
+  - 当前 `CLIP` 运行状态
+  - 本次查询语句
+  - 原始候选图片 URL
+  - 重排后的 URL 与得分
+- 若只是验证整链路是否打通，可直接使用 `dry-run + force-image-refresh` 跑单条种子商品，例如:
+```bash
+IMG_ENABLE_CLIP_RERANK=1 \
+IMG_CLIP_MODEL=/mnt/d/python_work/image-harvester/goods_excel/ai_goods_pipeline/runtime/models/chinese-clip-vit-base-patch16 \
+python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
+  --category-id 129 \
+  --ids 583 \
+  --limit 1 \
+  --missing-mode none \
+  --concurrency 1 \
+  --force-image-refresh 1 \
+  --dry-run 1
+```
+
 ### 13.2 质量验收
 - 126/129 不出现明显高价离谱数据。
 - 128 商品文案体现服务交付，不是快消品描述。
 - 同批重复标题率低于 `2%`。
 - 江苏地域分布不集中于 1-2 个城市。
+- 若开启 `CLIP`，`128/129` 的主图语义错配率应明显低于未开启时的人工巡检结果。
 
 ### 13.3 稳定性验收
 - 100 条批处理成功率 >= `95%`。
@@ -619,22 +686,23 @@ https://image.baidu.com/search/index?tn=baiduimage&fm=result&ie=utf-8&word=<关�
 - M6 批量运行质量报表: 已完成按任务维度输出成功率、失败原因分布、图片来源分布、搜图来源分布和平均耗时，并落盘 `report_*.json`。
 - M7 主流程图片源收敛: 已将主流程默认图片源收敛为百度图片搜索，Bing 暂时退出主流程，仅保留实现与验证脚本以便后续按开关恢复。
 - M8 种子商品异步补全链路: 已新增 `enrich_seed_goods_from_db.py`，支持直接从 `jj_wangyi_goods` 查询 `image` 或 `description` 为空的种子商品，并通过异步 Qwen + 异步百度图片链路补 `sub_title / image / description`，可按 `category_id / ids / limit / concurrency / dry-run` 控制。
+- M9 图片重排增强: 已接入可选 `CLIP` 图片重排能力，支持在百度候选图完成过滤与有效性校验后，对 `128/129` 分类再做一轮语义排序；同时新增独立验证脚本，并将图片语义词统一收口到 `enums/image_semantics.py`。
 
 ### 16.2 当前重点
-- M9 批量质量验证: 以 `126/127/128/129` 四类为单位继续跑 `10~30` 条样本，重点抽查标题真实性、价格分布、图片相关性、城市覆盖和最终成功率。
-- M10 图片质量增强: 持续补充图片误判样本，收紧“新闻配图、体育资讯图、文章封面图、素材预览图、跨城错图、跨品类错图”过滤规则。
-- M11 运行验证标准化: 继续沉淀“最小闭环验证 + 主流程联调验证 + 数据库抽检”的排查手册，保证图片问题能快速定位到抓取层、过滤层、校验层或回退层。
+- M10 批量质量验证: 以 `126/127/128/129` 四类为单位继续跑 `10~30` 条样本，重点抽查标题真实性、价格分布、图片相关性、城市覆盖和最终成功率。
+- M11 图片质量增强: 持续补充图片误判样本，收紧“新闻配图、体育资讯图、文章封面图、素材预览图、跨城错图、跨品类错图”过滤规则，并继续评估“扩大候选池后再做 CLIP 重排”的下一步方案。
+- M12 运行验证标准化: 继续沉淀“最小闭环验证 + 主流程联调验证 + 数据库抽检”的排查手册，保证图片问题能快速定位到抓取层、过滤层、校验层或回退层。
 
 ### 16.3 下一阶段建议
-- M12 失败任务重跑机制: 增加基于失败日志的定向重试能力，避免整批任务重复跑。
-- M13 审稿与人工复核: 补齐 `--export-excel` 或等价审稿导出能力，支持人工抽检标题、图片和价格。
-- M14 线上稳定性收口: 建立环境依赖检查、密钥有效性检查、Playwright/Chromium 可用性检查和数据库连通性自检。
+- M13 失败任务重跑机制: 增加基于失败日志的定向重试能力，避免整批任务重复跑。
+- M14 审稿与人工复核: 补齐 `--export-excel` 或等价审稿导出能力，支持人工抽检标题、图片和价格。
+- M15 线上稳定性收口: 建立环境依赖检查、密钥有效性检查、Playwright/Chromium 可用性检查和数据库连通性自检。
 
 ### 16.4 当前正式链路整理
 - 输入层: `generate_goods.py` 接收 `category_id + keywords + count + model + write_db + dry_run`，并从根目录 `.env` 读取数据库、千问、图片与 OSS 配置，目标表为 `jj_wangyi_goods`。
 - 生成层: `pipeline.py` 调用 Prompt 组装逻辑，按 `126 苏州特产 / 127 农副产品 / 128 苏超纪念品 / 129 工艺产品` 四类画像约束生成结构化商品草案，默认主模型为 `qwen-plus`，必要时可切 `qwen-max`。
 - 校验层: 生成结果先经过 JSON 结构校验、分类约束、价格区间、字段完整性、标题去重和历史库去重，不合格候选直接丢弃并补生成。
-- 图片层: 当前搜图关键词固定只使用生成后的完整 `title`，主流程正式图片来源默认仅为百度图片，按 Playwright 渲染后的首屏 DOM 顺序抓取，不再使用 `ptapi` 封装接口，也不再使用项目内预置素材兜底；如后续打开 `IMG_ENABLE_BING=1`，再启用 Bing 补图。
+- 图片层: 当前搜图关键词固定只使用生成后的完整 `title`，主流程正式图片来源默认仅为百度图片，按 Playwright 渲染后的首屏 DOM 顺序抓取，不再使用 `ptapi` 封装接口，也不再使用项目内预置素材兜底；如后续打开 `IMG_ENABLE_BING=1`，再启用 Bing 补图。对 `128/129` 可按开关追加 `CLIP` 语义重排，但 `CLIP` 只在已有候选图内排序，不替代搜图本身。
 - 映射层: 抓回图片后继续做可访问性、类型、大小、去重和离题过滤，最终固定映射为 `1 张主图 + 3 张详情图`；如开启 OSS，则先上传 OSS 再写业务访问域名。
 - 入库层: 只有同时满足文本校验与 `4` 张有效图片的商品才允许写入 `jj_wangyi_goods`，否则记失败并继续补生成，直到达到目标数量或任务级尝试上限。
 - 补录层: 新增 `enrich_seed_goods_from_db.py` 作为第二方案，直接查询库内 `image` 或 `description` 为空的存量种子商品，按单商品单 prompt 异步补全文案与图片；当前默认仍只走百度图片，可通过 `--ids` 和 `--limit 1` 做最小闭环验证。
@@ -644,6 +712,7 @@ https://image.baidu.com/search/index?tn=baiduimage&fm=result&ie=utf-8&word=<关�
 ## 17. 变更记录
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| v1.26 | 2026-03-21 | 新增可选 `CLIP` 图片重排说明，补充 `.env` 配置、最小闭环验证命令、适用范围与代码结构；同时明确图片语义词统一维护在 `enums/image_semantics.py` |
 | v1.25 | 2026-03-20 | 新增基于数据库存量商品的纯异步补录脚本 `enrich_seed_goods_from_db.py`，支持按空 `image/description` 条件异步补 `sub_title/图片/详情`，并补充使用说明 |
 | v1.24 | 2026-03-20 | 主流程默认关闭 Bing 搜图，图片来源暂时收敛为百度图片；新增 `IMG_ENABLE_BING` 开关，保留 Bing 实现与验证脚本供后续恢复 |
 | v1.23 | 2026-03-20 | 新增批量运行质量报表 `report_*.json`，输出成功率、失败原因分布、图片来源分布、搜图来源分布和平均耗时，并同步更新文档与里程碑 |

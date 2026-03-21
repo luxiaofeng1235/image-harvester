@@ -9,6 +9,7 @@
 - 百度图片首屏抓取当前依赖 Playwright 渲染后的 DOM。
 - Bing 抓取实现和验证脚本仍保留，但主流程默认关闭，可通过 `IMG_ENABLE_BING=1` 恢复。
 - 图片候选会额外经过分类感知过滤，优先拦截明显跨城市、跨品类的错图结果。
+- 可按需开启 `CLIP` 图片重排，对已通过校验的候选图再做一轮语义排序；当前建议只用于 `128/129`。
 - 每条商品必须满足 `1` 张主图 + `3` 张详情图后才允许入库。
 - 当前可通过 `OSS_ENABLED=0` 关闭 OSS 上传，直接写入原图 URL。
 
@@ -16,7 +17,7 @@
 - 输入: 命令行传入 `category_id + keywords + count`，并读取根目录 `.env`。
 - 生成: `qwen-plus/qwen-max` 按分类 Prompt 生成结构化商品数据。
 - 校验: 先做 JSON、分类、价格、字段完整性、标题去重和历史库去重。
-- 图片: 固定按 `title` 走百度图片，按浏览器首屏顺序抓取；如后续打开 `IMG_ENABLE_BING=1`，再追加 Bing 补图。
+- 图片: 固定按 `title` 走百度图片，按浏览器首屏顺序抓取；先做分类感知过滤，再按需做 `CLIP` 重排；如后续打开 `IMG_ENABLE_BING=1`，再追加 Bing 补图。
 - 映射: 过滤失效图、离题图、重复图后，固定组装 `1 主图 + 3 详情图`。
 - 入库: 满足图片与字段要求后写入 `jj_wangyi_goods`，否则继续补生成。
 - 排查: 当前主流程图片问题优先看百度抓取，必要时再单独用 `verify_bing_order.py` 验证 Bing。
@@ -56,6 +57,16 @@ pip3 install requests lxml PyMySQL python-dotenv playwright
 pip3 install oss2
 ```
 
+如果需要开启 `CLIP` 图片重排，再安装:
+```bash
+pip3 install -U transformers huggingface_hub safetensors tokenizers
+```
+
+说明:
+- 当前 `CLIP` 重排默认关闭，不装也不影响主流程。
+- `torch` 需提前可用；有 GPU 可显著降低重排耗时，没有 GPU 也可以用 CPU 跑。
+- 模型默认使用 `OFA-Sys/chinese-clip-vit-base-patch16`，建议提前下载到本地目录后再通过 `.env` 指向本地路径。
+
 ### 4.3 当前代码未使用的库
 - `rapidfuzz` 当前代码没有实际引用，不属于必装依赖。
 
@@ -86,6 +97,11 @@ IMG_RETRY=3
 IMG_MIN_BYTES=1024
 IMG_ALLOW_GIF_AS_MAIN=0
 IMG_ENABLE_BING=0
+IMG_ENABLE_CLIP_RERANK=0
+IMG_CLIP_MODEL=OFA-Sys/chinese-clip-vit-base-patch16
+IMG_CLIP_MIN_SCORE=0.22
+IMG_CLIP_MAX_CANDIDATES=8
+IMG_CLIP_CATEGORY_IDS=128,129
 
 TITLE_SIMILARITY_THRESHOLD=0.88
 TASK_MAX_ATTEMPTS_MULTIPLIER=3
@@ -101,6 +117,9 @@ OSS_VIEW_DOMAIN=
 说明:
 - `OSS_ENABLED=0` 表示关闭 OSS，直接写原始图片 URL。
 - `OSS_ENABLED=1` 表示开启 OSS，此时需要补齐 OSS 配置。
+- `IMG_ENABLE_CLIP_RERANK=1` 表示开启 `CLIP` 图片重排；默认关闭。
+- `IMG_CLIP_MODEL` 可填 HuggingFace 模型名，也可直接填本地目录。
+- `IMG_CLIP_CATEGORY_IDS` 当前建议只配置 `128,129`，也就是苏超纪念品和工艺产品。
 - `.env` 不应提交到仓库。
 
 ## 6. 当前图片规则
@@ -118,6 +137,8 @@ https://image.baidu.com/search/index?tn=baiduimage&fm=result&ie=utf-8&word=<titl
 - 优先取静态图 `jpg/jpeg/png/webp` 作为主图。
 - 详情图固定取后续 `3` 张有效图。
 - 明显离题结果、跨城市错图、跨品类错图会被过滤。
+- 若开启 `CLIP`，会在“已通过 URL 有效性校验的静态候选图”上做一次语义重排，不会新增图片来源，也不会跳过前面的过滤规则。
+- `CLIP` 当前只建议用于 `128/129`；当候选静态图少于 `2` 张、依赖未装好或模型不可用时会自动跳过，不阻塞主流程。
 - 只有满足 `1` 主图 + `3` 详情图时才允许入库。
 
 ## 7. 模型策略
@@ -232,7 +253,66 @@ OSS_ENABLED=1
 - `OSS_ENDPOINT`
 - `OSS_VIEW_DOMAIN`
 
-### 11.3 种子商品异步补全脚本
+### 11.3 开启 CLIP 图片重排
+推荐场景:
+- `128 苏超纪念品`：减少“风景图、资讯图、非商品图”混入主图
+- `129 工艺产品`：减少“人物上身图、泛场景图、非实物图”排到前面
+
+推荐配置:
+```env
+IMG_ENABLE_CLIP_RERANK=1
+IMG_CLIP_MODEL=/mnt/d/python_work/image-harvester/goods_excel/ai_goods_pipeline/runtime/models/chinese-clip-vit-base-patch16
+IMG_CLIP_MIN_SCORE=0.22
+IMG_CLIP_MAX_CANDIDATES=8
+IMG_CLIP_CATEGORY_IDS=128,129
+```
+
+首次下载模型示例:
+```bash
+python3 - <<'PY'
+from transformers import AutoProcessor, AutoModel
+
+model_name = "OFA-Sys/chinese-clip-vit-base-patch16"
+save_dir = "ai_goods_pipeline/runtime/models/chinese-clip-vit-base-patch16"
+
+processor = AutoProcessor.from_pretrained(model_name)
+model = AutoModel.from_pretrained(model_name)
+
+processor.save_pretrained(save_dir)
+model.save_pretrained(save_dir)
+print("saved:", save_dir)
+PY
+```
+
+单独评估重排效果:
+```bash
+python3 ai_goods_pipeline/eval_clip_rerank.py \
+  --title '真丝长方丝巾 防晒百搭丝绸配饰' \
+  --category-id 129 \
+  --query '真丝 长方丝巾 平铺' \
+  --count 4 \
+  --enable-clip-rerank 1
+```
+
+整链路干跑验证:
+```bash
+IMG_ENABLE_CLIP_RERANK=1 \
+IMG_CLIP_MODEL=/mnt/d/python_work/image-harvester/goods_excel/ai_goods_pipeline/runtime/models/chinese-clip-vit-base-patch16 \
+python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
+  --category-id 129 \
+  --ids 583 \
+  --limit 1 \
+  --missing-mode none \
+  --concurrency 1 \
+  --force-image-refresh 1 \
+  --dry-run 1
+```
+
+维护位置:
+- 图片语义词库统一维护在 `ai_goods_pipeline/enums/image_semantics.py`
+- 当前同步图片客户端、异步图片客户端、`CLIP` 重排器都从这一处导入，不再各自写死
+
+### 11.4 种子商品异步补全脚本
 适用场景:
 - 已经有人工导入的种子商品，仅需从数据库中补 `sub_title / image / description`
 - 查询条件固定按 `image` 为空或 `description` 为空筛选
@@ -292,7 +372,16 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 - 千问接口响应时间
 - 百度图片搜索页面响应时间
 - 图片源站可访问性
+- `CLIP` 模型首次加载时间
 - OSS 上传是否开启
+
+### 12.4 为什么开了 CLIP 但图片结果看起来没变化
+常见原因:
+- 当前分类不在 `IMG_CLIP_CATEGORY_IDS` 内
+- 有效静态候选图不足 `2` 张
+- `IMG_ENABLE_CLIP_RERANK=0`
+- `IMG_CLIP_MODEL` 未指向有效模型目录
+- 当前错图问题出在“候选池本身就没找到对图”，这种情况 `CLIP` 只能重排已有候选，不能凭空补图
 
 ## 13. 推荐排查顺序
 出现问题时建议按这个顺序排查:
