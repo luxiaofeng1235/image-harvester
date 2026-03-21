@@ -126,10 +126,11 @@
   left: 50%;
   transform: translateX(-50%);
   margin: 0;
-  font-family: "SimHei", "Microsoft YaHei", sans-serif;
+  font-family: "SimHei" !important;
   font-size: 30px;
   font-weight: 400;
-  color: #5a5a5a;
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000;
   text-align: center;
   white-space: nowrap;
 }
@@ -161,13 +162,15 @@
 
 #zr-3dseries-root .zr-3dseries-card-title {
   margin: 0;
-  font-family: Arial, "SimSun", Helvetica, sans-serif, Verdana;
+  font-family: "SimSun" !important;
   font-size: 24px;
-  font-weight: 400;
+  font-weight: 700 !important;
   text-align: left;
   width: 450px;
   height: 41px;
-  line-height: 41px;
-  color: #111111;
+  line-height: 33.6px;
+  color: #000000 !important;
+  letter-spacing: 0;
+  -webkit-text-fill-color: #000000;
   white-space: nowrap;
 }
