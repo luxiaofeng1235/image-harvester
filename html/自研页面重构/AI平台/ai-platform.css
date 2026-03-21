@@ -172,8 +172,10 @@
   color: #111111 !important;
   font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
   font-size: 22px;
-  line-height: 1.2;
-  display: block;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   white-space: nowrap;
 }
@@ -191,7 +193,7 @@
 .zr-aiplat-feature-left-3 .zr-aiplat-feature-plate { top: -17px; }
 .zr-aiplat-feature-left-4 .zr-aiplat-feature-plate { top: -20px; }
 
-.zr-aiplat-feature-left-1 .zr-aiplat-feature-title { top: 33px; }
+.zr-aiplat-feature-left-1 .zr-aiplat-feature-title { top: 31px; }
 .zr-aiplat-feature-left-2 .zr-aiplat-feature-title { top: 0; }
 .zr-aiplat-feature-left-3 .zr-aiplat-feature-title { top: -30px; }
 .zr-aiplat-feature-left-4 .zr-aiplat-feature-title { top: -37px; }
@@ -330,7 +332,7 @@
 
 .zr-aiplat-page .zr-aiplat-feature-title {
   font-size: 22px !important;
-  line-height: 1.2 !important;
+  line-height: 1 !important;
   font-weight: 400 !important;
 }
 
