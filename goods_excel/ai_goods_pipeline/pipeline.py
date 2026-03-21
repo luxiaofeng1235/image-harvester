@@ -4,7 +4,6 @@ from collections import Counter
 import json
 import time
 from dataclasses import dataclass
-from html import escape as html_escape
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +22,7 @@ from ai_goods_pipeline.prompts.category_profiles import (
     get_category_profile,
     select_history_guard_titles,
 )
+from ai_goods_pipeline.utils.description_layout import build_description_html
 from ai_goods_pipeline.validators.goods_validator import GoodsValidator, ValidationResult
 from ai_goods_pipeline.writers.db_writer import DBWriter
 
@@ -335,6 +335,7 @@ class AIGoodsPipeline:
             return None, entry
 
         description = self._build_description_html(
+            subtitle=item["subtitle"],
             selling_points=item["selling_points"],
             attrs=item["attrs"],
             detail_images=detail_images,
@@ -392,26 +393,17 @@ class AIGoodsPipeline:
     def _build_description_html(
         self,
         *,
+        subtitle: str,
         selling_points: list[str],
         attrs: dict[str, Any],
         detail_images: list[str],
     ) -> str:
-        selling_points_text = "；".join(html_escape(point) for point in selling_points)
-        attrs_text = "；".join(
-            f"{html_escape(str(key))}：{html_escape(str(value))}" for key, value in attrs.items()
+        return build_description_html(
+            subtitle=subtitle,
+            selling_points=selling_points,
+            attrs=attrs,
+            detail_images=detail_images,
         )
-        sections = [
-            '<div class="product-description">',
-            f"  <p><strong>商品亮点</strong>：{selling_points_text}</p>",
-            f"  <p><strong>规格属性</strong>：{attrs_text}</p>",
-            "</div>",
-        ]
-        if detail_images:
-            sections.append('<div class="product-detail">')
-            for url in detail_images:
-                sections.append(f'  <p><img src="{html_escape(url)}" /></p>')
-            sections.append("</div>")
-        return "\n".join(sections)
 
     def _failure_entry(
         self,

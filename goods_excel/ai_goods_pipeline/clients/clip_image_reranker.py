@@ -8,7 +8,12 @@ from threading import Lock
 import requests
 from PIL import Image, ImageFile, UnidentifiedImageError
 
-from ai_goods_pipeline.constants import IMAGE_CARRIER_KEYWORDS, IMAGE_MATERIAL_HINTS
+from ai_goods_pipeline.enums.image_semantics import (
+    IMAGE_CARRIER_KEYWORDS,
+    IMAGE_FINISHED_DISPLAY_CARRIERS,
+    IMAGE_FLAT_DISPLAY_CARRIERS,
+    IMAGE_MATERIAL_HINTS,
+)
 
 try:
     import torch
@@ -306,11 +311,7 @@ class ClipImageReranker:
         elif category_id == 129:
             prompts.append(f"工艺品 商品实物图 {title}")
             if carrier_terms:
-                display_hint = "实物"
-                if carrier_terms[0] in {"长方丝巾", "丝巾", "方巾", "围巾", "手帕", "折扇", "丝带"}:
-                    display_hint = "平铺"
-                elif carrier_terms[0] in {"屏风", "挂画", "摆件"}:
-                    display_hint = "成品"
+                display_hint = self._get_display_hint(carrier_terms[0])
                 prompts.append(f"{carrier_terms[0]} {display_hint} 商品实物图")
             if material_terms and carrier_terms:
                 prompts.append(f"{material_terms[0]} {carrier_terms[0]} 商品实物图")
@@ -329,3 +330,10 @@ class ClipImageReranker:
             deduped.append(value)
             seen.add(value)
         return deduped[:4]
+
+    def _get_display_hint(self, carrier: str) -> str:
+        if carrier in IMAGE_FLAT_DISPLAY_CARRIERS:
+            return "平铺"
+        if carrier in IMAGE_FINISHED_DISPLAY_CARRIERS:
+            return "成品"
+        return "实物"

@@ -4,7 +4,6 @@ import argparse
 import asyncio
 import json
 import time
-from html import escape as html_escape
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +22,7 @@ from ai_goods_pipeline.clients.async_qwen_client import (
 from ai_goods_pipeline.clients.oss_client import OSSImageUploader
 from ai_goods_pipeline.config import load_settings
 from ai_goods_pipeline.prompts.seed_enrichment import build_seed_enrichment_prompts
+from ai_goods_pipeline.utils.description_layout import build_description_html
 from ai_goods_pipeline.utils.logger import setup_logger
 from ai_goods_pipeline.writers.async_db_writer import AsyncDBWriter
 
@@ -56,30 +56,6 @@ def parse_ids(raw_ids: str) -> list[int]:
             continue
         ids.append(int(text))
     return ids
-
-
-def build_description_html(
-    *,
-    selling_points: list[str],
-    attrs: dict[str, Any],
-    detail_images: list[str],
-) -> str:
-    selling_points_text = "；".join(html_escape(point) for point in selling_points)
-    attrs_text = "；".join(
-        f"{html_escape(str(key))}：{html_escape(str(value))}" for key, value in attrs.items()
-    )
-    sections = [
-        '<div class="product-description">',
-        f"  <p><strong>商品亮点</strong>：{selling_points_text}</p>",
-        f"  <p><strong>规格属性</strong>：{attrs_text}</p>",
-        "</div>",
-    ]
-    if detail_images:
-        sections.append('<div class="product-detail">')
-        for url in detail_images:
-            sections.append(f'  <p><img src="{html_escape(url)}" /></p>')
-        sections.append("</div>")
-    return "\n".join(sections)
 
 
 def sanitize_enrichment_item(
@@ -248,6 +224,7 @@ async def process_one_row(
 
         if need_description:
             final_description = build_description_html(
+                subtitle=qwen_payload["subtitle"],
                 selling_points=qwen_payload["selling_points"],
                 attrs=qwen_payload["attrs"],
                 detail_images=detail_images,

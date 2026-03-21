@@ -14,19 +14,23 @@ from ai_goods_pipeline.constants import (
     CRAFT_KEYWORDS,
     FOOD_KEYWORDS,
     FOOTBALL_KEYWORDS,
-    IMAGE_CARRIER_KEYWORDS,
     IMAGE_BAIDU_FETCH_LIMIT,
     IMAGE_BING_META_BLOCKLIST,
     IMAGE_CANDIDATE_POOL_TARGET,
     IMAGE_DETAIL_COUNT,
-    IMAGE_MATERIAL_HINTS,
     IMAGE_QUERY_LIMIT,
-    IMAGE_QUERY_TERM_BLOCKLIST,
     IMAGE_TITLE_QUERY_MAX_LEN,
     IMAGE_URL_HOST_BLOCKLIST,
     IMAGE_URL_PATH_BLOCKLIST,
     JIANGSU_HINTS,
     SUZHOU_HINTS,
+)
+from ai_goods_pipeline.enums.image_semantics import (
+    IMAGE_CARRIER_KEYWORDS,
+    IMAGE_FINISHED_DISPLAY_CARRIERS,
+    IMAGE_FLAT_DISPLAY_CARRIERS,
+    IMAGE_MATERIAL_HINTS,
+    IMAGE_QUERY_TERM_BLOCKLIST,
 )
 from ai_goods_pipeline.utils.async_retry import async_retry_call
 
@@ -247,11 +251,7 @@ class AsyncImageClient:
             if city:
                 variants.append(f"{city} {carrier_terms[0]}")
         elif category_id == 129 and carrier_terms:
-            display_hint = "实物"
-            if carrier_terms[0] in {"长方丝巾", "丝巾", "方巾", "围巾", "手帕", "折扇", "丝带"}:
-                display_hint = "平铺"
-            elif carrier_terms[0] in {"屏风", "挂画", "摆件"}:
-                display_hint = "成品"
+            display_hint = self._get_display_hint(carrier_terms[0])
             if material_terms:
                 variants.append(f"{material_terms[0]} {carrier_terms[0]} {display_hint}")
             if quoted_terms:
@@ -443,7 +443,15 @@ class AsyncImageClient:
     def _extract_query_terms(self, parts: list[str]) -> list[str]:
         terms: list[str] = []
         seen: set[str] = set()
-        known_terms = CITY_POOL + SUZHOU_HINTS + FOOD_KEYWORDS + FOOTBALL_KEYWORDS + CRAFT_KEYWORDS
+        known_terms = (
+            CITY_POOL
+            + SUZHOU_HINTS
+            + FOOD_KEYWORDS
+            + FOOTBALL_KEYWORDS
+            + CRAFT_KEYWORDS
+            + IMAGE_CARRIER_KEYWORDS
+            + IMAGE_MATERIAL_HINTS
+        )
 
         for part in parts:
             text = str(part or "").strip().lower()
@@ -487,6 +495,13 @@ class AsyncImageClient:
 
     def _count_keyword_hits(self, text: str, terms: list[str] | tuple[str, ...]) -> int:
         return sum(1 for term in terms if term and term.lower() in text)
+
+    def _get_display_hint(self, carrier: str) -> str:
+        if carrier in IMAGE_FLAT_DISPLAY_CARRIERS:
+            return "平铺"
+        if carrier in IMAGE_FINISHED_DISPLAY_CARRIERS:
+            return "成品"
+        return "实物"
 
     def _is_blocked_image_url(self, url: str) -> bool:
         parsed = urlparse(url)
