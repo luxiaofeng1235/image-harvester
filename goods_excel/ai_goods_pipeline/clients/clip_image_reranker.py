@@ -80,6 +80,7 @@ class ClipImageReranker:
         title: str,
         category_id: int,
         candidate_urls: list[str],
+        preview_url_map: dict[str, str] | None = None,
     ) -> ClipRerankResult:
         original_urls = [str(url).strip() for url in candidate_urls if str(url).strip()]
         if not original_urls:
@@ -122,16 +123,18 @@ class ClipImageReranker:
 
         prompts = self._build_prompts(title=title, category_id=category_id)
         limited_urls = original_urls[: self.max_candidates]
-        images: list[Image.Image] = []
-        image_urls: list[str] = []
-        for url in limited_urls:
-            image = self._download_image(url)
-            if image is None:
-                continue
-            images.append(image)
-            image_urls.append(url)
-
-        if len(image_urls) < 2:
+        preview_urls, preview_images = self._load_candidate_images(
+            candidate_urls=limited_urls,
+            preview_url_map=preview_url_map,
+            prefer_preview=True,
+        )
+        if len(preview_urls) < 2:
+            preview_urls, preview_images = self._load_candidate_images(
+                candidate_urls=limited_urls,
+                preview_url_map=preview_url_map,
+                prefer_preview=False,
+            )
+        if len(preview_urls) < 2:
             return ClipRerankResult(
                 applied=False,
                 reason="insufficient_images",
@@ -140,7 +143,7 @@ class ClipImageReranker:
             )
 
         try:
-            score_values = self._score_images(images=images, prompts=prompts)
+            preview_score_values = self._score_images(images=preview_images, prompts=prompts)
         except Exception as exc:  # pragma: no cover - runtime dependent
             self._last_error = str(exc)
             return ClipRerankResult(
@@ -152,8 +155,42 @@ class ClipImageReranker:
 
         score_map = {
             url: round(float(score), 4)
-            for url, score in zip(image_urls, score_values, strict=False)
+            for url, score in zip(preview_urls, preview_score_values, strict=False)
         }
+        preview_ranked_urls = [
+            url
+            for url, _ in sorted(
+                score_map.items(),
+                key=lambda item: item[1],
+                reverse=True,
+            )
+        ]
+
+        refine_top_k = min(len(preview_ranked_urls), max(4, min(8, self.max_candidates)))
+        refine_urls = preview_ranked_urls[:refine_top_k]
+        if len(refine_urls) >= 2:
+            refined_loaded_urls, refined_images = self._load_candidate_images(
+                candidate_urls=refine_urls,
+                preview_url_map=preview_url_map,
+                prefer_preview=False,
+            )
+            if len(refined_loaded_urls) >= 2:
+                try:
+                    refined_score_values = self._score_images(
+                        images=refined_images,
+                        prompts=prompts,
+                    )
+                    for url, score in zip(
+                        refined_loaded_urls,
+                        refined_score_values,
+                        strict=False,
+                    ):
+                        base_score = score_map.get(url, float(score))
+                        blended_score = float(score) * 0.65 + float(base_score) * 0.35
+                        score_map[url] = round(blended_score, 4)
+                except Exception:
+                    pass
+
         kept_urls = [
             url
             for url, score in sorted(
@@ -179,6 +216,39 @@ class ClipImageReranker:
             ranked_urls=ranked_urls,
             scores=score_map,
         )
+
+    def _load_candidate_images(
+        self,
+        *,
+        candidate_urls: list[str],
+        preview_url_map: dict[str, str] | None,
+        prefer_preview: bool,
+    ) -> tuple[list[str], list[Image.Image]]:
+        loaded_urls: list[str] = []
+        images: list[Image.Image] = []
+        for url in candidate_urls:
+            preview_url = str((preview_url_map or {}).get(url) or "").strip()
+            targets: list[str] = []
+            if prefer_preview and preview_url:
+                targets.append(preview_url)
+            targets.append(url)
+            if not prefer_preview and preview_url and preview_url != url:
+                targets.append(preview_url)
+
+            image = None
+            seen_targets: set[str] = set()
+            for target in targets:
+                if not target or target in seen_targets:
+                    continue
+                seen_targets.add(target)
+                image = self._download_image(target)
+                if image is not None:
+                    break
+            if image is None:
+                continue
+            loaded_urls.append(url)
+            images.append(image)
+        return loaded_urls, images
 
     def _deps_ready(self) -> bool:
         if torch is None or AutoModel is None or AutoProcessor is None:

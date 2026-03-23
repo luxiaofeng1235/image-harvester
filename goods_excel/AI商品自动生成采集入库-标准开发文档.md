@@ -157,7 +157,7 @@ Prompt组装(全局+分类+任务+输出Schema)
 - 当前建议适用分类: `128 苏超纪念品`、`129 工艺产品`
 - 当前默认模型目录: `ai_goods_pipeline/runtime/models/chinese-clip-vit-base-patch16`
 - 工作方式:
-  - 只对“已通过过滤和 URL 有效性校验的静态图片候选”做语义重排。
+  - 当前会先对“已通过过滤和 URL 有效性校验的静态候选”做一轮缩略图预排，再对前排候选补做原图精排。
   - 不新增搜图来源，不替代百度抓图，不绕过前置过滤。
   - 当静态候选图少于 `2` 张、依赖缺失、模型不可用或分类未命中 `IMG_CLIP_CATEGORY_IDS` 时，自动跳过，不阻塞主流程。
   - 当前只允许从本地模型目录加载，不再回退远端下载；模型目录不存在时直接报本地缺失并跳过。
@@ -469,7 +469,7 @@ IMG_ENABLE_BING=0
 IMG_ENABLE_CLIP_RERANK=0
 IMG_CLIP_MODEL=ai_goods_pipeline/runtime/models/chinese-clip-vit-base-patch16
 IMG_CLIP_MIN_SCORE=0.22
-IMG_CLIP_MAX_CANDIDATES=8
+IMG_CLIP_MAX_CANDIDATES=12
 IMG_CLIP_CATEGORY_IDS=128,129
 
 TITLE_SIMILARITY_THRESHOLD=0.88

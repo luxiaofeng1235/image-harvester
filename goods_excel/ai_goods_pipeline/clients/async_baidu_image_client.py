@@ -76,6 +76,7 @@ class AsyncBaiduImageClient:
                 timeout=self.timeout * 1000,
             )
             await page.wait_for_timeout(800)
+            await self._expand_search_results(page, limit)
             items = await page.evaluate(
                 """
                 (maxCount) => {
@@ -145,6 +146,32 @@ class AsyncBaiduImageClient:
         finally:
             if page is not None:
                 await page.close()
+
+    async def _expand_search_results(self, page, limit: int) -> None:
+        selector = 'a[href*="/search/detail?"][href*="objurl="][href*="tn=baiduimagedetail"]'
+        target_count = max(limit * 3, limit)
+        previous_count = 0
+        stable_rounds = 0
+        for _ in range(3):
+            current_count = await page.evaluate(
+                "(selector) => document.querySelectorAll(selector).length",
+                selector,
+            )
+            if current_count >= target_count:
+                break
+            await page.mouse.wheel(0, 2200)
+            await page.wait_for_timeout(700)
+            refreshed_count = await page.evaluate(
+                "(selector) => document.querySelectorAll(selector).length",
+                selector,
+            )
+            if refreshed_count <= previous_count:
+                stable_rounds += 1
+                if stable_rounds >= 2:
+                    break
+            else:
+                stable_rounds = 0
+            previous_count = max(previous_count, refreshed_count)
 
     async def _get_browser(self):
         if async_playwright is None or self._browser_failed:

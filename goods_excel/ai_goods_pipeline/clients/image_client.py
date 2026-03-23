@@ -111,6 +111,7 @@ class ImageClient:
         keywords: list[str],
     ) -> ImageResolutionResult:
         candidate_urls: list[str] = []
+        candidate_preview_urls: dict[str, str] = {}
         candidate_sources: dict[str, str] = {}
         source_queries: list[str] = []
         search_context = self._build_search_context(
@@ -122,23 +123,35 @@ class ImageClient:
 
         search_queries = self._build_queries(title, image_keywords, keywords, category_id)
         for query in search_queries:
-            baidu_urls = self.fetch_baidu_images(query, context=search_context)
-            if baidu_urls:
+            baidu_items = self.fetch_baidu_candidates(query, context=search_context)
+            if baidu_items:
                 source_queries.append(f"baidu_images:{query}")
-                for url in baidu_urls:
+                for item in baidu_items:
+                    url = str(item.get("image_url") or "").strip()
+                    preview_url = str(item.get("thumbnail_url") or "").strip()
+                    if not url:
+                        continue
                     if url not in candidate_urls:
                         candidate_urls.append(url)
+                    if preview_url:
+                        candidate_preview_urls.setdefault(url, preview_url)
                     candidate_sources.setdefault(url, "baidu")
             if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
                 break
 
             if self.enable_bing:
-                bing_urls = self.fetch_bing_images(query, context=search_context)
-                if bing_urls:
+                bing_items = self.fetch_bing_candidates(query, context=search_context)
+                if bing_items:
                     source_queries.append(f"bing_images:{query}")
-                    for url in bing_urls:
+                    for item in bing_items:
+                        url = str(item.get("image_url") or "").strip()
+                        preview_url = str(item.get("thumbnail_url") or "").strip()
+                        if not url:
+                            continue
                         if url not in candidate_urls:
                             candidate_urls.append(url)
+                        if preview_url:
+                            candidate_preview_urls.setdefault(url, preview_url)
                         candidate_sources.setdefault(url, "bing")
                 if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
                     break
@@ -148,6 +161,7 @@ class ImageClient:
             title=title,
             category_id=category_id,
             valid_images=valid_images,
+            preview_url_map=candidate_preview_urls,
         )
         static_images = [img.url for img in valid_images if not img.is_gif]
         gif_images = [img.url for img in valid_images if img.is_gif]
@@ -176,12 +190,12 @@ class ImageClient:
             all_valid_urls=[img.url for img in valid_images],
         )
 
-    def fetch_bing_images(
+    def fetch_bing_candidates(
         self,
         query: str,
         *,
         context: SearchRelevanceContext | None = None,
-    ) -> list[str]:
+    ) -> list[dict[str, str]]:
         if not self.enable_bing:
             return []
         query = query.strip()
@@ -191,9 +205,8 @@ class ImageClient:
             items = self.bing_image_client.fetch_images(query, limit=IMAGE_BING_FETCH_LIMIT)
         except Exception:
             return []
-        finally:
-            self.bing_image_client.close_browser()
-        urls: list[str] = []
+        candidates: list[dict[str, str]] = []
+        seen_urls: set[str] = set()
         for item in items:
             if self._is_blocked_search_result(item):
                 continue
@@ -202,16 +215,29 @@ class ImageClient:
             url = str(item.get("image_url") or "").strip()
             if self._is_blocked_image_url(url):
                 continue
-            if url and url not in urls:
-                urls.append(url)
-        return urls
+            if url and url not in seen_urls:
+                candidates.append(item)
+                seen_urls.add(url)
+        return candidates
 
-    def fetch_baidu_images(
+    def fetch_bing_images(
         self,
         query: str,
         *,
         context: SearchRelevanceContext | None = None,
     ) -> list[str]:
+        return [
+            str(item.get("image_url") or "").strip()
+            for item in self.fetch_bing_candidates(query, context=context)
+            if str(item.get("image_url") or "").strip()
+        ]
+
+    def fetch_baidu_candidates(
+        self,
+        query: str,
+        *,
+        context: SearchRelevanceContext | None = None,
+    ) -> list[dict[str, str]]:
         query = query.strip()
         if not query:
             return []
@@ -219,9 +245,8 @@ class ImageClient:
             items = self.baidu_image_client.fetch_images(query, limit=IMAGE_BAIDU_FETCH_LIMIT)
         except Exception:
             return []
-        finally:
-            self.baidu_image_client.close_browser()
-        urls: list[str] = []
+        candidates: list[dict[str, str]] = []
+        seen_urls: set[str] = set()
         for item in items:
             if self._is_blocked_search_result(item):
                 continue
@@ -230,9 +255,22 @@ class ImageClient:
             url = str(item.get("image_url") or "").strip()
             if self._is_blocked_image_url(url):
                 continue
-            if url and url not in urls:
-                urls.append(url)
-        return urls
+            if url and url not in seen_urls:
+                candidates.append(item)
+                seen_urls.add(url)
+        return candidates
+
+    def fetch_baidu_images(
+        self,
+        query: str,
+        *,
+        context: SearchRelevanceContext | None = None,
+    ) -> list[str]:
+        return [
+            str(item.get("image_url") or "").strip()
+            for item in self.fetch_baidu_candidates(query, context=context)
+            if str(item.get("image_url") or "").strip()
+        ]
 
     def runtime_status(self) -> dict[str, bool]:
         baidu_render_ready = self.baidu_image_client.can_render()
@@ -508,6 +546,7 @@ class ImageClient:
         title: str,
         category_id: int,
         valid_images: list[ImageProbe],
+        preview_url_map: dict[str, str] | None = None,
     ) -> list[ImageProbe]:
         if len(valid_images) < 2:
             return valid_images
@@ -521,6 +560,7 @@ class ImageClient:
             title=title,
             category_id=category_id,
             candidate_urls=[img.url for img in static_images],
+            preview_url_map=preview_url_map,
         )
         if not rerank_result.applied:
             return valid_images

@@ -103,7 +103,7 @@ IMG_ENABLE_BING=0
 IMG_ENABLE_CLIP_RERANK=0
 IMG_CLIP_MODEL=ai_goods_pipeline/runtime/models/chinese-clip-vit-base-patch16
 IMG_CLIP_MIN_SCORE=0.22
-IMG_CLIP_MAX_CANDIDATES=8
+IMG_CLIP_MAX_CANDIDATES=12
 IMG_CLIP_CATEGORY_IDS=128,129
 
 TITLE_SIMILARITY_THRESHOLD=0.88
@@ -285,7 +285,7 @@ OSS_ENABLED=1
 IMG_ENABLE_CLIP_RERANK=1
 IMG_CLIP_MODEL=/mnt/d/python_work/image-harvester/goods_excel/ai_goods_pipeline/runtime/models/chinese-clip-vit-base-patch16
 IMG_CLIP_MIN_SCORE=0.22
-IMG_CLIP_MAX_CANDIDATES=8
+IMG_CLIP_MAX_CANDIDATES=12
 IMG_CLIP_CATEGORY_IDS=128,129
 ```
 
@@ -337,6 +337,7 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 维护位置:
 - 图片语义词库统一维护在 `ai_goods_pipeline/enums/image_semantics.py`
 - 当前同步图片客户端、异步图片客户端、`CLIP` 重排器都从这一处导入，不再各自写死
+- 当前 `CLIP` 会优先用百度缩略图做一轮预排，再对前排候选补做原图精排；仍然只在已有候选池内排序，不新增图片来源
 
 ### 11.4 种子商品异步补全脚本
 适用场景:

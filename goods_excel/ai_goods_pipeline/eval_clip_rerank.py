@@ -55,11 +55,24 @@ def main() -> int:
         print(query)
         print()
 
-        candidate_urls = client.fetch_baidu_images(query)[: max(1, args.count)]
+        candidate_items = client.fetch_baidu_candidates(query)[: max(1, args.count)]
+        candidate_urls = [
+            str(item.get("image_url") or "").strip()
+            for item in candidate_items
+            if str(item.get("image_url") or "").strip()
+        ]
+        preview_url_map = {
+            str(item.get("image_url") or "").strip(): str(item.get("thumbnail_url") or "").strip()
+            for item in candidate_items
+            if str(item.get("image_url") or "").strip()
+        }
         print("=== Candidate URLs ===")
         print(f"candidate_count={len(candidate_urls)}")
         for index, url in enumerate(candidate_urls, 1):
-            print(f"#{index} {url}")
+            preview_url = preview_url_map.get(url, "")
+            print(f"#{index} url={url}")
+            if preview_url:
+                print(f"   preview={preview_url}")
         print()
 
         valid_images = client._validate_urls(candidate_urls)  # noqa: SLF001 - evaluation script
@@ -77,6 +90,7 @@ def main() -> int:
             title=args.title,
             category_id=args.category_id,
             candidate_urls=original_urls,
+            preview_url_map=preview_url_map,
         )
         print("=== Rerank Result ===")
         print(json.dumps({"applied": rerank_result.applied, "reason": rerank_result.reason}, ensure_ascii=False))

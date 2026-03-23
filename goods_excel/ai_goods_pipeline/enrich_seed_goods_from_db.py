@@ -166,7 +166,7 @@ async def process_one_row(
     need_image = force_image_refresh or not existing_image
     need_description = not existing_description
     need_subtitle = not existing_sub_title
-    started_at = time.time()
+    started_at = time.perf_counter()
 
     qwen_payload = None
     final_sub_title = existing_sub_title
@@ -247,7 +247,7 @@ async def process_one_row(
         "title": title,
         "ok": True,
         "updated": not dry_run,
-        "duration_seconds": round(time.time() - started_at, 3),
+        "duration_seconds": round(time.perf_counter() - started_at, 3),
         "source_queries": source_queries,
         "preview": update_payload if dry_run else {},
     }
@@ -295,7 +295,7 @@ async def process_rows(
 
     async def _runner(row: dict[str, Any]) -> dict[str, Any]:
         async with semaphore:
-            started_at = time.time()
+            started_at = time.perf_counter()
             try:
                 result = await process_one_row(
                     row=row,
@@ -329,7 +329,7 @@ async def process_rows(
                     "title": str(row["goods_name"] or "").strip(),
                     "ok": False,
                     "updated": False,
-                    "duration_seconds": round(time.time() - started_at, 3),
+                    "duration_seconds": round(time.perf_counter() - started_at, 3),
                     "error": str(exc),
                 }
             except Exception as exc:
@@ -343,7 +343,7 @@ async def process_rows(
                     "title": str(row["goods_name"] or "").strip(),
                     "ok": False,
                     "updated": False,
-                    "duration_seconds": round(time.time() - started_at, 3),
+                    "duration_seconds": round(time.perf_counter() - started_at, 3),
                     "error": str(exc),
                 }
 
@@ -379,7 +379,7 @@ def build_summary(
         "success_count": success_count,
         "updated_count": updated_count,
         "failure_count": len(failed_items),
-        "total_duration_seconds": round(time.time() - started_at, 3),
+        "total_duration_seconds": round(time.perf_counter() - started_at, 3),
         "results": results,
     }
 
@@ -427,7 +427,7 @@ async def amain() -> int:
         bool(args.dry_run),
         model,
     )
-    started_at = time.time()
+    started_at = time.perf_counter()
     results = await process_rows(
         rows,
         settings=settings,

@@ -114,6 +114,7 @@ class AsyncImageClient:
         keywords: list[str],
     ) -> AsyncImageResolutionResult:
         candidate_urls: list[str] = []
+        candidate_preview_urls: dict[str, str] = {}
         candidate_sources: dict[str, str] = {}
         source_queries: list[str] = []
         search_context = self._build_search_context(
@@ -124,12 +125,18 @@ class AsyncImageClient:
         )
 
         for query in self._build_queries(title, image_keywords, keywords, category_id):
-            baidu_urls = await self.fetch_baidu_images(query, context=search_context)
-            if baidu_urls:
+            baidu_items = await self.fetch_baidu_candidates(query, context=search_context)
+            if baidu_items:
                 source_queries.append(f"baidu_images:{query}")
-                for url in baidu_urls:
+                for item in baidu_items:
+                    url = str(item.get("image_url") or "").strip()
+                    preview_url = str(item.get("thumbnail_url") or "").strip()
+                    if not url:
+                        continue
                     if url not in candidate_urls:
                         candidate_urls.append(url)
+                    if preview_url:
+                        candidate_preview_urls.setdefault(url, preview_url)
                     candidate_sources.setdefault(url, "baidu")
             if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
                 break
@@ -139,6 +146,7 @@ class AsyncImageClient:
             title=title,
             category_id=category_id,
             valid_images=valid_images,
+            preview_url_map=candidate_preview_urls,
         )
         static_images = [img.url for img in valid_images if not img.is_gif]
         gif_images = [img.url for img in valid_images if img.is_gif]
@@ -165,12 +173,12 @@ class AsyncImageClient:
             all_valid_urls=[img.url for img in valid_images],
         )
 
-    async def fetch_baidu_images(
+    async def fetch_baidu_candidates(
         self,
         query: str,
         *,
         context: SearchRelevanceContext | None = None,
-    ) -> list[str]:
+    ) -> list[dict[str, str]]:
         query = query.strip()
         if not query:
             return []
@@ -178,7 +186,8 @@ class AsyncImageClient:
             items = await self.baidu_image_client.fetch_images(query, limit=IMAGE_BAIDU_FETCH_LIMIT)
         except Exception:
             return []
-        urls: list[str] = []
+        candidates: list[dict[str, str]] = []
+        seen_urls: set[str] = set()
         for item in items:
             if self._is_blocked_search_result(item):
                 continue
@@ -187,9 +196,23 @@ class AsyncImageClient:
             url = str(item.get("image_url") or "").strip()
             if self._is_blocked_image_url(url):
                 continue
-            if url and url not in urls:
-                urls.append(url)
-        return urls
+            if url and url not in seen_urls:
+                candidates.append(item)
+                seen_urls.add(url)
+        return candidates
+
+    async def fetch_baidu_images(
+        self,
+        query: str,
+        *,
+        context: SearchRelevanceContext | None = None,
+    ) -> list[str]:
+        items = await self.fetch_baidu_candidates(query, context=context)
+        return [
+            str(item.get("image_url") or "").strip()
+            for item in items
+            if str(item.get("image_url") or "").strip()
+        ]
 
     def _build_queries(
         self,
@@ -393,6 +416,7 @@ class AsyncImageClient:
         title: str,
         category_id: int,
         valid_images: list[AsyncImageProbe],
+        preview_url_map: dict[str, str] | None = None,
     ) -> list[AsyncImageProbe]:
         if len(valid_images) < 2:
             return valid_images
@@ -407,6 +431,7 @@ class AsyncImageClient:
             title=title,
             category_id=category_id,
             candidate_urls=[img.url for img in static_images],
+            preview_url_map=preview_url_map,
         )
         if not rerank_result.applied:
             return valid_images

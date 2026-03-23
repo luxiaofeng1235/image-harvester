@@ -79,6 +79,7 @@ class BaiduImageClient:
                 timeout=self.timeout * 1000,
             )
             page.wait_for_timeout(800)
+            self._expand_search_results(page, limit)
             items = page.evaluate(
                 """
                 (maxCount) => {
@@ -148,6 +149,32 @@ class BaiduImageClient:
         finally:
             if page is not None:
                 page.close()
+
+    def _expand_search_results(self, page, limit: int) -> None:
+        selector = 'a[href*="/search/detail?"][href*="objurl="][href*="tn=baiduimagedetail"]'
+        target_count = max(limit * 3, limit)
+        previous_count = 0
+        stable_rounds = 0
+        for _ in range(3):
+            current_count = page.evaluate(
+                "(selector) => document.querySelectorAll(selector).length",
+                selector,
+            )
+            if current_count >= target_count:
+                break
+            page.mouse.wheel(0, 2200)
+            page.wait_for_timeout(700)
+            refreshed_count = page.evaluate(
+                "(selector) => document.querySelectorAll(selector).length",
+                selector,
+            )
+            if refreshed_count <= previous_count:
+                stable_rounds += 1
+                if stable_rounds >= 2:
+                    break
+            else:
+                stable_rounds = 0
+            previous_count = max(previous_count, refreshed_count)
 
     def _get_browser(self):
         if sync_playwright is None or self._browser_failed:

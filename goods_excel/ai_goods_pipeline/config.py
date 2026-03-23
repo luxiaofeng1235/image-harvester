@@ -186,7 +186,7 @@ def load_settings(env_file: Path | None = None) -> Settings:
         image_clip_min_score=_as_float(os.getenv("IMG_CLIP_MIN_SCORE"), 0.22),
         image_clip_max_candidates=_as_int(
             os.getenv("IMG_CLIP_MAX_CANDIDATES"),
-            8,
+            12,
         ),
         image_clip_category_ids=_as_int_tuple(
             os.getenv("IMG_CLIP_CATEGORY_IDS"),
