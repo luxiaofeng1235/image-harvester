@@ -5,6 +5,7 @@
 
 当前实现特点:
 - 直接写入 MySQL，不再导出 Excel。
+- 当前只维护单表 `jj_wangyi_goods`，不再按天分表，也不新增批次日志表。
 - 图片搜索默认只按生成后的商品标题 `title` 搜图，当前主流程仅使用 `百度图片`。
 - 百度图片首屏抓取当前依赖 Playwright 渲染后的 DOM。
 - Bing 抓取实现和验证脚本仍保留，但主流程默认关闭，可通过 `IMG_ENABLE_BING=1` 恢复。
@@ -20,6 +21,7 @@
 - 图片: 固定按 `title` 走百度图片，按浏览器首屏顺序抓取；先做分类感知过滤，再按需做 `CLIP` 重排；如后续打开 `IMG_ENABLE_BING=1`，再追加 Bing 补图。
 - 映射: 过滤失效图、离题图、重复图后，固定组装 `1 主图 + 3 详情图`。
 - 入库: 满足图片与字段要求后写入 `jj_wangyi_goods`，否则继续补生成。
+- 批次: 每条数据会写入 `batch_id/last_batch_id/source_type/source_note`；可手动指定 `--batch-id`，不传则自动使用系统生成批次号。
 - 排查: 当前主流程图片问题优先看百度抓取，必要时再单独用 `verify_bing_order.py` 验证 Bing。
 - 自检: 可通过 `--check-runtime 1` 快速确认当前图片运行环境，输出是否启用 Bing 及对应渲染状态。
 
@@ -65,7 +67,8 @@ pip3 install -U transformers huggingface_hub safetensors tokenizers
 说明:
 - 当前 `CLIP` 重排默认关闭，不装也不影响主流程。
 - `torch` 需提前可用；有 GPU 可显著降低重排耗时，没有 GPU 也可以用 CPU 跑。
-- 模型默认使用 `OFA-Sys/chinese-clip-vit-base-patch16`，建议提前下载到本地目录后再通过 `.env` 指向本地路径。
+- `CLIP` 只允许读取本地模型目录，默认路径为 `ai_goods_pipeline/runtime/models/chinese-clip-vit-base-patch16`。
+- 若本地目录不存在会直接跳过重排，不再回退到 HuggingFace 远端下载。
 
 ### 4.3 当前代码未使用的库
 - `rapidfuzz` 当前代码没有实际引用，不属于必装依赖。
@@ -98,7 +101,7 @@ IMG_MIN_BYTES=1024
 IMG_ALLOW_GIF_AS_MAIN=0
 IMG_ENABLE_BING=0
 IMG_ENABLE_CLIP_RERANK=0
-IMG_CLIP_MODEL=OFA-Sys/chinese-clip-vit-base-patch16
+IMG_CLIP_MODEL=ai_goods_pipeline/runtime/models/chinese-clip-vit-base-patch16
 IMG_CLIP_MIN_SCORE=0.22
 IMG_CLIP_MAX_CANDIDATES=8
 IMG_CLIP_CATEGORY_IDS=128,129
@@ -118,9 +121,23 @@ OSS_VIEW_DOMAIN=
 - `OSS_ENABLED=0` 表示关闭 OSS，直接写原始图片 URL。
 - `OSS_ENABLED=1` 表示开启 OSS，此时需要补齐 OSS 配置。
 - `IMG_ENABLE_CLIP_RERANK=1` 表示开启 `CLIP` 图片重排；默认关闭。
-- `IMG_CLIP_MODEL` 可填 HuggingFace 模型名，也可直接填本地目录。
+- `IMG_CLIP_MODEL` 只支持本地目录；可填相对项目根目录的路径，也可填绝对路径。
 - `IMG_CLIP_CATEGORY_IDS` 当前建议只配置 `128,129`，也就是苏超纪念品和工艺产品。
 - `.env` 不应提交到仓库。
+
+## 5.1 单表批次字段
+当前所有导入、生成、补录链路都只写入 `jj_wangyi_goods` 一张表，并统一使用以下字段标记批次:
+- `batch_id`: 首次入库批次号
+- `last_batch_id`: 最近一次处理批次号
+- `source_type`: 首次来源类型，当前实际写入值为 `ai_generate / seed_import / legacy_import`
+- `source_note`: 来源备注
+
+使用建议:
+- 查某次新生成或新导入的数据，看 `batch_id`
+- 查最近一次被补图/补描述处理过的数据，看 `last_batch_id`
+- 想区分来源入口，看 `source_type`
+- 按日期筛选仍使用 `create_time/update_time`
+- 异步补录脚本只更新 `last_batch_id`，不会覆盖原始 `batch_id/source_type`
 
 ## 6. 当前图片规则
 ### 6.1 搜图规则
@@ -158,6 +175,7 @@ python3 ai_goods_pipeline/generate_goods.py \
   --category-id 126 \
   --keywords "苏州特产,苏州碧螺春,苏式糕点,阳澄湖伴手礼" \
   --count 1 \
+  --batch-id suzhou_20260323_a \
   --write-db 1 \
   --dry-run 0
 ```
@@ -168,6 +186,7 @@ python3 ai_goods_pipeline/generate_goods.py \
   --category-id 127 \
   --keywords "江苏农副产品,盐城大米,南通海苔,水产干货" \
   --count 1 \
+  --batch-id agri_20260323_a \
   --write-db 1 \
   --dry-run 0
 ```
@@ -178,6 +197,7 @@ python3 ai_goods_pipeline/generate_goods.py \
   --category-id 128 \
   --keywords "苏超纪念品,南京助威围巾,球迷伴手礼" \
   --count 1 \
+  --batch-id football_20260323_a \
   --write-db 1 \
   --dry-run 0
 ```
@@ -188,6 +208,7 @@ python3 ai_goods_pipeline/generate_goods.py \
   --category-id 129 \
   --keywords "江苏工艺产品,宜兴紫砂杯,苏绣团扇,云锦礼品" \
   --count 1 \
+  --batch-id craft_20260323_a \
   --write-db 1 \
   --dry-run 0
 ```
@@ -202,6 +223,7 @@ python3 ai_goods_pipeline/generate_goods.py \
 - `--dry-run`: `1` 只跑流程不写库，`0` 正式写库
 - `--export-excel`: 当前保留参数，但 DB-first 实现下不使用
 - `--city-strategy`: 城市分布策略，默认 `balanced`
+- `--batch-id`: 可选，自定义批次号；不传时自动使用系统生成批次号
 - `--check-runtime`: 只做图片运行环境自检，不生成、不入库
 
 自检示例:
@@ -267,7 +289,7 @@ IMG_CLIP_MAX_CANDIDATES=8
 IMG_CLIP_CATEGORY_IDS=128,129
 ```
 
-首次下载模型示例:
+首次手动准备本地模型示例:
 ```bash
 python3 - <<'PY'
 from transformers import AutoProcessor, AutoModel
@@ -283,6 +305,10 @@ model.save_pretrained(save_dir)
 print("saved:", save_dir)
 PY
 ```
+
+说明:
+- 这一步只用于首次把模型手动保存到本地目录。
+- 项目运行期不会再自动回退远端下载；本地目录不存在时会直接跳过 `CLIP` 重排。
 
 单独评估重排效果:
 ```bash
@@ -328,6 +354,7 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 - `--missing-mode`: `either/image/description/both`
 - `--concurrency`: 异步并发数，默认 `3`
 - `--dry-run`: `1` 只预览不写库，`0` 正式写库
+- `--batch-id`: 可选，自定义本次补录批次号；不传时自动使用系统生成批次号
 
 干跑一条:
 ```bash
@@ -336,6 +363,7 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
   --limit 1 \
   --missing-mode either \
   --concurrency 1 \
+  --batch-id enrich_20260323_a \
   --dry-run 1
 ```
 
@@ -354,6 +382,7 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 - 当前链路默认仍只使用百度图片，不走 Bing 主流程
 - 文案补全与图片抓取均为异步实现；仅当开启 OSS 上传时，OSS SDK 仍通过 `asyncio.to_thread` 包一层同步上传
 - 若商品已有主图但缺描述，脚本会保留现有主图，只补详情图与描述
+- 正式写库时不会改动原始 `batch_id/source_type`，只更新 `last_batch_id`
 - 控制台会输出 `selected/success/updated/failed/log/run_id/summary`
 
 ## 12. 常见问题

@@ -12,6 +12,7 @@ if __package__ in {None, ""}:
 from ai_goods_pipeline.config import load_settings
 from ai_goods_pipeline.pipeline import AIGoodsPipeline, GenerationTask
 from ai_goods_pipeline.prompts.category_profiles import get_category_profile
+from ai_goods_pipeline.utils.batch_meta import normalize_batch_id
 from ai_goods_pipeline.utils.logger import setup_logger
 
 
@@ -26,6 +27,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dry-run", type=int, default=0)
     parser.add_argument("--export-excel", type=int, default=0)
     parser.add_argument("--city-strategy", type=str, default="balanced")
+    parser.add_argument("--batch-id", type=str, default="")
     parser.add_argument("--check-runtime", type=int, default=0)
     return parser.parse_args()
 
@@ -34,6 +36,7 @@ def main() -> int:
     args = parse_args()
     settings = load_settings()
     logger, log_path, run_id = setup_logger(settings.logs_dir)
+    batch_id = normalize_batch_id(args.batch_id, fallback=run_id)
     pipeline = AIGoodsPipeline(settings=settings, logger=logger, run_id=run_id, log_path=log_path)
     try:
         if args.check_runtime:
@@ -41,6 +44,7 @@ def main() -> int:
                 json.dumps(
                     {
                         "run_id": run_id,
+                        "batch_id": batch_id,
                         "runtime_status": pipeline.image_client.runtime_status(),
                         "log": str(log_path),
                     },
@@ -71,11 +75,12 @@ def main() -> int:
             dry_run=bool(args.dry_run),
             export_excel=bool(args.export_excel),
             city_strategy=args.city_strategy,
+            batch_id=batch_id,
         )
         result = pipeline.run(task)
         print(
             (
-                f"run_id={result.run_id} requested={result.requested_count} "
+                f"run_id={result.run_id} batch_id={batch_id} requested={result.requested_count} "
                 f"success={result.success_count} inserted={result.inserted_count} "
                 f"failures={result.failure_count} "
                 f"log={result.log_path} failures_log={result.failure_log_path} "

@@ -1,9 +1,9 @@
 # AI商品自动生成采集入库-标准开发文档
 
 ## 1. 文档信息
-- 文档版本: `v1.26`
+- 文档版本: `v1.27`
 - 创建日期: `2026-03-04`
-- 更新日期: `2026-03-21`
+- 更新日期: `2026-03-23`
 - 适用项目: `image-harvester/goods_excel`
 - 目标系统: `jiujie_shop.jj_wangyi_goods`
 
@@ -18,6 +18,7 @@
 - 使用千问模型生成结构化商品文案与价格。
 - 使用图片搜索结果抓取图片并映射主图/详情图。
 - 落地到 MySQL 表 `jj_wangyi_goods`。
+- 所有批次标记统一维护在 `jj_wangyi_goods` 单表中，不做按天分表，也不新增批次日志表。
 - 结果可控: 价格区间、地域覆盖、批次去重、库内去重、合规校验。
 
 ## 3. 范围与非范围
@@ -154,11 +155,12 @@ Prompt组装(全局+分类+任务+输出Schema)
   - `ai_goods_pipeline/enums/image_semantics.py`
 - 默认状态: 关闭，需通过 `.env` 显式开启 `IMG_ENABLE_CLIP_RERANK=1`
 - 当前建议适用分类: `128 苏超纪念品`、`129 工艺产品`
-- 当前默认模型: `OFA-Sys/chinese-clip-vit-base-patch16`
+- 当前默认模型目录: `ai_goods_pipeline/runtime/models/chinese-clip-vit-base-patch16`
 - 工作方式:
   - 只对“已通过过滤和 URL 有效性校验的静态图片候选”做语义重排。
   - 不新增搜图来源，不替代百度抓图，不绕过前置过滤。
   - 当静态候选图少于 `2` 张、依赖缺失、模型不可用或分类未命中 `IMG_CLIP_CATEGORY_IDS` 时，自动跳过，不阻塞主流程。
+  - 当前只允许从本地模型目录加载，不再回退远端下载；模型目录不存在时直接报本地缺失并跳过。
 - 当前边界:
   - `CLIP` 只能在已有候选池内排序，无法解决“候选池本身没有正确商品图”的问题。
   - 现阶段更适合处理 `128/129` 这类“候选池里有对图，但顺序容易被人物图/风景图/泛场景图带偏”的问题。
@@ -191,8 +193,19 @@ Prompt组装(全局+分类+任务+输出Schema)
 | `price` | `price` | 转 `decimal(10,2)` |
 | `description` | 文案+详情图 | HTML 拼接 |
 | `en_name` | 可选 | 可留空 |
+| `batch_id` | 任务批次号 | 首次入库批次号；支持命令行 `--batch-id`，不传时自动回退到 `run_id` |
+| `last_batch_id` | 最近处理批次号 | 首次写入时与 `batch_id` 相同；后续补录或重处理时只更新此字段 |
+| `source_type` | 来源类型 | 首次来源标记；当前实际写入 `ai_generate / seed_import / legacy_import` |
+| `source_note` | 来源备注 | 记录来源文件、分类、入口等简要说明，便于后续筛查 |
 | `create_time` | 系统时间 | 自动写入 |
 | `update_time` | 系统时间 | 自动写入 |
+
+单表批次策略补充:
+- 所有批次管理统一落在 `jj_wangyi_goods` 表内，不新增批次日志表，也不做按天分表。
+- `batch_id` 表示“这条商品第一次进入系统时属于哪个批次”。
+- `last_batch_id` 表示“这条商品最近一次被主流程生成、导入或补录处理时属于哪个批次”。
+- `source_type` 只记录首次来源，不因后续补图、补描述而反复改写。
+- `enrich_seed_goods_from_db.py` 作为补录链路，正式写库时只更新缺失字段和 `last_batch_id`，不覆盖原始 `batch_id/source_type`。
 
 ### 7.3 description 拼接模板
 ```html
@@ -454,7 +467,7 @@ IMG_MIN_BYTES=1024
 IMG_ALLOW_GIF_AS_MAIN=0
 IMG_ENABLE_BING=0
 IMG_ENABLE_CLIP_RERANK=0
-IMG_CLIP_MODEL=OFA-Sys/chinese-clip-vit-base-patch16
+IMG_CLIP_MODEL=ai_goods_pipeline/runtime/models/chinese-clip-vit-base-patch16
 IMG_CLIP_MIN_SCORE=0.22
 IMG_CLIP_MAX_CANDIDATES=8
 IMG_CLIP_CATEGORY_IDS=128,129
@@ -474,7 +487,7 @@ OSS_VIEW_DOMAIN=https://static.example.com/
 - `.env` 禁止入库，保留 `.env.example`。
 - 已泄露旧 key 需尽快轮换。
 - `IMG_ENABLE_CLIP_RERANK` 默认建议关闭，先保证候选池质量，再按需开启重排增强。
-- `IMG_CLIP_MODEL` 建议优先指向本地模型目录，避免运行时临时下载导致抖动。
+- `IMG_CLIP_MODEL` 当前只支持本地模型目录，不允许再回退远端下载。
 - `IMG_CLIP_CATEGORY_IDS` 当前建议保留为 `128,129`，暂不建议全分类开启。
 
 ## 11. 建议代码结构
@@ -511,6 +524,7 @@ python3 ai_goods_pipeline/generate_goods.py \
   --keywords "苏州特产,苏州碧螺春,苏式糕点,阳澄湖伴手礼" \
   --count 50 \
   --model qwen-plus \
+  --batch-id suzhou_20260323_a \
   --write-db 1
 ```
 
@@ -518,12 +532,14 @@ python3 ai_goods_pipeline/generate_goods.py \
 - `--dry-run 1` 仅生成不入库
 - `--export-excel 1` 导出审稿文件
 - `--city-strategy balanced` 按13市均衡分布
+- `--batch-id custom_batch_xxx` 手动指定本次批次号；不传时自动使用系统生成的 `run_id`
 
 参数语义补充:
 - `--count` 表示最终通过校验并成功入库或成功导出的商品数量，不是模型一次返回的候选数量。
 - 若候选商品因重复、价格越界、图片失效、字段缺失等原因被丢弃，程序应自动继续补生成，直到凑满 `count` 或达到任务级总尝试上限。
 - `--dry-run 1` 下也应严格执行去重、图片校验和失败记录，只是不落库。
 - `--export-excel 1` 建议导出“通过候选 + 失败原因 + 审稿备注”三类信息，便于人工复审。
+- `--batch-id` 仅决定本次任务写入的批次标记，不影响去重、图片抓取和模型生成逻辑。
 
 ## 13. 测试与验收
 ### 13.1 功能验收
@@ -700,6 +716,7 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 
 ### 16.4 当前正式链路整理
 - 输入层: `generate_goods.py` 接收 `category_id + keywords + count + model + write_db + dry_run`，并从根目录 `.env` 读取数据库、千问、图片与 OSS 配置，目标表为 `jj_wangyi_goods`。
+- 批次层: 当前只维护 `jj_wangyi_goods` 单表批次元数据；主生成、种子导入、老 Excel 导入都写入 `batch_id/last_batch_id/source_type/source_note`，支持命令行自定义 `--batch-id`，不传则回退为系统生成 `run_id`。
 - 生成层: `pipeline.py` 调用 Prompt 组装逻辑，按 `126 苏州特产 / 127 农副产品 / 128 苏超纪念品 / 129 工艺产品` 四类画像约束生成结构化商品草案，默认主模型为 `qwen-plus`，必要时可切 `qwen-max`。
 - 校验层: 生成结果先经过 JSON 结构校验、分类约束、价格区间、字段完整性、标题去重和历史库去重，不合格候选直接丢弃并补生成。
 - 图片层: 当前搜图关键词固定只使用生成后的完整 `title`，主流程正式图片来源默认仅为百度图片，按 Playwright 渲染后的首屏 DOM 顺序抓取，不再使用 `ptapi` 封装接口，也不再使用项目内预置素材兜底；如后续打开 `IMG_ENABLE_BING=1`，再启用 Bing 补图。对 `128/129` 可按开关追加 `CLIP` 语义重排，但 `CLIP` 只在已有候选图内排序，不替代搜图本身。
@@ -712,6 +729,7 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 ## 17. 变更记录
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| v1.27 | 2026-03-23 | 批次管理正式收敛为 `jj_wangyi_goods` 单表方案，新增 `batch_id/last_batch_id/source_type/source_note` 字段说明，并补充 `generate_goods.py`、`enrich_seed_goods_from_db.py` 的 `--batch-id` 用法与补录不覆盖原始来源的规则 |
 | v1.26 | 2026-03-21 | 新增可选 `CLIP` 图片重排说明，补充 `.env` 配置、最小闭环验证命令、适用范围与代码结构；同时明确图片语义词统一维护在 `enums/image_semantics.py` |
 | v1.25 | 2026-03-20 | 新增基于数据库存量商品的纯异步补录脚本 `enrich_seed_goods_from_db.py`，支持按空 `image/description` 条件异步补 `sub_title/图片/详情`，并补充使用说明 |
 | v1.24 | 2026-03-20 | 主流程默认关闭 Bing 搜图，图片来源暂时收敛为百度图片；新增 `IMG_ENABLE_BING` 开关，保留 Bing 实现与验证脚本供后续恢复 |

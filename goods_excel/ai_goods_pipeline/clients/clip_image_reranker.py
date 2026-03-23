@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from io import BytesIO
+from pathlib import Path
 import re
 from threading import Lock
 
@@ -61,10 +62,13 @@ class ClipImageReranker:
         self._last_error = ""
 
     def runtime_status(self) -> dict[str, object]:
+        local_model_dir = self._resolve_local_model_dir()
         return {
             "enabled": self.enabled,
             "category_ids": self.category_ids,
             "model_name": self.model_name,
+            "local_model_dir": local_model_dir,
+            "local_model_dir_exists": bool(local_model_dir and Path(local_model_dir).is_dir()),
             "deps_ready": self._deps_ready(),
             "model_loaded": self._model is not None and self._processor is not None,
             "last_error": self._last_error,
@@ -190,29 +194,36 @@ class ClipImageReranker:
                 return self._model, self._processor
             if not self._deps_ready():
                 return None, None
+            local_model_dir = self._resolve_local_model_dir()
+            if not local_model_dir:
+                return None, None
             try:
-                self._processor, self._model = self._load_from_pretrained(local_files_only=True)
-            except Exception:
-                try:
-                    self._processor, self._model = self._load_from_pretrained(local_files_only=False)
-                except Exception as exc:  # pragma: no cover - runtime dependent
-                    self._last_error = str(exc)
-                    self._model = None
-                    self._processor = None
-                    return None, None
+                self._processor, self._model = self._load_from_pretrained(local_model_dir)
+            except Exception as exc:  # pragma: no cover - runtime dependent
+                self._last_error = f"local_model_load_failed:{exc}"
+                self._model = None
+                self._processor = None
+                return None, None
             self._device = "cuda" if torch.cuda.is_available() else "cpu"
             self._model.to(self._device)
             self._model.eval()
             return self._model, self._processor
 
-    def _load_from_pretrained(self, *, local_files_only: bool):
+    def _resolve_local_model_dir(self) -> str | None:
+        candidate = Path(str(self.model_name or "")).expanduser()
+        if not candidate.is_dir():
+            self._last_error = f"local_model_dir_missing:{candidate}"
+            return None
+        return str(candidate.resolve())
+
+    def _load_from_pretrained(self, model_dir: str):
         processor = AutoProcessor.from_pretrained(
-            self.model_name,
-            local_files_only=local_files_only,
+            model_dir,
+            local_files_only=True,
         )
         model = AutoModel.from_pretrained(
-            self.model_name,
-            local_files_only=local_files_only,
+            model_dir,
+            local_files_only=True,
         )
         return processor, model
 

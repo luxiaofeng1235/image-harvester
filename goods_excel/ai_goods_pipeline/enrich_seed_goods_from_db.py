@@ -21,6 +21,7 @@ from ai_goods_pipeline.clients.async_qwen_client import (
 )
 from ai_goods_pipeline.clients.oss_client import OSSImageUploader
 from ai_goods_pipeline.config import load_settings
+from ai_goods_pipeline.utils.batch_meta import normalize_batch_id
 from ai_goods_pipeline.prompts.seed_enrichment import build_seed_enrichment_prompts
 from ai_goods_pipeline.utils.description_layout import build_description_html
 from ai_goods_pipeline.utils.logger import setup_logger
@@ -45,6 +46,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--concurrency", type=int, default=3)
     parser.add_argument("--dry-run", type=int, default=0)
     parser.add_argument("--force-image-refresh", type=int, default=0)
+    parser.add_argument("--batch-id", type=str, default="")
     return parser.parse_args()
 
 
@@ -151,6 +153,7 @@ async def process_one_row(
     qwen_client: AsyncQwenClient,
     image_client: AsyncImageClient,
     db_writer: AsyncDBWriter,
+    batch_id: str,
 ) -> dict[str, Any]:
     row_id = int(row["id"])
     title = str(row["goods_name"] or "").strip()
@@ -234,6 +237,7 @@ async def process_one_row(
         "sub_title": final_sub_title,
         "image": final_image,
         "description": final_description,
+        "last_batch_id": normalize_batch_id(batch_id, fallback=batch_id),
     }
     if not dry_run:
         await db_writer.update_goods_enrichment(goods_id=row_id, **update_payload)
@@ -258,6 +262,7 @@ async def process_rows(
     dry_run: bool,
     force_image_refresh: bool,
     logger,
+    batch_id: str,
 ) -> list[dict[str, Any]]:
     semaphore = asyncio.Semaphore(max(1, concurrency))
     qwen_client = AsyncQwenClient(
@@ -301,6 +306,7 @@ async def process_rows(
                     qwen_client=qwen_client,
                     image_client=image_client,
                     db_writer=db_writer,
+                    batch_id=batch_id,
                 )
                 logger.info(
                     "Processed seed goods id=%s ok=%s updated=%s duration=%.2fs title=%s",
@@ -385,6 +391,7 @@ async def amain() -> int:
 
     settings = load_settings()
     logger, log_path, run_id = setup_logger(settings.logs_dir)
+    batch_id = normalize_batch_id(args.batch_id, fallback=run_id)
     db_writer = AsyncDBWriter(
         host=settings.db_host,
         port=settings.db_port,
@@ -429,6 +436,7 @@ async def amain() -> int:
         dry_run=bool(args.dry_run),
         force_image_refresh=bool(args.force_image_refresh),
         logger=logger,
+        batch_id=batch_id,
     )
     summary = build_summary(
         category_id=args.category_id,
@@ -444,7 +452,7 @@ async def amain() -> int:
         (
             f"selected={summary['selected_count']} success={summary['success_count']} "
             f"updated={summary['updated_count']} failed={summary['failure_count']} "
-            f"log={log_path} run_id={run_id}"
+            f"log={log_path} run_id={run_id} batch_id={batch_id}"
         )
     )
     print("summary=" + json.dumps(summary, ensure_ascii=False))

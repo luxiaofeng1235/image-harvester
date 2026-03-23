@@ -16,12 +16,14 @@ from ai_goods_pipeline.clients.qwen_client import (
     QwenParseError,
 )
 from ai_goods_pipeline.config import Settings
+from ai_goods_pipeline.enums.source_types import SOURCE_AI_GENERATE
 from ai_goods_pipeline.prompts.category_profiles import (
     build_prompts,
     choose_candidate_count,
     get_category_profile,
     select_history_guard_titles,
 )
+from ai_goods_pipeline.utils.batch_meta import build_source_note, normalize_batch_id
 from ai_goods_pipeline.utils.description_layout import build_description_html
 from ai_goods_pipeline.validators.goods_validator import GoodsValidator, ValidationResult
 from ai_goods_pipeline.writers.db_writer import DBWriter
@@ -38,6 +40,7 @@ class GenerationTask:
     dry_run: bool
     export_excel: bool
     city_strategy: str
+    batch_id: str = ""
 
 
 @dataclass(slots=True)
@@ -340,6 +343,7 @@ class AIGoodsPipeline:
             attrs=item["attrs"],
             detail_images=detail_images,
         )
+        batch_id = normalize_batch_id(task.batch_id, fallback=self.run_id)
         return {
             "goods_name": item["title"],
             "sub_title": item["subtitle"],
@@ -348,6 +352,16 @@ class AIGoodsPipeline:
             "price": item["price"],
             "description": description,
             "en_name": "",
+            "batch_id": batch_id,
+            "last_batch_id": batch_id,
+            "source_type": SOURCE_AI_GENERATE,
+            "source_note": build_source_note(
+                [
+                    f"batch_id={batch_id}",
+                    f"keywords={','.join(task.keywords)}",
+                    f"model={generation.model}",
+                ]
+            ),
             "create_time": now,
             "update_time": now,
             "selling_points": item["selling_points"],

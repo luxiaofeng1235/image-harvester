@@ -67,7 +67,9 @@ class AsyncDBWriter:
             where_clauses.append(missing_sql)
 
         sql = f"""
-            SELECT id, goods_name, sub_title, category_id, image, price, description, en_name, create_time, update_time
+            SELECT
+                id, goods_name, sub_title, category_id, image, price, description,
+                en_name, batch_id, last_batch_id, source_type, source_note, create_time, update_time
             FROM `{self.table}`
             WHERE {' AND '.join(where_clauses)}
             ORDER BY id ASC
@@ -88,6 +90,7 @@ class AsyncDBWriter:
         sub_title: str | None = None,
         image: str | None = None,
         description: str | None = None,
+        last_batch_id: str | None = None,
     ) -> int:
         pool = await self._get_pool()
         fields: list[str] = []
@@ -102,6 +105,9 @@ class AsyncDBWriter:
         if description is not None:
             fields.append("description = %s")
             params.append(description)
+        if last_batch_id is not None:
+            fields.append("last_batch_id = %s")
+            params.append(last_batch_id)
 
         fields.append("update_time = %s")
         params.append(int(time.time()))
@@ -113,6 +119,7 @@ class AsyncDBWriter:
                 affected = await cursor.execute(sql, params)
             await conn.commit()
         return int(affected)
+
 
     async def _get_pool(self):
         if aiomysql is None:

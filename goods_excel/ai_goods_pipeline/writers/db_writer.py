@@ -52,8 +52,11 @@ class DBWriter:
 
         sql = f"""
             INSERT INTO `{self.table}`
-            (goods_name, sub_title, category_id, image, price, description, en_name, create_time, update_time)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            (
+                goods_name, sub_title, category_id, image, price, description, en_name,
+                batch_id, last_batch_id, source_type, source_note, create_time, update_time
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         params = [
             (
@@ -64,6 +67,10 @@ class DBWriter:
                 item["price"],
                 item["description"],
                 item.get("en_name", ""),
+                item.get("batch_id", ""),
+                item.get("last_batch_id", item.get("batch_id", "")),
+                item.get("source_type", ""),
+                item.get("source_note", ""),
                 item["create_time"],
                 item["update_time"],
             )
@@ -101,7 +108,9 @@ class DBWriter:
             where_clauses.append(missing_sql)
 
         sql = f"""
-            SELECT id, goods_name, sub_title, category_id, image, price, description, en_name, create_time, update_time
+            SELECT
+                id, goods_name, sub_title, category_id, image, price, description,
+                en_name, batch_id, last_batch_id, source_type, source_note, create_time, update_time
             FROM `{self.table}`
             WHERE {' AND '.join(where_clauses)}
             ORDER BY id ASC
@@ -122,6 +131,7 @@ class DBWriter:
         sub_title: str | None = None,
         image: str | None = None,
         description: str | None = None,
+        last_batch_id: str | None = None,
     ) -> int:
         fields: list[str] = []
         params: list[Any] = []
@@ -135,6 +145,9 @@ class DBWriter:
         if description is not None:
             fields.append("description = %s")
             params.append(description)
+        if last_batch_id is not None:
+            fields.append("last_batch_id = %s")
+            params.append(last_batch_id)
 
         fields.append("update_time = %s")
         params.append(int(time.time()))
@@ -146,6 +159,7 @@ class DBWriter:
                 affected = cursor.execute(sql, params)
             conn.commit()
         return int(affected)
+
 
     def _build_missing_condition(self, missing_mode: str) -> str:
         image_empty = "(image IS NULL OR image = '')"

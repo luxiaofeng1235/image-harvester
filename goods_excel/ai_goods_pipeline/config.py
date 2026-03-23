@@ -9,6 +9,9 @@ from dotenv import load_dotenv
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 PROJECT_DIR = PACKAGE_DIR.parent
+DEFAULT_CLIP_MODEL_DIR = (
+    PACKAGE_DIR / "runtime" / "models" / "chinese-clip-vit-base-patch16"
+)
 
 
 def _as_bool(value: str | None, default: bool = False) -> bool:
@@ -39,6 +42,19 @@ def _as_int_tuple(value: str | None, default: tuple[int, ...]) -> tuple[int, ...
             continue
         items.append(int(text))
     return tuple(items) if items else default
+
+
+def _as_local_path_str(
+    value: str | None,
+    *,
+    base_dir: Path,
+    default: Path,
+) -> str:
+    text = str(value or "").strip()
+    candidate = Path(text).expanduser() if text else default
+    if not candidate.is_absolute():
+        candidate = base_dir / candidate
+    return str(candidate.resolve())
 
 
 @dataclass(slots=True)
@@ -162,9 +178,10 @@ def load_settings(env_file: Path | None = None) -> Settings:
             os.getenv("IMG_ENABLE_CLIP_RERANK"),
             False,
         ),
-        image_clip_model=os.getenv(
-            "IMG_CLIP_MODEL",
-            "OFA-Sys/chinese-clip-vit-base-patch16",
+        image_clip_model=_as_local_path_str(
+            os.getenv("IMG_CLIP_MODEL"),
+            base_dir=PROJECT_DIR,
+            default=DEFAULT_CLIP_MODEL_DIR,
         ),
         image_clip_min_score=_as_float(os.getenv("IMG_CLIP_MIN_SCORE"), 0.22),
         image_clip_max_candidates=_as_int(
