@@ -154,6 +154,7 @@ async def process_one_row(
     image_client: AsyncImageClient,
     db_writer: AsyncDBWriter,
     batch_id: str,
+    run_id: str,
 ) -> dict[str, Any]:
     row_id = int(row["id"])
     title = str(row["goods_name"] or "").strip()
@@ -184,6 +185,7 @@ async def process_one_row(
                 title=title,
                 price=price,
                 system_prompt_base=settings.qwen_system_prompt,
+                style_seed=f"{run_id}:{batch_id}:{row_id}",
             )
             generation = await qwen_client.generate(
                 system_prompt=system_prompt,
@@ -227,10 +229,13 @@ async def process_one_row(
 
         if need_description:
             final_description = build_description_html(
+                title=title,
+                category_id=category_id,
                 subtitle=qwen_payload["subtitle"],
                 selling_points=qwen_payload["selling_points"],
                 attrs=qwen_payload["attrs"],
                 detail_images=detail_images,
+                variation_seed=f"{run_id}:{batch_id}:{row_id}",
             )
 
     update_payload = {
@@ -263,6 +268,7 @@ async def process_rows(
     force_image_refresh: bool,
     logger,
     batch_id: str,
+    run_id: str,
 ) -> list[dict[str, Any]]:
     semaphore = asyncio.Semaphore(max(1, concurrency))
     qwen_client = AsyncQwenClient(
@@ -307,6 +313,7 @@ async def process_rows(
                     image_client=image_client,
                     db_writer=db_writer,
                     batch_id=batch_id,
+                    run_id=run_id,
                 )
                 logger.info(
                     "Processed seed goods id=%s ok=%s updated=%s duration=%.2fs title=%s",
@@ -437,6 +444,7 @@ async def amain() -> int:
         force_image_refresh=bool(args.force_image_refresh),
         logger=logger,
         batch_id=batch_id,
+        run_id=run_id,
     )
     summary = build_summary(
         category_id=args.category_id,

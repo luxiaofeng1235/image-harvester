@@ -154,6 +154,7 @@ class AIGoodsPipeline:
                 city_strategy=task.city_strategy,
                 history_titles=history_guard_titles,
                 system_prompt_base=self.settings.qwen_system_prompt,
+                style_seed=f"{self.run_id}:{normalize_batch_id(task.batch_id, fallback=self.run_id)}:{attempted_candidates}:{len(records)}",
             )
 
             batch_added = 0
@@ -338,10 +339,13 @@ class AIGoodsPipeline:
             return None, entry
 
         description = self._build_description_html(
+            title=item["title"],
+            category_id=task.category_id,
             subtitle=item["subtitle"],
             selling_points=item["selling_points"],
             attrs=item["attrs"],
             detail_images=detail_images,
+            variation_seed=f"{self.run_id}:{normalize_batch_id(task.batch_id, fallback=self.run_id)}",
         )
         batch_id = normalize_batch_id(task.batch_id, fallback=self.run_id)
         return {
@@ -407,16 +411,22 @@ class AIGoodsPipeline:
     def _build_description_html(
         self,
         *,
+        title: str,
+        category_id: int,
         subtitle: str,
         selling_points: list[str],
         attrs: dict[str, Any],
         detail_images: list[str],
+        variation_seed: str = "",
     ) -> str:
         return build_description_html(
+            title=title,
+            category_id=category_id,
             subtitle=subtitle,
             selling_points=selling_points,
             attrs=attrs,
             detail_images=detail_images,
+            variation_seed=variation_seed,
         )
 
     def _failure_entry(

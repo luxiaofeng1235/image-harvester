@@ -6,6 +6,7 @@ from typing import Iterable
 
 from ai_goods_pipeline.constants import CATEGORY_PROFILES, CITY_POOL
 from ai_goods_pipeline.prompts.demo_library import get_category_demo_prompt_block
+from ai_goods_pipeline.prompts.description_styles import build_batch_description_style_block
 
 
 def get_category_profile(category_id: int) -> dict[str, object]:
@@ -140,6 +141,7 @@ def build_prompts(
     city_strategy: str,
     history_titles: list[str],
     system_prompt_base: str,
+    style_seed: str = "",
 ) -> tuple[str, str]:
     profile = get_category_profile(category_id)
     category_name = profile["name"]
@@ -173,6 +175,11 @@ def build_prompts(
         target_count=target_count,
         city_strategy=city_strategy,
     )
+    style_rules = build_batch_description_style_block(
+        category_id=category_id,
+        seed_text=style_seed or f"{category_id}:{','.join(keywords)}:{target_count}",
+        target_count=target_count,
+    )
     demo_block = get_category_demo_prompt_block(category_id, limit=10)
     user_prompt = "\n".join(
         [
@@ -190,6 +197,9 @@ def build_prompts(
             "- title 只放一个最关键卖点热词；规格、包装、送礼场景、更多修饰信息写入 subtitle 和 selling_points，不要继续堆在 title。",
             "- subtitle 要承接 2~4 个补充卖点，补充产地/工艺/风味/交付/场景信息，不能简单重复标题。",
             "- selling_points 固定输出 3~5 条字符串，每条只写一个明确卖点，避免整段堆砌和句式重复。",
+            "- 同一批次不同商品的 subtitle 和 selling_points 不能反复套同一种句式模板，必须主动拉开表达重心，可以分别偏向产地、风味、原料、工艺、包装、食用方式、礼赠场景中的不同维度。",
+            "- 对 126/127 食品类商品，不要把每条都写成“产地+原料+包装+场景”的同一语序；允许有的先写风味，有的先写规格，有的先写节令或吃法，但都要保持真实可售。",
+            *style_rules,
             "- attrs 固定输出对象，value 只能是字符串或数字。",
             "- image_keywords 固定输出 1~3 个关键词，作为结构化标签保留，不能为空。",
             "- 城市、产地、工艺、材质、风味、交付方式之间必须彼此匹配，禁止生硬拼接。",

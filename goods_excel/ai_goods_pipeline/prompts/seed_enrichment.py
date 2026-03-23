@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 
+from ai_goods_pipeline.prompts.description_styles import build_single_description_style_block
+
 
 SEED_CATEGORY_HINTS = {
     126: [
@@ -54,6 +56,7 @@ def build_seed_enrichment_prompts(
     title: str,
     price: float,
     system_prompt_base: str,
+    style_seed: str = "",
 ) -> tuple[str, str]:
     category_label = get_seed_category_label(category_id)
     schema = [
@@ -67,6 +70,11 @@ def build_seed_enrichment_prompts(
         }
     ]
     category_rules = SEED_CATEGORY_HINTS.get(category_id, [])
+    style_rules = build_single_description_style_block(
+        category_id=category_id,
+        title=title,
+        seed_text=style_seed or f"{category_id}:{title}:{round(float(price), 2)}",
+    )
     system_prompt = "\n".join(
         [
             system_prompt_base.strip(),
@@ -88,6 +96,9 @@ def build_seed_enrichment_prompts(
             "- price 必须与输入价格完全一致。",
             "- subtitle 保持 1 句自然中文，补充具体信息，不要写成空泛广告语。",
             "- selling_points 固定输出 3~5 条，每条只表达一个明确卖点，避免句式高度重复。",
+            "- 不要把每条商品都补成同一种模板句；可根据商品类型在产地、风味、原料、工艺、包装、食用方式、礼赠场景里选择 1~2 个最适合的重点来写。",
+            "- 对 126/127 食品和农副产品，避免反复使用同一种“产地+规格+包装+场景”语序，尽量让不同商品的描述重心自然分散。",
+            *style_rules,
             "- attrs 固定输出对象，value 只能是字符串或数字。",
             "- image_keywords 固定输出 1~3 个关键词，必须适合图片搜索。",
             "- 禁止输出功能性、保健性、疗效性、检测性、百分比、营养成分、添加剂、认证、官方背书等无法核验内容。",
