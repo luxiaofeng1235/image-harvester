@@ -14,12 +14,12 @@ if __package__ in {None, ""}:
     sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from ai_goods_pipeline.clients.async_image_client import AsyncImageClient
+from ai_goods_pipeline.clients.async_oss_client import AsyncOSSImageUploader
 from ai_goods_pipeline.clients.async_qwen_client import (
     AsyncQwenClient,
     AsyncQwenClientError,
     AsyncQwenParseError,
 )
-from ai_goods_pipeline.clients.oss_client import OSSImageUploader
 from ai_goods_pipeline.config import load_settings
 from ai_goods_pipeline.utils.batch_meta import normalize_batch_id
 from ai_goods_pipeline.prompts.seed_enrichment import build_seed_enrichment_prompts
@@ -117,30 +117,19 @@ def sanitize_enrichment_item(
 
 async def maybe_upload_images(
     *,
-    settings,
     main_image: str,
     detail_images: list[str],
     dry_run: bool,
+    oss_uploader: AsyncOSSImageUploader | None,
 ) -> tuple[str, list[str]]:
-    if dry_run or not settings.oss_enabled:
+    if dry_run or oss_uploader is None:
         return main_image, detail_images
 
-    uploader = OSSImageUploader(
-        enabled=settings.oss_enabled,
-        access_key_id=settings.oss_access_key_id,
-        access_key_secret=settings.oss_access_key_secret,
-        bucket_name=settings.oss_bucket,
-        endpoint=settings.oss_endpoint,
-        view_domain=settings.oss_view_domain,
-        prefix=settings.oss_prefix,
-        timeout=settings.image_timeout,
+    uploaded_main, uploaded_details = await asyncio.gather(
+        oss_uploader.upload_url(main_image),
+        oss_uploader.upload_urls(detail_images, force_upload=True),
     )
-    try:
-        uploaded_main = await asyncio.to_thread(uploader.upload_url, main_image)
-        uploaded_details = await asyncio.to_thread(uploader.upload_urls, detail_images)
-        return uploaded_main, uploaded_details
-    finally:
-        uploader.close()
+    return uploaded_main, uploaded_details
 
 
 async def process_one_row(
@@ -153,6 +142,7 @@ async def process_one_row(
     qwen_client: AsyncQwenClient,
     image_client: AsyncImageClient,
     db_writer: AsyncDBWriter,
+    oss_uploader: AsyncOSSImageUploader | None,
     batch_id: str,
     run_id: str,
 ) -> dict[str, Any]:
@@ -219,10 +209,10 @@ async def process_one_row(
         resolved_main_image = image_result.main_image
         detail_images = image_result.detail_images
         uploaded_main_image, detail_images = await maybe_upload_images(
-            settings=settings,
             main_image=resolved_main_image,
             detail_images=detail_images,
             dry_run=dry_run,
+            oss_uploader=oss_uploader,
         )
         if need_image:
             final_image = uploaded_main_image
@@ -298,6 +288,21 @@ async def process_rows(
         table=settings.db_table,
         pool_maxsize=max(2, concurrency + 1),
     )
+    oss_uploader = (
+        AsyncOSSImageUploader(
+            enabled=settings.oss_enabled,
+            access_key_id=settings.oss_access_key_id,
+            access_key_secret=settings.oss_access_key_secret,
+            bucket_name=settings.oss_bucket,
+            endpoint=settings.oss_endpoint,
+            view_domain=settings.oss_view_domain,
+            prefix=settings.oss_prefix,
+            timeout=settings.image_timeout,
+            max_concurrency=max(2, concurrency * 2),
+        )
+        if settings.oss_enabled
+        else None
+    )
 
     async def _runner(row: dict[str, Any]) -> dict[str, Any]:
         async with semaphore:
@@ -312,6 +317,7 @@ async def process_rows(
                     qwen_client=qwen_client,
                     image_client=image_client,
                     db_writer=db_writer,
+                    oss_uploader=oss_uploader,
                     batch_id=batch_id,
                     run_id=run_id,
                 )
@@ -360,6 +366,8 @@ async def process_rows(
         await qwen_client.close()
         await image_client.close()
         await db_writer.close()
+        if oss_uploader is not None:
+            await oss_uploader.close()
 
 
 def build_summary(

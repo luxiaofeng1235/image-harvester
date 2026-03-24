@@ -323,7 +323,7 @@ class AIGoodsPipeline:
         detail_images = image_result.detail_images
         try:
             main_image = self.oss_uploader.upload_url(main_image)
-            detail_images = self.oss_uploader.upload_urls(detail_images)
+            detail_images = self.oss_uploader.upload_urls(detail_images, force_upload=True)
         except Exception as exc:
             entry = self._failure_entry(
                 task=task,

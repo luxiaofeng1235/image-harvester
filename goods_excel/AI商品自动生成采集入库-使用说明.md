@@ -12,7 +12,8 @@
 - 图片候选会额外经过分类感知过滤，优先拦截明显跨城市、跨品类的错图结果。
 - 可按需开启 `CLIP` 图片重排，对已通过校验的候选图再做一轮语义排序；当前建议只用于 `128/129`。
 - 每条商品必须满足 `1` 张主图 + `3` 张详情图后才允许入库。
-- 当前可通过 `OSS_ENABLED=0` 关闭 OSS 上传，直接写入原图 URL。
+- 当前可通过 `OSS_ENABLED=0` 关闭 OSS 上传；关闭后不会再把图片统一转 OSS，而是按归一化后的原图 URL 写库。
+- 当前图片有效性校验已提升到“真实图片解码”级别，不再只依赖状态码或响应头。
 
 ## 1.1 当前链路速览
 - 输入: 命令行传入 `category_id + keywords + count`，并读取根目录 `.env`。
@@ -160,8 +161,11 @@ https://image.baidu.com/search/index?tn=baiduimage&fm=result&ie=utf-8&word=<titl
 - 图片写库前会先做 URL 归一化。
   - `https://xxx/abc.jpeg?x-tos-process=...` 会裁成 `https://xxx/abc.jpeg`
   - `https://nimg.ws.126.net/?url=http...abc.jpg&thumbnail=...&quality=...` 会裁成 `https://nimg.ws.126.net/?url=http...abc.jpg`
-- 若归一化后已经是标准图片 URL，则直接入库。
+- 采集阶段会对图片字节做一次真实解码，损坏图、伪图片响应、无权限返回页会直接过滤。
+- OSS 上传阶段也会再次做真实解码校验，避免把异常内容同步进业务图床。
+- 若归一化后已经是标准图片 URL，则主图可直接入库。
 - 若归一化后仍不是标准图片 URL，例如 `https://img2.baidu.com/it/u=...` 这类“可打开但前端不易识别”的地址，则在 `OSS_ENABLED=1` 时自动同步 OSS 后再入库。
+- `OSS_ENABLED=1` 时，详情图会统一转 OSS 后再写入富文本；主图仍按“标准直链直接写库、非标准图链转 OSS”执行。
 - 当前详情图 HTML 输出为裸 `img` 标签，不再使用 `<p><img /></p>` 包裹。
 
 ## 7. 模型策略
@@ -387,7 +391,7 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 
 说明:
 - 当前链路默认仍只使用百度图片，不走 Bing 主流程
-- 文案补全与图片抓取均为异步实现；仅当开启 OSS 上传时，OSS SDK 仍通过 `asyncio.to_thread` 包一层同步上传
+- 文案补全与图片抓取均为异步实现；仅当开启 OSS 上传时，OSS SDK 仍通过 `asyncio.to_thread` 包一层同步上传，详情图会统一转 OSS
 - 若商品已有主图但缺描述，脚本会保留现有主图，只补详情图与描述
 - 正式写库时不会改动原始 `batch_id/source_type`，只更新 `last_batch_id`
 - 控制台会输出 `selected/success/updated/failed/log/run_id/summary`

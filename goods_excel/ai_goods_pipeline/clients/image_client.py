@@ -33,6 +33,7 @@ from ai_goods_pipeline.enums.image_semantics import (
     IMAGE_MATERIAL_HINTS,
     IMAGE_QUERY_TERM_BLOCKLIST,
 )
+from ai_goods_pipeline.utils.image_decode import probe_image_content
 from ai_goods_pipeline.utils.image_url import normalize_storable_image_url
 from ai_goods_pipeline.utils.retry import retry_call
 
@@ -49,6 +50,8 @@ class ImageProbe:
     content_type: str
     size: int
     is_gif: bool
+    width: int
+    height: int
 
 
 @dataclass(slots=True)
@@ -589,33 +592,34 @@ class ImageClient:
                 url,
                 headers={"User-Agent": USER_AGENT},
                 timeout=self.timeout,
-                stream=True,
             )
             response.raise_for_status()
             content_type = (response.headers.get("Content-Type") or "").lower()
             if not content_type.startswith("image/"):
-                response.close()
                 return None
             if self._is_blocked_image_url(url):
-                response.close()
                 return None
             content_length = int(response.headers.get("Content-Length") or 0)
-            size = 0
-            for chunk in response.iter_content(chunk_size=2048):
-                if not chunk:
-                    continue
-                size += len(chunk)
-                if size >= self.min_bytes:
-                    break
-            response.close()
+            content = response.content
+            size = len(content)
             if max(content_length, size) < self.min_bytes:
                 return None
-            is_gif = "gif" in content_type or url.lower().endswith(".gif")
+            decoded = probe_image_content(content)
+            if decoded is None:
+                return None
+            width, height, image_format = decoded
+            is_gif = (
+                "gif" in content_type
+                or image_format == "gif"
+                or url.lower().endswith(".gif")
+            )
             return ImageProbe(
                 url=url,
                 content_type=content_type,
                 size=max(content_length, size),
                 is_gif=is_gif,
+                width=width,
+                height=height,
             )
 
         try:

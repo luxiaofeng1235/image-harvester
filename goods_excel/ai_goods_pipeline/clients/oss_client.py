@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import os
 from pathlib import Path
+import threading
 from urllib.parse import urlparse
 
 import oss2
@@ -12,6 +14,7 @@ from ai_goods_pipeline.utils.image_url import (
     is_standard_storable_image_url,
     normalize_storable_image_url,
 )
+from ai_goods_pipeline.utils.image_decode import probe_image_content
 
 
 CONTENT_TYPE_MAP = {
@@ -36,6 +39,7 @@ class OSSImageUploader:
         view_domain: str,
         prefix: str,
         timeout: int = 20,
+        max_concurrency: int = 4,
     ) -> None:
         self.force_enabled = enabled
         self.access_key_id = access_key_id
@@ -45,8 +49,10 @@ class OSSImageUploader:
         self.view_domain = view_domain.rstrip("/") + "/" if view_domain else ""
         self.prefix = prefix.strip("/") + "/" if prefix else ""
         self.timeout = timeout
+        self.max_concurrency = max(1, max_concurrency)
         self.session = requests.Session()
         self.upload_cache: dict[str, str] = {}
+        self._cache_lock = threading.Lock()
         self.enabled = self.force_enabled and all(
             [self.access_key_id, self.access_key_secret, self.bucket_name, self.endpoint, self.view_domain]
         )
@@ -61,40 +67,54 @@ class OSSImageUploader:
         except Exception:
             pass
 
-    def upload_url(self, url: str) -> str:
+    def upload_url(self, url: str, *, force_upload: bool = False) -> str:
         url = normalize_storable_image_url(url)
         if not url:
             return ""
-        if is_standard_storable_image_url(url):
+        if not force_upload and is_standard_storable_image_url(url):
             return url
         if not self.enabled:
             return url
         if url.startswith(self.view_domain):
             return url
-        if url in self.upload_cache:
-            return self.upload_cache[url]
+        cache_key = f"{int(force_upload)}:{url}"
+        with self._cache_lock:
+            cached = self.upload_cache.get(cache_key)
+        if cached:
+            return cached
 
         response = self.session.get(url, timeout=self.timeout)
         response.raise_for_status()
+        content_type = (response.headers.get("Content-Type") or "").lower()
+        if not content_type.startswith("image/"):
+            raise ValueError("non_image_content_type")
         content = response.content
         if not content:
             raise ValueError("empty_image_content")
+        if probe_image_content(content) is None:
+            raise ValueError("invalid_image_content")
 
         oss_key = self._url_to_oss_key(url)
         content_type = self._guess_content_type(oss_key)
         assert self.bucket is not None
         self.bucket.put_object(oss_key, content, headers={"Content-Type": content_type})
         new_url = f"{self.view_domain}{oss_key}"
-        self.upload_cache[url] = new_url
+        with self._cache_lock:
+            self.upload_cache[cache_key] = new_url
         return new_url
 
-    def upload_urls(self, urls: list[str]) -> list[str]:
-        uploaded: list[str] = []
-        for url in urls:
-            if not url:
-                continue
-            uploaded.append(self.upload_url(url))
-        return uploaded
+    def upload_urls(self, urls: list[str], *, force_upload: bool = False) -> list[str]:
+        valid_urls = [str(url or "").strip() for url in urls if str(url or "").strip()]
+        if not valid_urls:
+            return []
+        if len(valid_urls) == 1:
+            return [self.upload_url(valid_urls[0], force_upload=force_upload)]
+        with ThreadPoolExecutor(max_workers=min(self.max_concurrency, len(valid_urls))) as executor:
+            futures = [
+                executor.submit(self.upload_url, url, force_upload=force_upload)
+                for url in valid_urls
+            ]
+            return [future.result() for future in futures]
 
     def _url_to_oss_key(self, url: str) -> str:
         md5 = hashlib.md5(url.encode("utf-8")).hexdigest()
