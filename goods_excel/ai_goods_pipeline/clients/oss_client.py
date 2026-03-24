@@ -8,6 +8,11 @@ from urllib.parse import urlparse
 import oss2
 import requests
 
+from ai_goods_pipeline.utils.image_url import (
+    is_standard_storable_image_url,
+    normalize_storable_image_url,
+)
+
 
 CONTENT_TYPE_MAP = {
     ".jpg": "image/jpeg",
@@ -57,9 +62,11 @@ class OSSImageUploader:
             pass
 
     def upload_url(self, url: str) -> str:
-        url = (url or "").strip()
+        url = normalize_storable_image_url(url)
         if not url:
             return ""
+        if is_standard_storable_image_url(url):
+            return url
         if not self.enabled:
             return url
         if url.startswith(self.view_domain):

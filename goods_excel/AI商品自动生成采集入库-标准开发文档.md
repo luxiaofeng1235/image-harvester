@@ -1,9 +1,9 @@
 # AI商品自动生成采集入库-标准开发文档
 
 ## 1. 文档信息
-- 文档版本: `v1.27`
+- 文档版本: `v1.28`
 - 创建日期: `2026-03-04`
-- 更新日期: `2026-03-23`
+- 更新日期: `2026-03-24`
 - 适用项目: `image-harvester/goods_excel`
 - 目标系统: `jiujie_shop.jj_wangyi_goods`
 
@@ -214,9 +214,10 @@ Prompt组装(全局+分类+任务+输出Schema)
   <p><strong>规格属性</strong>：{{attrs_text}}</p>
 </div>
 <div class="product-detail">
-  <p><img src="{{detail_img_1}}" /></p>
-  <p><img src="{{detail_img_2}}" /></p>
-  <p><img src="{{detail_img_3}}" /></p>
+  <p><strong>商品展示</strong></p>
+  <img src="{{detail_img_1}}" />
+  <img src="{{detail_img_2}}" />
+  <img src="{{detail_img_3}}" />
 </div>
 ```
 
@@ -234,9 +235,13 @@ Prompt组装(全局+分类+任务+输出Schema)
 - 若首屏图片存在失效、被显式文本过滤、不是有效图片、重复 URL 等情况，最终主图/详情图会顺延到后续百度候选；若后续重新开启 Bing，则也可能顺延到后续 Bing 候选。因此“首屏顺序一致”与“最终写库四张图完全等于首屏前四张”不是同一个约束层级。
 - 所有分类当前都不再使用项目内预置素材兜底，图片不足时直接判为图片失败并继续补生成。
 - `128 苏超纪念品` 应优先使用不含官方 logo、球员肖像、受保护视觉元素的通用场景图或自有风格图，避免侵权风险。
-- 主图和详情图在写库前应统一同步到 OSS，并使用业务访问域名写入数据库。
-- 默认建议开启 OSS 同步；如需排查性能或先验证生成链路，可通过 `OSS_ENABLED=0` 临时关闭，此时数据库直接写入原图 URL。
-- 详情图 HTML 必须固定输出 `3` 个有效 `img` 标签，禁止保留模板占位符、空链接或缺图入库。
+- 图片 URL 在写库前必须先做一轮“可存储 URL 归一化”。
+  - 直链图片如 `https://xxx/abc.jpeg?x-tos-process=...`、`https://xxx/abc.jpg?x-oss-process=...` 只保留到图片扩展名，去掉后续处理参数。
+  - 代理图片如 `https://nimg.ws.126.net/?url=http...abc.jpg&thumbnail=...&quality=...` 只保留真正的原图参数部分，也就是截到 `url=http...abc.jpg` 为止。
+- 若图片 URL 在归一化后已经是前端可识别的标准图片格式，则直接写入数据库，不强制再走 OSS。
+- 若图片 URL 在归一化后仍不是标准图片格式，例如 `https://img2.baidu.com/it/u=...` 这种“打开是图片、URL 看起来不像标准图片链接”的地址，则应在开启 `OSS_ENABLED=1` 时自动同步 OSS，并写回业务访问域名。
+- `OSS_ENABLED=0` 时，标准图片 URL 仍可直接写库；非标准图片 URL 不会被自动转正，因此生产环境建议开启 OSS。
+- 详情图 HTML 必须固定输出 `3` 个有效 `img` 标签，且 `img` 外层不再包 `p` 标签，禁止保留模板占位符、空链接或缺图入库。
 
 ## 8. Prompt工程标准
 ### 8.1 组装结构
@@ -703,6 +708,7 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 - M7 主流程图片源收敛: 已将主流程默认图片源收敛为百度图片搜索，Bing 暂时退出主流程，仅保留实现与验证脚本以便后续按开关恢复。
 - M8 种子商品异步补全链路: 已新增 `enrich_seed_goods_from_db.py`，支持直接从 `jj_wangyi_goods` 查询 `image` 或 `description` 为空的种子商品，并通过异步 Qwen + 异步百度图片链路补 `sub_title / image / description`，可按 `category_id / ids / limit / concurrency / dry-run` 控制。
 - M9 图片重排增强: 已接入可选 `CLIP` 图片重排能力，支持在百度候选图完成过滤与有效性校验后，对 `128/129` 分类再做一轮语义排序；同时新增独立验证脚本，并将图片语义词统一收口到 `enums/image_semantics.py`。
+- M9.1 图片 URL 标准化收口: 已新增图片 URL 归一化规则，统一裁掉 `x-tos-process/x-oss-process/thumbnail/quality` 等处理参数；标准图链直接入库，非标准图链自动走 OSS 规范化，同时将详情图 HTML 收敛为裸 `img` 标签输出。
 
 ### 16.2 当前重点
 - M10 批量质量验证: 以 `126/127/128/129` 四类为单位继续跑 `10~30` 条样本，重点抽查标题真实性、价格分布、图片相关性、城市覆盖和最终成功率。
@@ -720,7 +726,7 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 - 生成层: `pipeline.py` 调用 Prompt 组装逻辑，按 `126 苏州特产 / 127 农副产品 / 128 苏超纪念品 / 129 工艺产品` 四类画像约束生成结构化商品草案，默认主模型为 `qwen-plus`，必要时可切 `qwen-max`。
 - 校验层: 生成结果先经过 JSON 结构校验、分类约束、价格区间、字段完整性、标题去重和历史库去重，不合格候选直接丢弃并补生成。
 - 图片层: 当前搜图关键词固定只使用生成后的完整 `title`，主流程正式图片来源默认仅为百度图片，按 Playwright 渲染后的首屏 DOM 顺序抓取，不再使用 `ptapi` 封装接口，也不再使用项目内预置素材兜底；如后续打开 `IMG_ENABLE_BING=1`，再启用 Bing 补图。对 `128/129` 可按开关追加 `CLIP` 语义重排，但 `CLIP` 只在已有候选图内排序，不替代搜图本身。
-- 映射层: 抓回图片后继续做可访问性、类型、大小、去重和离题过滤，最终固定映射为 `1 张主图 + 3 张详情图`；如开启 OSS，则先上传 OSS 再写业务访问域名。
+- 映射层: 抓回图片后继续做可访问性、类型、大小、去重和离题过滤，最终固定映射为 `1 张主图 + 3 张详情图`；写库前先做图片 URL 归一化，标准图链直接写库，非标准图链在开启 OSS 时再同步到业务访问域名。
 - 入库层: 只有同时满足文本校验与 `4` 张有效图片的商品才允许写入 `jj_wangyi_goods`，否则记失败并继续补生成，直到达到目标数量或任务级尝试上限。
 - 补录层: 新增 `enrich_seed_goods_from_db.py` 作为第二方案，直接查询库内 `image` 或 `description` 为空的存量种子商品，按单商品单 prompt 异步补全文案与图片；当前默认仍只走百度图片，可通过 `--ids` 和 `--limit 1` 做最小闭环验证。
 - 验证层: 图片顺序问题已拆成最小闭环验证，`verify_baidu_order.py` 与 `verify_bing_order.py` 只验证抓取顺序本身，主流程联调再负责验证过滤、映射、OSS 与入库表现。
@@ -729,6 +735,7 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 ## 17. 变更记录
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| v1.28 | 2026-03-24 | 新增图片 URL 归一化规则，统一处理 `?x-tos-process`、`?x-oss-process`、`&thumbnail=&quality=` 等尾部参数；补充“标准图链直接入库、非标准图链走 OSS”规则，并把详情图 HTML 模板更新为裸 `img` 标签输出 |
 | v1.27 | 2026-03-23 | 批次管理正式收敛为 `jj_wangyi_goods` 单表方案，新增 `batch_id/last_batch_id/source_type/source_note` 字段说明，并补充 `generate_goods.py`、`enrich_seed_goods_from_db.py` 的 `--batch-id` 用法与补录不覆盖原始来源的规则 |
 | v1.26 | 2026-03-21 | 新增可选 `CLIP` 图片重排说明，补充 `.env` 配置、最小闭环验证命令、适用范围与代码结构；同时明确图片语义词统一维护在 `enums/image_semantics.py` |
 | v1.25 | 2026-03-20 | 新增基于数据库存量商品的纯异步补录脚本 `enrich_seed_goods_from_db.py`，支持按空 `image/description` 条件异步补 `sub_title/图片/详情`，并补充使用说明 |

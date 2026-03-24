@@ -118,7 +118,7 @@ OSS_VIEW_DOMAIN=
 ```
 
 说明:
-- `OSS_ENABLED=0` 表示关闭 OSS，直接写原始图片 URL。
+- `OSS_ENABLED=0` 表示关闭 OSS。此时标准图片 URL 会按归一化后的结果直接写库，但非标准图片 URL 不会被自动转成统一 OSS 地址。
 - `OSS_ENABLED=1` 表示开启 OSS，此时需要补齐 OSS 配置。
 - `IMG_ENABLE_CLIP_RERANK=1` 表示开启 `CLIP` 图片重排；默认关闭。
 - `IMG_CLIP_MODEL` 只支持本地目录；可填相对项目根目录的路径，也可填绝对路径。
@@ -157,6 +157,12 @@ https://image.baidu.com/search/index?tn=baiduimage&fm=result&ie=utf-8&word=<titl
 - 若开启 `CLIP`，会在“已通过 URL 有效性校验的静态候选图”上做一次语义重排，不会新增图片来源，也不会跳过前面的过滤规则。
 - `CLIP` 当前只建议用于 `128/129`；当候选静态图少于 `2` 张、依赖未装好或模型不可用时会自动跳过，不阻塞主流程。
 - 只有满足 `1` 主图 + `3` 详情图时才允许入库。
+- 图片写库前会先做 URL 归一化。
+  - `https://xxx/abc.jpeg?x-tos-process=...` 会裁成 `https://xxx/abc.jpeg`
+  - `https://nimg.ws.126.net/?url=http...abc.jpg&thumbnail=...&quality=...` 会裁成 `https://nimg.ws.126.net/?url=http...abc.jpg`
+- 若归一化后已经是标准图片 URL，则直接入库。
+- 若归一化后仍不是标准图片 URL，例如 `https://img2.baidu.com/it/u=...` 这类“可打开但前端不易识别”的地址，则在 `OSS_ENABLED=1` 时自动同步 OSS 后再入库。
+- 当前详情图 HTML 输出为裸 `img` 标签，不再使用 `<p><img /></p>` 包裹。
 
 ## 7. 模型策略
 - 主模型: `qwen-plus`

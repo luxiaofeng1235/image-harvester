@@ -33,6 +33,7 @@ from ai_goods_pipeline.enums.image_semantics import (
     IMAGE_MATERIAL_HINTS,
     IMAGE_QUERY_TERM_BLOCKLIST,
 )
+from ai_goods_pipeline.utils.image_url import normalize_storable_image_url
 from ai_goods_pipeline.utils.retry import retry_call
 
 
@@ -127,7 +128,7 @@ class ImageClient:
             if baidu_items:
                 source_queries.append(f"baidu_images:{query}")
                 for item in baidu_items:
-                    url = str(item.get("image_url") or "").strip()
+                    url = normalize_storable_image_url(str(item.get("image_url") or "").strip())
                     preview_url = str(item.get("thumbnail_url") or "").strip()
                     if not url:
                         continue
@@ -144,7 +145,7 @@ class ImageClient:
                 if bing_items:
                     source_queries.append(f"bing_images:{query}")
                     for item in bing_items:
-                        url = str(item.get("image_url") or "").strip()
+                        url = normalize_storable_image_url(str(item.get("image_url") or "").strip())
                         preview_url = str(item.get("thumbnail_url") or "").strip()
                         if not url:
                             continue
@@ -212,11 +213,13 @@ class ImageClient:
                 continue
             if context is not None and not self._is_relevant_search_result(item, context):
                 continue
-            url = str(item.get("image_url") or "").strip()
+            url = normalize_storable_image_url(str(item.get("image_url") or "").strip())
             if self._is_blocked_image_url(url):
                 continue
             if url and url not in seen_urls:
-                candidates.append(item)
+                candidate = dict(item)
+                candidate["image_url"] = url
+                candidates.append(candidate)
                 seen_urls.add(url)
         return candidates
 
@@ -227,9 +230,9 @@ class ImageClient:
         context: SearchRelevanceContext | None = None,
     ) -> list[str]:
         return [
-            str(item.get("image_url") or "").strip()
+            normalize_storable_image_url(str(item.get("image_url") or "").strip())
             for item in self.fetch_bing_candidates(query, context=context)
-            if str(item.get("image_url") or "").strip()
+            if normalize_storable_image_url(str(item.get("image_url") or "").strip())
         ]
 
     def fetch_baidu_candidates(
@@ -252,11 +255,13 @@ class ImageClient:
                 continue
             if context is not None and not self._is_relevant_search_result(item, context):
                 continue
-            url = str(item.get("image_url") or "").strip()
+            url = normalize_storable_image_url(str(item.get("image_url") or "").strip())
             if self._is_blocked_image_url(url):
                 continue
             if url and url not in seen_urls:
-                candidates.append(item)
+                candidate = dict(item)
+                candidate["image_url"] = url
+                candidates.append(candidate)
                 seen_urls.add(url)
         return candidates
 
@@ -267,9 +272,9 @@ class ImageClient:
         context: SearchRelevanceContext | None = None,
     ) -> list[str]:
         return [
-            str(item.get("image_url") or "").strip()
+            normalize_storable_image_url(str(item.get("image_url") or "").strip())
             for item in self.fetch_baidu_candidates(query, context=context)
-            if str(item.get("image_url") or "").strip()
+            if normalize_storable_image_url(str(item.get("image_url") or "").strip())
         ]
 
     def runtime_status(self) -> dict[str, bool]:

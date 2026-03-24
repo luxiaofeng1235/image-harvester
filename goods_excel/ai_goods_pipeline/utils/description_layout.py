@@ -6,6 +6,8 @@ from html import unescape as html_unescape
 import re
 from typing import Any
 
+from ai_goods_pipeline.utils.image_url import normalize_storable_image_url
+
 
 LAYOUT_VARIANT_POOLS = {
     126: {
@@ -60,7 +62,11 @@ def build_description_html(
     intro = str(subtitle or "").strip()
     clean_points = [str(point).strip() for point in selling_points if str(point).strip()]
     clean_attrs = _normalize_attrs(attrs, category_id=category_id)
-    clean_images = [str(url).strip() for url in detail_images if str(url).strip()]
+    clean_images = [
+        normalize_storable_image_url(str(url).strip())
+        for url in detail_images
+        if normalize_storable_image_url(str(url).strip())
+    ]
     variant = _choose_layout_variant(
         title=title,
         category_id=category_id,
@@ -99,7 +105,7 @@ def build_description_html(
         sections.append('<div class="product-detail">')
         sections.append(f"  <p><strong>{html_escape(str(variant['detail_label']))}</strong></p>")
         for url in clean_images:
-            sections.append(f'  <p><img src="{html_escape(url)}" /></p>')
+            sections.append(f'  <img src="{html_escape(url)}" />')
         sections.append("</div>")
     return "\n".join(sections)
 
