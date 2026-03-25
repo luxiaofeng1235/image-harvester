@@ -16,6 +16,7 @@ class AsyncOSSImageUploader:
         endpoint: str,
         view_domain: str,
         prefix: str,
+        object_acl: str = "",
         timeout: int = 20,
         max_concurrency: int = 4,
     ) -> None:
@@ -27,6 +28,7 @@ class AsyncOSSImageUploader:
             endpoint=endpoint,
             view_domain=view_domain,
             prefix=prefix,
+            object_acl=object_acl,
             timeout=timeout,
         )
         self.semaphore = asyncio.Semaphore(max(1, max_concurrency))

@@ -26,6 +26,29 @@ CONTENT_TYPE_MAP = {
     ".bmp": "image/bmp",
 }
 
+OBJECT_ACL_MAP = {
+    "": None,
+    "inherit": None,
+    "bucket": None,
+    "default": None,
+    "private": oss2.OBJECT_ACL_PRIVATE,
+    "public-read": oss2.OBJECT_ACL_PUBLIC_READ,
+    "public_read": oss2.OBJECT_ACL_PUBLIC_READ,
+    "public-read-write": oss2.OBJECT_ACL_PUBLIC_READ_WRITE,
+    "public_read_write": oss2.OBJECT_ACL_PUBLIC_READ_WRITE,
+}
+
+
+def normalize_object_acl(value: str | None) -> str:
+    return str(value or "").strip().lower().replace("_", "-")
+
+
+def resolve_object_acl(value: str | None):
+    normalized = normalize_object_acl(value)
+    if normalized not in OBJECT_ACL_MAP:
+        raise ValueError(f"unsupported_oss_object_acl:{value}")
+    return OBJECT_ACL_MAP[normalized]
+
 
 class OSSImageUploader:
     def __init__(
@@ -38,6 +61,7 @@ class OSSImageUploader:
         endpoint: str,
         view_domain: str,
         prefix: str,
+        object_acl: str = "",
         timeout: int = 20,
         max_concurrency: int = 4,
     ) -> None:
@@ -48,6 +72,8 @@ class OSSImageUploader:
         self.endpoint = endpoint
         self.view_domain = view_domain.rstrip("/") + "/" if view_domain else ""
         self.prefix = prefix.strip("/") + "/" if prefix else ""
+        self.object_acl = normalize_object_acl(object_acl)
+        self.object_acl_permission = resolve_object_acl(self.object_acl)
         self.timeout = timeout
         self.max_concurrency = max(1, max_concurrency)
         self.session = requests.Session()
@@ -98,6 +124,8 @@ class OSSImageUploader:
         content_type = self._guess_content_type(oss_key)
         assert self.bucket is not None
         self.bucket.put_object(oss_key, content, headers={"Content-Type": content_type})
+        if self.object_acl_permission is not None:
+            self.bucket.put_object_acl(oss_key, self.object_acl_permission)
         new_url = f"{self.view_domain}{oss_key}"
         with self._cache_lock:
             self.upload_cache[cache_key] = new_url

@@ -101,6 +101,7 @@ class AIGoodsPipeline:
             endpoint=settings.oss_endpoint,
             view_domain=settings.oss_view_domain,
             prefix=settings.oss_prefix,
+            object_acl=settings.oss_object_acl,
             timeout=settings.image_timeout,
         )
         self._runtime_logged = False

@@ -489,11 +489,14 @@ OSS_ACCESS_KEY_SECRET=your_oss_key_secret
 OSS_BUCKET=your_bucket
 OSS_ENDPOINT=oss-cn-shanghai.aliyuncs.com
 OSS_VIEW_DOMAIN=https://static.example.com/
+OSS_PREFIX=goods/images/
+OSS_OBJECT_ACL=public-read
 ```
 
 说明:
 - `.env` 禁止入库，保留 `.env.example`。
 - 已泄露旧 key 需尽快轮换。
+- 推荐默认配置 `OSS_OBJECT_ACL=public-read`，确保每次新上传图片对象显式具备公共读取权限，不依赖 bucket 默认 ACL。
 - `IMG_ENABLE_CLIP_RERANK` 默认建议关闭，先保证候选池质量，再按需开启重排增强。
 - `IMG_CLIP_MODEL` 当前只支持本地模型目录，不允许再回退远端下载。
 - `IMG_CLIP_CATEGORY_IDS` 当前建议保留为 `128,129`，暂不建议全分类开启。
@@ -738,6 +741,7 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 ## 17. 变更记录
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| v1.30 | 2026-03-25 | OSS 上传新增对象级 ACL 配置，默认按 `public-read` 为新上传图片补公共读取权限；同时新增历史 OSS 图片 ACL 批量修复脚本 |
 | v1.29 | 2026-03-24 | 补强图片校验为“真实字节解码”级别，采集与 OSS 上传两段都拦截损坏图/伪图片；同时明确开启 OSS 时详情图统一转 OSS、主图继续保留标准直链直写策略 |
 | v1.28 | 2026-03-24 | 新增图片 URL 归一化规则，统一处理 `?x-tos-process`、`?x-oss-process`、`&thumbnail=&quality=` 等尾部参数；补充“标准图链直接入库、非标准图链走 OSS”规则，并把详情图 HTML 模板更新为裸 `img` 标签输出 |
 | v1.27 | 2026-03-23 | 批次管理正式收敛为 `jj_wangyi_goods` 单表方案，新增 `batch_id/last_batch_id/source_type/source_note` 字段说明，并补充 `generate_goods.py`、`enrich_seed_goods_from_db.py` 的 `--batch-id` 用法与补录不覆盖原始来源的规则 |

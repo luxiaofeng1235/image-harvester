@@ -116,11 +116,14 @@ OSS_ACCESS_KEY_SECRET=
 OSS_BUCKET=
 OSS_ENDPOINT=
 OSS_VIEW_DOMAIN=
+OSS_PREFIX=goods/images/
+OSS_OBJECT_ACL=public-read
 ```
 
 说明:
 - `OSS_ENABLED=0` 表示关闭 OSS。此时标准图片 URL 会按归一化后的结果直接写库，但非标准图片 URL 不会被自动转成统一 OSS 地址。
 - `OSS_ENABLED=1` 表示开启 OSS，此时需要补齐 OSS 配置。
+- `OSS_OBJECT_ACL=public-read` 表示每次新上传到 OSS 的图片对象都会额外补一层公开读权限，避免 bucket 默认 ACL 或历史策略导致前端访问失败。
 - `IMG_ENABLE_CLIP_RERANK=1` 表示开启 `CLIP` 图片重排；默认关闭。
 - `IMG_CLIP_MODEL` 只支持本地目录；可填相对项目根目录的路径，也可填绝对路径。
 - `IMG_CLIP_CATEGORY_IDS` 当前建议只配置 `128,129`，也就是苏超纪念品和工艺产品。
@@ -430,4 +433,23 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 3. 再看千问接口是否可用
 4. 再看百度图片搜索是否可访问
 5. 如任务变慢，先关闭 `OSS_ENABLED`
+
+### 12.6 旧 OSS 图片有的能访问、有的不能访问
+- 先确认 `.env` 中已配置 `OSS_OBJECT_ACL=public-read`，这样后续新上传图片会自动补公开读权限。
+- 对已经在库里、但 ACL 不一致的历史 OSS 图片，可先 dry-run 预览：
+
+```bash
+python3 ai_goods_pipeline/fix_oss_object_acl.py \
+  --goods-ids 2137 \
+  --acl public-read
+```
+
+- 确认无误后正式执行：
+
+```bash
+python3 ai_goods_pipeline/fix_oss_object_acl.py \
+  --goods-ids 2137 \
+  --acl public-read \
+  --apply 1
+```
 6. 最后查看 `ai_goods_pipeline/logs/` 下日志

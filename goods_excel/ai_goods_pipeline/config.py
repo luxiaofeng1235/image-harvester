@@ -101,6 +101,7 @@ class Settings:
     oss_tokenexpiretime: int
     oss_policyfile: str
     oss_prefix: str
+    oss_object_acl: str
 
     @property
     def db_config(self) -> dict[str, object]:
@@ -208,6 +209,7 @@ def load_settings(env_file: Path | None = None) -> Settings:
         oss_tokenexpiretime=_as_int(os.getenv("OSS_TOKENEXPIRETIME"), 900),
         oss_policyfile=os.getenv("OSS_POLICYFILE", ""),
         oss_prefix=os.getenv("OSS_PREFIX", "goods/images/"),
+        oss_object_acl=str(os.getenv("OSS_OBJECT_ACL", "public-read") or "").strip(),
     )
     settings.ensure_runtime_dirs()
     settings.validate()
