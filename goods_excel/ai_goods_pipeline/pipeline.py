@@ -34,6 +34,7 @@ class GenerationTask:
     category_id: int
     keywords: list[str]
     count: int
+    shop_id: int
     model: str
     fallback_model: str
     write_db: bool
@@ -352,6 +353,7 @@ class AIGoodsPipeline:
         return {
             "goods_name": item["title"],
             "sub_title": item["subtitle"],
+            "shop_id": task.shop_id,
             "category_id": task.category_id,
             "image": main_image,
             "price": item["price"],

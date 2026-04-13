@@ -16,7 +16,7 @@
 - 当前图片有效性校验已提升到“真实图片解码”级别，不再只依赖状态码或响应头。
 
 ## 1.1 当前链路速览
-- 输入: 命令行传入 `category_id + keywords + count`，并读取根目录 `.env`。
+- 输入: 命令行传入 `category_id + keywords + count`，可选携带 `shop_id`，并读取根目录 `.env`。
 - 生成: `qwen-plus/qwen-max` 按分类 Prompt 生成结构化商品数据。
 - 校验: 先做 JSON、分类、价格、字段完整性、标题去重和历史库去重。
 - 图片: 固定按 `title` 走百度图片，按浏览器首屏顺序抓取；先做分类感知过滤，再按需做 `CLIP` 重排；如后续打开 `IMG_ENABLE_BING=1`，再追加 Bing 补图。
@@ -186,6 +186,7 @@ https://image.baidu.com/search/index?tn=baiduimage&fm=result&ie=utf-8&word=<titl
 ```bash
 python3 ai_goods_pipeline/generate_goods.py \
   --category-id 126 \
+  --shop-id 1001 \
   --keywords "苏州特产,苏州碧螺春,苏式糕点,阳澄湖伴手礼" \
   --count 1 \
   --batch-id suzhou_20260323_a \
@@ -197,6 +198,7 @@ python3 ai_goods_pipeline/generate_goods.py \
 ```bash
 python3 ai_goods_pipeline/generate_goods.py \
   --category-id 127 \
+  --shop-id 1001 \
   --keywords "江苏农副产品,盐城大米,南通海苔,水产干货" \
   --count 1 \
   --batch-id agri_20260323_a \
@@ -208,6 +210,7 @@ python3 ai_goods_pipeline/generate_goods.py \
 ```bash
 python3 ai_goods_pipeline/generate_goods.py \
   --category-id 128 \
+  --shop-id 1001 \
   --keywords "苏超纪念品,南京助威围巾,球迷伴手礼" \
   --count 1 \
   --batch-id football_20260323_a \
@@ -219,6 +222,7 @@ python3 ai_goods_pipeline/generate_goods.py \
 ```bash
 python3 ai_goods_pipeline/generate_goods.py \
   --category-id 129 \
+  --shop-id 1001 \
   --keywords "江苏工艺产品,宜兴紫砂杯,苏绣团扇,云锦礼品" \
   --count 1 \
   --batch-id craft_20260323_a \
@@ -228,6 +232,7 @@ python3 ai_goods_pipeline/generate_goods.py \
 
 ## 9. 参数说明
 - `--category-id`: 分类 ID，当前支持 `126/127/128/129`
+- `--shop-id`: 可选，商家 ID，默认 `0`；入库时会写入表字段 `shop_id`
 - `--keywords`: 任务关键词，主要用于控制生成方向，不再用于 Bing 搜图
 - `--count`: 最终成功入库数量
 - `--model`: 指定主模型，默认按分类配置

@@ -21,6 +21,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--category-id", type=int)
     parser.add_argument("--keywords", type=str, help="逗号分隔关键词")
     parser.add_argument("--count", type=int, help="最终成功商品数量")
+    parser.add_argument("--shop-id", type=int, default=0)
     parser.add_argument("--model", type=str, default="")
     parser.add_argument("--fallback-model", type=str, default="")
     parser.add_argument("--write-db", type=int, default=1)
@@ -69,6 +70,7 @@ def main() -> int:
             category_id=args.category_id,
             keywords=keywords,
             count=args.count,
+            shop_id=args.shop_id,
             model=args.model or str(profile["default_model"]),
             fallback_model=args.fallback_model or str(profile["fallback_model"]),
             write_db=bool(args.write_db),

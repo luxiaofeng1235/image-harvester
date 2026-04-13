@@ -30,6 +30,7 @@ class SeedItem:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Import seed goods by title and price.")
     parser.add_argument("--category-id", type=int, required=True)
+    parser.add_argument("--shop-id", type=int, default=0)
     parser.add_argument("--input-file", type=str, default="")
     parser.add_argument("--dry-run", type=int, default=0)
     parser.add_argument("--skip-existing", type=int, default=1)
@@ -66,6 +67,7 @@ def parse_seed_items(lines: list[str]) -> list[SeedItem]:
 
 def build_records(
     category_id: int,
+    shop_id: int,
     items: list[SeedItem],
     *,
     batch_id: str,
@@ -78,6 +80,7 @@ def build_records(
             {
                 "goods_name": item.title,
                 "sub_title": "",
+                "shop_id": shop_id,
                 "category_id": category_id,
                 "image": "",
                 "price": item.price,
@@ -129,6 +132,7 @@ def main() -> int:
     )
     records = build_records(
         args.category_id,
+        args.shop_id,
         ready_items,
         batch_id=batch_id,
         source_note=source_note,

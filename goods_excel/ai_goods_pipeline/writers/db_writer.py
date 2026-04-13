@@ -53,15 +53,16 @@ class DBWriter:
         sql = f"""
             INSERT INTO `{self.table}`
             (
-                goods_name, sub_title, category_id, image, price, description, en_name,
+                goods_name, sub_title, shop_id, category_id, image, price, description, en_name,
                 batch_id, last_batch_id, source_type, source_note, create_time, update_time
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         params = [
             (
                 item["goods_name"],
                 item["sub_title"],
+                int(item.get("shop_id", 0) or 0),
                 item["category_id"],
                 item["image"],
                 item["price"],
@@ -109,7 +110,7 @@ class DBWriter:
 
         sql = f"""
             SELECT
-                id, goods_name, sub_title, category_id, image, price, description,
+                id, goods_name, sub_title, shop_id, category_id, image, price, description,
                 en_name, batch_id, last_batch_id, source_type, source_note, create_time, update_time
             FROM `{self.table}`
             WHERE {' AND '.join(where_clauses)}
