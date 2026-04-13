@@ -25,6 +25,7 @@ from ai_goods_pipeline.prompts.category_profiles import (
 )
 from ai_goods_pipeline.utils.batch_meta import build_source_note, normalize_batch_id
 from ai_goods_pipeline.utils.description_layout import build_description_html
+from ai_goods_pipeline.utils.image_url import normalize_storable_image_url
 from ai_goods_pipeline.validators.goods_validator import GoodsValidator, ValidationResult
 from ai_goods_pipeline.writers.db_writer import DBWriter
 
@@ -106,6 +107,9 @@ class AIGoodsPipeline:
             timeout=settings.image_timeout,
         )
         self._runtime_logged = False
+        self._batch_main_images: set[str] = set()
+        self._batch_detail_groups: set[tuple[str, ...]] = set()
+        self._batch_media_groups: set[tuple[str, ...]] = set()
 
     def close(self) -> None:
         self.image_client.close()
@@ -114,6 +118,7 @@ class AIGoodsPipeline:
 
     def run(self, task: GenerationTask) -> PipelineResult:
         run_started_at = time.time()
+        self._reset_batch_media_registry()
         profile = get_category_profile(task.category_id)
         self.logger.info(
             "Start pipeline: category=%s(%s) count=%s keywords=%s dry_run=%s",
@@ -321,8 +326,28 @@ class AIGoodsPipeline:
             entry["all_valid_urls"] = image_result.all_valid_urls
             return None, entry
         now = int(time.time())
-        main_image = image_result.main_image
-        detail_images = image_result.detail_images
+        source_main_image = image_result.main_image
+        source_detail_images = list(image_result.detail_images)
+        duplicate_reason = self._check_batch_media_reuse(
+            main_image=source_main_image,
+            detail_images=source_detail_images,
+        )
+        if duplicate_reason:
+            entry = self._failure_entry(
+                task=task,
+                candidate_title=item["title"],
+                normalized_title=validation.normalized_title,
+                fail_stage="image",
+                fail_reason=duplicate_reason,
+                image_keywords=item["image_keywords"],
+                raw_model_output=json.dumps(item, ensure_ascii=False),
+            )
+            entry["source_queries"] = image_result.source_queries
+            entry["all_valid_urls"] = image_result.all_valid_urls
+            return None, entry
+
+        main_image = source_main_image
+        detail_images = list(source_detail_images)
         try:
             main_image = self.oss_uploader.upload_url(main_image)
             detail_images = self.oss_uploader.upload_urls(detail_images, force_upload=True)
@@ -339,6 +364,11 @@ class AIGoodsPipeline:
             entry["source_queries"] = image_result.source_queries
             entry["all_valid_urls"] = image_result.all_valid_urls
             return None, entry
+
+        self._register_batch_media(
+            main_image=source_main_image,
+            detail_images=source_detail_images,
+        )
 
         description = self._build_description_html(
             title=item["title"],
@@ -431,6 +461,56 @@ class AIGoodsPipeline:
             detail_images=detail_images,
             variation_seed=variation_seed,
         )
+
+    def _reset_batch_media_registry(self) -> None:
+        self._batch_main_images = set()
+        self._batch_detail_groups = set()
+        self._batch_media_groups = set()
+
+    def _check_batch_media_reuse(
+        self,
+        *,
+        main_image: str,
+        detail_images: list[str],
+    ) -> str:
+        normalized_main = normalize_storable_image_url(main_image)
+        normalized_details = tuple(
+            normalize_storable_image_url(url)
+            for url in detail_images
+            if normalize_storable_image_url(url)
+        )
+        normalized_media_group = tuple(
+            item for item in (normalized_main, *normalized_details) if item
+        )
+        if normalized_main and normalized_main in self._batch_main_images:
+            return "duplicate_main_image_in_batch"
+        if normalized_details and normalized_details in self._batch_detail_groups:
+            return "duplicate_detail_images_in_batch"
+        if normalized_media_group and normalized_media_group in self._batch_media_groups:
+            return "duplicate_media_bundle_in_batch"
+        return ""
+
+    def _register_batch_media(
+        self,
+        *,
+        main_image: str,
+        detail_images: list[str],
+    ) -> None:
+        normalized_main = normalize_storable_image_url(main_image)
+        normalized_details = tuple(
+            normalize_storable_image_url(url)
+            for url in detail_images
+            if normalize_storable_image_url(url)
+        )
+        normalized_media_group = tuple(
+            item for item in (normalized_main, *normalized_details) if item
+        )
+        if normalized_main:
+            self._batch_main_images.add(normalized_main)
+        if normalized_details:
+            self._batch_detail_groups.add(normalized_details)
+        if normalized_media_group:
+            self._batch_media_groups.add(normalized_media_group)
 
     def _failure_entry(
         self,

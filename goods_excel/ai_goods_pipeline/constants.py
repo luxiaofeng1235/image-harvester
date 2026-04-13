@@ -194,6 +194,7 @@ ATTR_SYNONYMS = {
 IMAGE_URL_HOST_BLOCKLIST = [
     "hdslb.com",
     "miaobi-lite.bj.bcebos.com",
+    "dpfile.com",
 ]
 
 IMAGE_URL_EMBED_UNSTABLE_HOSTS = [

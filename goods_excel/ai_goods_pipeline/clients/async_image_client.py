@@ -229,7 +229,13 @@ class AsyncImageClient:
     ) -> list[str]:
         queries: list[str] = []
         seen: set[str] = set()
-        derived_queries = self._build_derived_queries(title, image_keywords, keywords, category_id)
+        scoped_keywords = self._scoped_image_keywords(image_keywords)
+        derived_queries = self._build_derived_queries(
+            title,
+            scoped_keywords,
+            keywords,
+            category_id,
+        )
 
         def _push(raw: str) -> None:
             value = str(raw or "").strip()
@@ -249,7 +255,7 @@ class AsyncImageClient:
         if len(queries) >= IMAGE_QUERY_LIMIT:
             return queries
 
-        for raw in [*image_keywords, *keywords]:
+        for raw in scoped_keywords:
             value = str(raw or "").strip()
             if not value:
                 continue
@@ -265,7 +271,7 @@ class AsyncImageClient:
         keywords: list[str],
         category_id: int,
     ) -> list[str]:
-        source_text = " ".join([title, *image_keywords, *keywords])
+        source_text = " ".join([title, *self._scoped_image_keywords(image_keywords)])
         city = next(iter(self._extract_expected_cities([source_text], category_id)), "")
         quoted_terms = re.findall(r"[“\"]([^”\"]{2,12})[”\"]", title)
         carrier_terms = [term for term in IMAGE_CARRIER_KEYWORDS if term in source_text]
@@ -310,12 +316,23 @@ class AsyncImageClient:
         category_id: int,
         keywords: list[str],
     ) -> SearchRelevanceContext:
-        parts = [title, *image_keywords, *keywords]
+        parts = [title, *self._scoped_image_keywords(image_keywords)]
         return SearchRelevanceContext(
             category_id=category_id,
             query_terms=tuple(self._extract_query_terms(parts)),
             expected_cities=tuple(self._extract_expected_cities(parts, category_id)),
         )
+
+    def _scoped_image_keywords(self, image_keywords: list[str]) -> list[str]:
+        scoped: list[str] = []
+        seen: set[str] = set()
+        for raw in image_keywords:
+            value = str(raw or "").strip()
+            if not value or value in seen:
+                continue
+            scoped.append(value)
+            seen.add(value)
+        return scoped[:3]
 
     def _is_blocked_search_result(self, item: dict[str, str]) -> bool:
         meta_text = " ".join(
@@ -360,15 +377,26 @@ class AsyncImageClient:
 
         if query_hits > 0:
             return True
-        if context.category_id == 128 and football_hits > 0:
+        if context.category_id == 128 and football_hits > 0 and self._matches_expected_city(meta_text, context):
             return True
         if context.category_id == 129 and craft_hits > 0:
             return True
-        if context.category_id in {126, 127} and food_hits > 0:
+        if (
+            context.category_id in {126, 127}
+            and food_hits > 0
+            and self._matches_expected_city(meta_text, context)
+        ):
             return True
-        if context.expected_cities and any(city in meta_text for city in context.expected_cities):
+        return False
+
+    def _matches_expected_city(
+        self,
+        meta_text: str,
+        context: SearchRelevanceContext,
+    ) -> bool:
+        if not context.expected_cities:
             return True
-        return True
+        return any(city in meta_text for city in context.expected_cities)
 
     async def _validate_urls(self, urls: list[str]) -> list[AsyncImageProbe]:
         results = await asyncio.gather(*[self._probe_url(url) for url in urls], return_exceptions=True)
