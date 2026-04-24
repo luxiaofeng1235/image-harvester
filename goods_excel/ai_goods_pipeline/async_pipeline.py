@@ -146,7 +146,6 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             ",".join(task.keywords),
             task.dry_run,
         )
-        await self._log_runtime_status()
         history_titles = await self.db_writer.fetch_existing_titles()
         validator = GoodsValidator(
             category_id=task.category_id,
