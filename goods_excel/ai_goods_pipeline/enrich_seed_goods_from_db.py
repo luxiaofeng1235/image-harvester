@@ -25,6 +25,7 @@ from ai_goods_pipeline.utils.batch_meta import normalize_batch_id
 from ai_goods_pipeline.prompts.seed_enrichment import build_seed_enrichment_prompts
 from ai_goods_pipeline.utils.description_layout import build_description_html
 from ai_goods_pipeline.utils.logger import setup_logger
+from ai_goods_pipeline.utils.text import normalize_title
 from ai_goods_pipeline.writers.async_db_writer import AsyncDBWriter
 
 
@@ -113,6 +114,14 @@ def sanitize_enrichment_item(
         "attrs": attrs,
         "image_keywords": image_keywords[:3],
     }
+
+
+def build_image_reuse_key(*, category_id: int, title: str, image_keywords: list[str]) -> str:
+    for seed in [*image_keywords, title]:
+        normalized = normalize_title(str(seed or "").strip())
+        if normalized:
+            return f"{category_id}:{normalized}"
+    return f"{category_id}:"
 
 
 async def maybe_upload_images(
@@ -230,6 +239,11 @@ async def process_one_row(
                 image_keywords=qwen_payload["image_keywords"],
                 category_id=category_id,
                 keywords=[title],
+                reuse_key=build_image_reuse_key(
+                    category_id=category_id,
+                    title=title,
+                    image_keywords=list(qwen_payload["image_keywords"] or []),
+                ),
             )
             source_queries = image_result.source_queries
             resolved_main_image = str(image_result.main_image or "").strip()

@@ -128,8 +128,17 @@ class AsyncImageClient:
         )
         self.validation_cache = self._load_validation_cache()
         self.resolution_pool_cache: dict[str, AsyncImageResolutionPool] = {}
+        self._resolution_pool_lock = asyncio.Lock()
+        self._resolution_pool_inflight: dict[str, asyncio.Task[AsyncImageResolutionPool]] = {}
 
     async def close(self) -> None:
+        async with self._resolution_pool_lock:
+            inflight = list(self._resolution_pool_inflight.values())
+            self._resolution_pool_inflight.clear()
+        for task in inflight:
+            task.cancel()
+        if inflight:
+            await asyncio.gather(*inflight, return_exceptions=True)
         try:
             self._persist_validation_cache()
         except Exception:
@@ -210,7 +219,46 @@ class AsyncImageClient:
         cache_key = str(reuse_key or "").strip()
         if cache_key and cache_key in self.resolution_pool_cache:
             return self.resolution_pool_cache[cache_key]
+        if cache_key:
+            async with self._resolution_pool_lock:
+                cached_pool = self.resolution_pool_cache.get(cache_key)
+                if cached_pool is not None:
+                    return cached_pool
+                inflight_task = self._resolution_pool_inflight.get(cache_key)
+                if inflight_task is None:
+                    inflight_task = asyncio.create_task(
+                        self._build_image_pool(
+                            title=title,
+                            image_keywords=image_keywords,
+                            category_id=category_id,
+                            keywords=keywords,
+                        )
+                    )
+                    self._resolution_pool_inflight[cache_key] = inflight_task
+            try:
+                pool = await inflight_task
+            finally:
+                async with self._resolution_pool_lock:
+                    if self._resolution_pool_inflight.get(cache_key) is inflight_task:
+                        self._resolution_pool_inflight.pop(cache_key, None)
+            self.resolution_pool_cache[cache_key] = pool
+            return pool
 
+        return await self._build_image_pool(
+            title=title,
+            image_keywords=image_keywords,
+            category_id=category_id,
+            keywords=keywords,
+        )
+
+    async def _build_image_pool(
+        self,
+        *,
+        title: str,
+        image_keywords: list[str],
+        category_id: int,
+        keywords: list[str],
+    ) -> AsyncImageResolutionPool:
         candidate_urls: list[str] = []
         candidate_preview_urls: dict[str, str] = {}
         candidate_sources: dict[str, str] = {}
@@ -252,8 +300,6 @@ class AsyncImageClient:
             gif_urls=[img.url for img in valid_images if img.is_gif],
             candidate_sources=dict(candidate_sources),
         )
-        if cache_key:
-            self.resolution_pool_cache[cache_key] = pool
         return pool
 
     async def _select_images_from_pool(
