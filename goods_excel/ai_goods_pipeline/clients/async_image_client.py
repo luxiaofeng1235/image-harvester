@@ -134,8 +134,11 @@ class AsyncImageClient:
             self._persist_validation_cache()
         except Exception:
             pass
-        await self.http_client.aclose()
-        await self.baidu_image_client.close()
+        await asyncio.gather(
+            asyncio.wait_for(self.http_client.aclose(), timeout=3.0),
+            asyncio.wait_for(self.baidu_image_client.close(), timeout=5.0),
+            return_exceptions=True,
+        )
 
     async def runtime_status(self) -> dict[str, bool | str]:
         baidu_render_ready = await self.baidu_image_client.can_render()
@@ -168,6 +171,31 @@ class AsyncImageClient:
             keywords=keywords,
             reuse_key=reuse_key,
         )
+        return await self._select_images_from_pool(pool, exclude_urls=exclude_urls)
+
+    async def resolve_image_pool(
+        self,
+        *,
+        title: str,
+        image_keywords: list[str],
+        category_id: int,
+        keywords: list[str],
+        reuse_key: str = "",
+    ) -> AsyncImageResolutionPool:
+        return await self._resolve_image_pool(
+            title=title,
+            image_keywords=image_keywords,
+            category_id=category_id,
+            keywords=keywords,
+            reuse_key=reuse_key,
+        )
+
+    async def select_images_from_pool(
+        self,
+        pool: AsyncImageResolutionPool,
+        *,
+        exclude_urls: set[str] | None = None,
+    ) -> AsyncImageResolutionResult:
         return await self._select_images_from_pool(pool, exclude_urls=exclude_urls)
 
     async def _resolve_image_pool(

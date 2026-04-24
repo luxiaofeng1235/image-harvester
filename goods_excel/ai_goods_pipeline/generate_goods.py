@@ -4,6 +4,7 @@ import argparse
 import asyncio
 import json
 import sys
+import time
 from pathlib import Path
 
 
@@ -93,7 +94,30 @@ async def amain() -> int:
         )
         print("quality_report=" + json.dumps(result.quality_report, ensure_ascii=False))
     finally:
+        close_started_at = time.perf_counter()
+        logger.info("amain finally: pipeline.close start")
         await pipeline.close()
+        logger.info("amain finally: pipeline.close done duration=%.3fs", time.perf_counter() - close_started_at)
+        current_task = asyncio.current_task()
+        pending_tasks = [
+            task
+            for task in asyncio.all_tasks()
+            if task is not current_task and not task.done()
+        ]
+        logger.info("amain finally: pending tasks before cleanup=%s", len(pending_tasks))
+        if pending_tasks:
+            for task in pending_tasks[:5]:
+                logger.info("amain finally: pending task=%r", task)
+            cleanup_started_at = time.perf_counter()
+            for task in pending_tasks:
+                task.cancel()
+            done, still_pending = await asyncio.wait(pending_tasks, timeout=3.0)
+            logger.info(
+                "amain finally: pending cleanup done=%s remaining=%s duration=%.3fs",
+                len(done),
+                len(still_pending),
+                time.perf_counter() - cleanup_started_at,
+            )
     return 0
 
 

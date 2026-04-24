@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+from dataclasses import dataclass
 import json
 import re
 import time
 from pathlib import Path
 from typing import Any
 
-from ai_goods_pipeline.clients.async_image_client import AsyncImageClient
+from ai_goods_pipeline.clients.async_image_client import AsyncImageClient, AsyncImageResolutionPool
 from ai_goods_pipeline.clients.async_oss_client import AsyncOSSImageUploader
 from ai_goods_pipeline.clients.async_qwen_client import (
     AsyncQwenClient,
@@ -26,9 +27,17 @@ from ai_goods_pipeline.prompts.category_profiles import (
 )
 from ai_goods_pipeline.utils.batch_meta import build_source_note, normalize_batch_id
 from ai_goods_pipeline.utils.image_url import normalize_storable_image_url
-from ai_goods_pipeline.utils.text import normalize_title
+from ai_goods_pipeline.utils.text import normalize_title, similarity_ratio
 from ai_goods_pipeline.validators.goods_validator import GoodsValidator, ValidationResult
 from ai_goods_pipeline.writers.async_db_writer import AsyncDBWriter
+
+
+@dataclass(slots=True)
+class PendingBatchCandidate:
+    raw_item: Any
+    validation: ValidationResult
+    image_pool_key: str
+    started_at: float
 
 
 class AsyncAIGoodsPipeline(AIGoodsPipeline):
@@ -86,16 +95,48 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
         self._batch_main_images: set[str] = set()
         self._batch_detail_groups: set[tuple[str, ...]] = set()
         self._batch_media_groups: set[tuple[str, ...]] = set()
+        self._accepted_image_pool_keys: set[str] = set()
 
     async def close(self) -> None:
-        await self.image_client.close()
-        await self.qwen_client.close()
-        await self.db_writer.close()
-        await self.oss_uploader.close()
+        async def _close_one(name: str, close_coro, timeout: float = 5.0) -> None:
+            started_at = time.perf_counter()
+            try:
+                await asyncio.wait_for(close_coro(), timeout=timeout)
+                self.logger.info(
+                    "Close done: %s duration=%.3fs",
+                    name,
+                    time.perf_counter() - started_at,
+                )
+            except asyncio.TimeoutError:
+                self.logger.warning(
+                    "Close timeout: %s exceeded %.1fs elapsed=%.3fs",
+                    name,
+                    timeout,
+                    time.perf_counter() - started_at,
+                )
+            except Exception as exc:
+                self.logger.warning(
+                    "Close failed: %s error=%s elapsed=%.3fs",
+                    name,
+                    exc,
+                    time.perf_counter() - started_at,
+                )
+
+        started_at = time.perf_counter()
+        self.logger.info("Close start")
+        await asyncio.gather(
+            _close_one("image_client", self.image_client.close, timeout=6.0),
+            _close_one("qwen_client", self.qwen_client.close, timeout=3.0),
+            _close_one("db_writer", self.db_writer.close, timeout=5.0),
+            _close_one("oss_uploader", self.oss_uploader.close, timeout=3.0),
+            return_exceptions=True,
+        )
+        self.logger.info("Close all done duration=%.3fs", time.perf_counter() - started_at)
 
     async def run(self, task: GenerationTask) -> PipelineResult:
         run_started_at = time.perf_counter()
         self._reset_batch_media_registry()
+        self._accepted_image_pool_keys = set()
         profile = get_category_profile(task.category_id)
         self.logger.info(
             "Start async pipeline: category=%s(%s) count=%s keywords=%s dry_run=%s",
@@ -179,52 +220,27 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
                 next_model = task.fallback_model if next_model != task.fallback_model else task.model
                 continue
 
-            for raw_item in generation.items:
-                if len(records) >= task.count or attempted_candidates >= max_attempts:
-                    break
-                candidate_started_at = time.perf_counter()
-                attempted_candidates += 1
-                validation = validator.validate(raw_item)
-                if not validation.ok:
-                    candidate_duration = time.perf_counter() - candidate_started_at
-                    candidate_durations.append(candidate_duration)
-                    failures.append(
-                        self._failure_entry(
-                            task=task,
-                            candidate_title=self._safe_title(raw_item),
-                            normalized_title=validation.normalized_title,
-                            fail_stage="validate",
-                            fail_reason=validation.reason,
-                            retry_count=0,
-                            similarity_score=validation.similarity_score,
-                            matched_history_title=validation.matched_history_title,
-                            image_keywords=self._safe_image_keywords(raw_item),
-                            raw_model_output=json.dumps(raw_item, ensure_ascii=False),
-                            candidate_duration_seconds=candidate_duration,
-                        )
-                    )
-                    continue
+            raw_items = generation.items[: max(0, max_attempts - attempted_candidates)]
+            pending_candidates, attempted_in_batch = self._collect_pending_candidates(
+                task=task,
+                validator=validator,
+                raw_items=raw_items,
+                failures=failures,
+                candidate_durations=candidate_durations,
+            )
+            attempted_candidates += attempted_in_batch
 
-                record, image_failure = await self._materialize_record(task, validation, generation)
-                candidate_duration = time.perf_counter() - candidate_started_at
-                candidate_durations.append(candidate_duration)
-                if image_failure is not None:
-                    image_failure["candidate_duration_seconds"] = round(candidate_duration, 3)
-                    failures.append(image_failure)
-                if record is None:
-                    continue
-
-                record["processing_duration_seconds"] = round(candidate_duration, 3)
-                records.append(record)
-                success_durations.append(candidate_duration)
-                validator.register_success(validation)
-                batch_added += 1
-                self.logger.info(
-                    "Accepted item %s/%s: %s",
-                    len(records),
-                    task.count,
-                    record["goods_name"],
-                )
+            materialized = await self._materialize_pending_candidates(
+                task=task,
+                generation=generation,
+                validator=validator,
+                pending_candidates=pending_candidates,
+                records=records,
+                failures=failures,
+                candidate_durations=candidate_durations,
+                success_durations=success_durations,
+            )
+            batch_added += materialized
 
             if batch_added == 0:
                 next_model = task.fallback_model if next_model != task.fallback_model else task.model
@@ -278,23 +294,245 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             quality_report=quality_report,
         )
 
+    def _collect_pending_candidates(
+        self,
+        *,
+        task: GenerationTask,
+        validator: GoodsValidator,
+        raw_items: list[dict[str, Any]],
+        failures: list[dict[str, Any]],
+        candidate_durations: list[float],
+    ) -> tuple[list[PendingBatchCandidate], int]:
+        pending: list[PendingBatchCandidate] = []
+        attempted_in_batch = 0
+        for raw_item in raw_items:
+            attempted_in_batch += 1
+            candidate_started_at = time.perf_counter()
+            validation = validator.validate(raw_item)
+            if not validation.ok:
+                self._append_validation_failure(
+                    task=task,
+                    raw_item=raw_item,
+                    validation=validation,
+                    failures=failures,
+                    candidate_durations=candidate_durations,
+                    started_at=candidate_started_at,
+                )
+                continue
+
+            assert validation.item is not None
+            image_pool_key = self._build_image_pool_key(task, validation.item)
+            duplicate_reason, duplicate_title, duplicate_score = self._match_pending_duplicate(
+                validation=validation,
+                image_pool_key=image_pool_key,
+                pending=pending,
+            )
+            if duplicate_reason:
+                self._append_validation_failure(
+                    task=task,
+                    raw_item=raw_item,
+                    validation=validation,
+                    failures=failures,
+                    candidate_durations=candidate_durations,
+                    started_at=candidate_started_at,
+                    fail_reason=duplicate_reason,
+                    matched_title=duplicate_title,
+                    similarity_score=duplicate_score,
+                )
+                continue
+
+            pending.append(
+                PendingBatchCandidate(
+                    raw_item=raw_item,
+                    validation=validation,
+                    image_pool_key=image_pool_key,
+                    started_at=candidate_started_at,
+                )
+            )
+        return pending, attempted_in_batch
+
+    def _append_validation_failure(
+        self,
+        *,
+        task: GenerationTask,
+        raw_item: Any,
+        validation: ValidationResult,
+        failures: list[dict[str, Any]],
+        candidate_durations: list[float],
+        started_at: float,
+        fail_reason: str = "",
+        matched_title: str = "",
+        similarity_score: float | None = None,
+    ) -> None:
+        candidate_duration = time.perf_counter() - started_at
+        candidate_durations.append(candidate_duration)
+        failures.append(
+            self._failure_entry(
+                task=task,
+                candidate_title=self._safe_title(raw_item),
+                normalized_title=validation.normalized_title,
+                fail_stage="validate",
+                fail_reason=fail_reason or validation.reason,
+                retry_count=0,
+                similarity_score=(
+                    validation.similarity_score if similarity_score is None else similarity_score
+                ),
+                matched_history_title=matched_title or validation.matched_history_title,
+                image_keywords=self._safe_image_keywords(raw_item),
+                raw_model_output=json.dumps(raw_item, ensure_ascii=False),
+                candidate_duration_seconds=candidate_duration,
+            )
+        )
+
+    def _match_pending_duplicate(
+        self,
+        *,
+        validation: ValidationResult,
+        image_pool_key: str,
+        pending: list[PendingBatchCandidate],
+    ) -> tuple[str, str, float]:
+        assert validation.item is not None
+        candidate_title = str(validation.item.get("title") or "").strip()
+        if image_pool_key in self._accepted_image_pool_keys:
+            return "duplicate_candidate_variant_in_batch", candidate_title, 1.0
+
+        duplicate_threshold = max(self.settings.title_similarity_threshold, 0.92)
+        for existing in pending:
+            assert existing.validation.item is not None
+            existing_title = str(existing.validation.item.get("title") or "").strip()
+            if image_pool_key and image_pool_key == existing.image_pool_key:
+                return "duplicate_candidate_variant_in_batch", existing_title, 1.0
+            similarity = similarity_ratio(
+                validation.normalized_title,
+                existing.validation.normalized_title,
+            )
+            if similarity >= duplicate_threshold:
+                return "duplicate_candidate_variant_in_batch", existing_title, similarity
+        return "", "", 0.0
+
+    async def _materialize_pending_candidates(
+        self,
+        *,
+        task: GenerationTask,
+        generation: AsyncQwenGenerationResult,
+        validator: GoodsValidator,
+        pending_candidates: list[PendingBatchCandidate],
+        records: list[dict[str, Any]],
+        failures: list[dict[str, Any]],
+        candidate_durations: list[float],
+        success_durations: list[float],
+    ) -> int:
+        if not pending_candidates:
+            return 0
+
+        semaphore = asyncio.Semaphore(max(1, min(4, len(pending_candidates))))
+
+        async def _load(candidate: PendingBatchCandidate):
+            assert candidate.validation.item is not None
+            item = candidate.validation.item
+            try:
+                async with semaphore:
+                    pool = await self.image_client.resolve_image_pool(
+                        title=item["title"],
+                        image_keywords=item["image_keywords"],
+                        category_id=task.category_id,
+                        keywords=task.keywords,
+                        reuse_key=candidate.image_pool_key,
+                    )
+                return candidate, pool, None
+            except Exception as exc:  # pragma: no cover - network/runtime dependent
+                return candidate, None, exc
+
+        tasks = [asyncio.create_task(_load(candidate)) for candidate in pending_candidates]
+        accepted_count = 0
+        try:
+            for future in asyncio.as_completed(tasks):
+                if len(records) >= task.count:
+                    break
+                candidate, pool, pool_error = await future
+                if candidate.image_pool_key in self._accepted_image_pool_keys:
+                    candidate_duration = time.perf_counter() - candidate.started_at
+                    candidate_durations.append(candidate_duration)
+                    failures.append(
+                        self._failure_entry(
+                            task=task,
+                            candidate_title=self._safe_title(candidate.raw_item),
+                            normalized_title=candidate.validation.normalized_title,
+                            fail_stage="validate",
+                            fail_reason="duplicate_candidate_variant_in_batch",
+                            matched_history_title=self._safe_title(candidate.raw_item),
+                            raw_model_output=json.dumps(candidate.raw_item, ensure_ascii=False),
+                            image_keywords=self._safe_image_keywords(candidate.raw_item),
+                            candidate_duration_seconds=candidate_duration,
+                        )
+                    )
+                    continue
+
+                if pool_error is not None:
+                    self.logger.warning("Image pool prefetch failed: %s", pool_error)
+
+                record, image_failure = await self._materialize_record(
+                    task,
+                    candidate.validation,
+                    generation,
+                    image_pool_key=candidate.image_pool_key,
+                    preloaded_pool=pool,
+                )
+                candidate_duration = time.perf_counter() - candidate.started_at
+                candidate_durations.append(candidate_duration)
+                if image_failure is not None:
+                    image_failure["candidate_duration_seconds"] = round(candidate_duration, 3)
+                    failures.append(image_failure)
+                if record is None:
+                    continue
+
+                record["processing_duration_seconds"] = round(candidate_duration, 3)
+                records.append(record)
+                success_durations.append(candidate_duration)
+                validator.register_success(candidate.validation)
+                self._accepted_image_pool_keys.add(candidate.image_pool_key)
+                accepted_count += 1
+                self.logger.info(
+                    "Accepted item %s/%s: %s",
+                    len(records),
+                    task.count,
+                    record["goods_name"],
+                )
+        finally:
+            for task_item in tasks:
+                if not task_item.done():
+                    task_item.cancel()
+            if tasks:
+                await asyncio.gather(*tasks, return_exceptions=True)
+        return accepted_count
+
     async def _materialize_record(
         self,
         task: GenerationTask,
         validation: ValidationResult,
         generation: AsyncQwenGenerationResult,
+        *,
+        image_pool_key: str = "",
+        preloaded_pool: AsyncImageResolutionPool | None = None,
     ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
         assert validation.item is not None
         item = validation.item
-        image_pool_key = self._build_image_pool_key(task, item)
-        image_result = await self.image_client.resolve_images(
-            title=item["title"],
-            image_keywords=item["image_keywords"],
-            category_id=task.category_id,
-            keywords=task.keywords,
-            reuse_key=image_pool_key,
-            exclude_urls=self._collect_reserved_media_urls(),
-        )
+        if not image_pool_key:
+            image_pool_key = self._build_image_pool_key(task, item)
+        if preloaded_pool is not None:
+            image_result = await self.image_client.select_images_from_pool(
+                preloaded_pool,
+                exclude_urls=self._collect_reserved_media_urls(),
+            )
+        else:
+            image_result = await self.image_client.resolve_images(
+                title=item["title"],
+                image_keywords=item["image_keywords"],
+                category_id=task.category_id,
+                keywords=task.keywords,
+                reuse_key=image_pool_key,
+                exclude_urls=self._collect_reserved_media_urls(),
+            )
         if not image_result.main_image:
             entry = self._failure_entry(
                 task=task,

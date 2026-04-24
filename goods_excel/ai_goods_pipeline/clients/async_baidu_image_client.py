@@ -36,13 +36,13 @@ class AsyncBaiduImageClient:
         async with self._browser_lock:
             if self._browser is not None:
                 try:
-                    await self._browser.close()
+                    await asyncio.wait_for(self._browser.close(), timeout=self.timeout)
                 except Exception:
                     pass
                 self._browser = None
             if self._playwright is not None:
                 try:
-                    await self._playwright.stop()
+                    await asyncio.wait_for(self._playwright.stop(), timeout=self.timeout)
                 except Exception:
                     pass
                 self._playwright = None
