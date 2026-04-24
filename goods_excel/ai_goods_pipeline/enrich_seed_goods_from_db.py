@@ -121,15 +121,42 @@ async def maybe_upload_images(
     detail_images: list[str],
     dry_run: bool,
     oss_uploader: AsyncOSSImageUploader | None,
-) -> tuple[str, list[str]]:
+) -> tuple[str, list[str], list[str]]:
     if dry_run or oss_uploader is None:
-        return main_image, detail_images
+        return main_image, detail_images, []
 
-    uploaded_main, uploaded_details = await asyncio.gather(
-        oss_uploader.upload_url(main_image),
-        oss_uploader.upload_urls(detail_images, force_upload=True),
+    warnings: list[str] = []
+    main_task = (
+        oss_uploader.upload_url(main_image)
+        if str(main_image or "").strip()
+        else asyncio.sleep(0, result="")
     )
-    return uploaded_main, uploaded_details
+    detail_task = (
+        oss_uploader.upload_urls(detail_images, force_upload=True)
+        if detail_images
+        else asyncio.sleep(0, result=[])
+    )
+    uploaded_main, uploaded_details = await asyncio.gather(
+        main_task,
+        detail_task,
+        return_exceptions=True,
+    )
+
+    final_main = main_image
+    final_details = detail_images
+    if isinstance(uploaded_main, Exception):
+        warnings.append(f"main_image_upload_failed:{uploaded_main}")
+        final_main = ""
+    else:
+        final_main = str(uploaded_main or "").strip()
+
+    if isinstance(uploaded_details, Exception):
+        warnings.append(f"detail_images_upload_failed:{uploaded_details}")
+        final_details = []
+    else:
+        final_details = list(uploaded_details)
+
+    return final_main, final_details, warnings
 
 
 async def process_one_row(
@@ -165,6 +192,7 @@ async def process_one_row(
     final_image = existing_image
     detail_images: list[str] = []
     source_queries: list[str] = []
+    warnings: list[str] = []
 
     if need_image or need_description or need_subtitle:
         if force_image_refresh and need_image and not need_description and not need_subtitle:
@@ -195,27 +223,32 @@ async def process_one_row(
     if need_image or need_description:
         if qwen_payload is None:
             raise ValueError("missing_qwen_payload_for_image_or_description")
-
-        image_result = await image_client.resolve_images(
-            title=title,
-            image_keywords=qwen_payload["image_keywords"],
-            category_id=category_id,
-            keywords=[title],
-        )
-        source_queries = image_result.source_queries
-        if not image_result.main_image:
-            raise ValueError("no_valid_main_image")
-
-        resolved_main_image = image_result.main_image
-        detail_images = image_result.detail_images
-        uploaded_main_image, detail_images = await maybe_upload_images(
-            main_image=resolved_main_image,
-            detail_images=detail_images,
-            dry_run=dry_run,
-            oss_uploader=oss_uploader,
-        )
-        if need_image:
-            final_image = uploaded_main_image
+        resolved_main_image = ""
+        try:
+            image_result = await image_client.resolve_images(
+                title=title,
+                image_keywords=qwen_payload["image_keywords"],
+                category_id=category_id,
+                keywords=[title],
+            )
+            source_queries = image_result.source_queries
+            resolved_main_image = str(image_result.main_image or "").strip()
+            detail_images = list(image_result.detail_images or [])
+            if resolved_main_image or detail_images:
+                uploaded_main_image, detail_images, upload_warnings = await maybe_upload_images(
+                    main_image=resolved_main_image,
+                    detail_images=detail_images,
+                    dry_run=dry_run,
+                    oss_uploader=oss_uploader,
+                )
+                warnings.extend(upload_warnings)
+                if need_image and uploaded_main_image:
+                    final_image = uploaded_main_image
+            elif need_image and not final_image:
+                warnings.append("no_valid_main_image")
+        except Exception as exc:
+            warnings.append(f"image_stage_failed:{exc}")
+            detail_images = []
 
         if need_description:
             final_description = build_description_html(
@@ -244,6 +277,7 @@ async def process_one_row(
         "updated": not dry_run,
         "duration_seconds": round(time.perf_counter() - started_at, 3),
         "source_queries": source_queries,
+        "warnings": warnings,
         "preview": update_payload if dry_run else {},
     }
 
@@ -330,6 +364,13 @@ async def process_rows(
                     result["duration_seconds"],
                     result["title"],
                 )
+                if result.get("warnings"):
+                    logger.warning(
+                        "Processed seed goods warnings id=%s title=%s warnings=%s",
+                        result["id"],
+                        result["title"],
+                        "; ".join(str(item) for item in result["warnings"]),
+                    )
                 return result
             except (AsyncQwenClientError, AsyncQwenParseError, ValueError) as exc:
                 logger.warning(
