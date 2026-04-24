@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import json
 import sys
 from pathlib import Path
@@ -9,8 +10,9 @@ from pathlib import Path
 if __package__ in {None, ""}:
     sys.path.append(str(Path(__file__).resolve().parent.parent))
 
+from ai_goods_pipeline.async_pipeline import AsyncAIGoodsPipeline
 from ai_goods_pipeline.config import load_settings
-from ai_goods_pipeline.pipeline import AIGoodsPipeline, GenerationTask
+from ai_goods_pipeline.pipeline import GenerationTask
 from ai_goods_pipeline.prompts.category_profiles import get_category_profile
 from ai_goods_pipeline.utils.batch_meta import normalize_batch_id
 from ai_goods_pipeline.utils.logger import setup_logger
@@ -33,12 +35,12 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> int:
+async def amain() -> int:
     args = parse_args()
     settings = load_settings()
     logger, log_path, run_id = setup_logger(settings.logs_dir)
     batch_id = normalize_batch_id(args.batch_id, fallback=run_id)
-    pipeline = AIGoodsPipeline(settings=settings, logger=logger, run_id=run_id, log_path=log_path)
+    pipeline = AsyncAIGoodsPipeline(settings=settings, logger=logger, run_id=run_id, log_path=log_path)
     try:
         if args.check_runtime:
             print(
@@ -46,7 +48,7 @@ def main() -> int:
                     {
                         "run_id": run_id,
                         "batch_id": batch_id,
-                        "runtime_status": pipeline.image_client.runtime_status(),
+                        "runtime_status": await pipeline.image_client.runtime_status(),
                         "log": str(log_path),
                     },
                     ensure_ascii=False,
@@ -79,7 +81,7 @@ def main() -> int:
             city_strategy=args.city_strategy,
             batch_id=batch_id,
         )
-        result = pipeline.run(task)
+        result = await pipeline.run(task)
         print(
             (
                 f"run_id={result.run_id} batch_id={batch_id} requested={result.requested_count} "
@@ -91,8 +93,12 @@ def main() -> int:
         )
         print("quality_report=" + json.dumps(result.quality_report, ensure_ascii=False))
     finally:
-        pipeline.close()
+        await pipeline.close()
     return 0
+
+
+def main() -> int:
+    return asyncio.run(amain())
 
 
 if __name__ == "__main__":

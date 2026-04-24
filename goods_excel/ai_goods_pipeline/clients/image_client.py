@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from pathlib import Path
 import re
+import threading
 from urllib.parse import urlparse
 
 import requests
@@ -33,8 +36,12 @@ from ai_goods_pipeline.enums.image_semantics import (
     IMAGE_MATERIAL_HINTS,
     IMAGE_QUERY_TERM_BLOCKLIST,
 )
-from ai_goods_pipeline.utils.image_decode import probe_image_content
+from ai_goods_pipeline.utils.image_decode import probe_image_content, probe_image_header
 from ai_goods_pipeline.utils.image_url import normalize_storable_image_url
+from ai_goods_pipeline.utils.image_validation_cache import (
+    load_validation_cache,
+    save_validation_cache,
+)
 from ai_goods_pipeline.utils.retry import retry_call
 
 
@@ -52,6 +59,7 @@ class ImageProbe:
     is_gif: bool
     width: int
     height: int
+    fully_validated: bool = True
 
 
 @dataclass(slots=True)
@@ -86,13 +94,20 @@ class ImageClient:
         clip_min_score: float,
         clip_max_candidates: int,
         clip_category_ids: tuple[int, ...],
+        probe_range_bytes: int,
+        validation_workers: int,
+        validation_cache_path: str,
+        validation_cache_max_entries: int,
     ) -> None:
         self.timeout = timeout
         self.retries = retries
         self.min_bytes = min_bytes
         self.allow_gif_as_main = allow_gif_as_main
         self.enable_bing = enable_bing
-        self.session = requests.Session()
+        self.probe_range_bytes = max(0, probe_range_bytes)
+        self.validation_workers = max(1, validation_workers)
+        self.validation_cache_path = Path(validation_cache_path).expanduser() if validation_cache_path else None
+        self.validation_cache_max_entries = max(0, validation_cache_max_entries)
         self.baidu_image_client = BaiduImageClient(timeout=timeout)
         self.bing_image_client = BingImageClient(timeout=timeout)
         self.clip_reranker = ClipImageReranker(
@@ -104,7 +119,8 @@ class ImageClient:
             timeout=timeout,
             user_agent=USER_AGENT,
         )
-        self.validation_cache: dict[str, ImageProbe | None] = {}
+        self._cache_lock = threading.Lock()
+        self.validation_cache = self._load_validation_cache()
 
     def resolve_images(
         self,
@@ -131,15 +147,13 @@ class ImageClient:
             if baidu_items:
                 source_queries.append(f"baidu_images:{query}")
                 for item in baidu_items:
-                    url = normalize_storable_image_url(str(item.get("image_url") or "").strip())
                     preview_url = str(item.get("thumbnail_url") or "").strip()
-                    if not url:
-                        continue
-                    if url not in candidate_urls:
-                        candidate_urls.append(url)
-                    if preview_url:
-                        candidate_preview_urls.setdefault(url, preview_url)
-                    candidate_sources.setdefault(url, "baidu")
+                    for url in self._extract_baidu_candidate_urls(item):
+                        if url not in candidate_urls:
+                            candidate_urls.append(url)
+                        if preview_url:
+                            candidate_preview_urls.setdefault(url, preview_url)
+                        candidate_sources.setdefault(url, "baidu")
             if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
                 break
 
@@ -161,12 +175,14 @@ class ImageClient:
                     break
 
         valid_images = self._validate_urls(candidate_urls)
+        ordered_valid_urls = [img.url for img in valid_images]
         valid_images = self._rerank_valid_images(
             title=title,
             category_id=category_id,
             valid_images=valid_images,
             preview_url_map=candidate_preview_urls,
         )
+        valid_images = self._confirm_selected_images(valid_images)
         static_images = [img.url for img in valid_images if not img.is_gif]
         gif_images = [img.url for img in valid_images if img.is_gif]
 
@@ -191,7 +207,7 @@ class ImageClient:
             main_image_source=main_image_source,
             detail_image_sources=detail_image_sources,
             source_queries=source_queries,
-            all_valid_urls=[img.url for img in valid_images],
+            all_valid_urls=ordered_valid_urls,
         )
 
     def fetch_bing_candidates(
@@ -258,14 +274,28 @@ class ImageClient:
                 continue
             if context is not None and not self._is_relevant_search_result(item, context):
                 continue
-            url = normalize_storable_image_url(str(item.get("image_url") or "").strip())
-            if self._is_blocked_image_url(url):
+            candidate = dict(item)
+            candidate["raw_image_url"] = normalize_storable_image_url(
+                str(item.get("raw_image_url") or "").strip()
+            )
+            candidate["thumbnail_url"] = normalize_storable_image_url(
+                str(item.get("thumbnail_url") or "").strip()
+            )
+            candidate["data_imgurl"] = normalize_storable_image_url(
+                str(item.get("data_imgurl") or "").strip()
+            )
+            candidate["image_url"] = normalize_storable_image_url(
+                str(item.get("image_url") or "").strip()
+            )
+            candidate_urls = self._extract_baidu_candidate_urls(candidate)
+            if not candidate_urls:
                 continue
-            if url and url not in seen_urls:
-                candidate = dict(item)
-                candidate["image_url"] = url
-                candidates.append(candidate)
-                seen_urls.add(url)
+            primary_url = candidate_urls[0]
+            if primary_url in seen_urls:
+                continue
+            candidate["image_url"] = primary_url
+            candidates.append(candidate)
+            seen_urls.add(primary_url)
         return candidates
 
     def fetch_baidu_images(
@@ -299,7 +329,7 @@ class ImageClient:
 
     def close(self) -> None:
         try:
-            self.session.close()
+            self._persist_validation_cache()
         except Exception:
             pass
         self.baidu_image_client.close()
@@ -491,8 +521,25 @@ class ImageClient:
             str(item.get("source_page") or "").strip().lower(),
             str(item.get("image_url") or "").strip().lower(),
             str(item.get("thumbnail_url") or "").strip().lower(),
+            str(item.get("data_imgurl") or "").strip().lower(),
         ]
         return " ".join(part for part in parts if part)
+
+    def _extract_baidu_candidate_urls(self, item: dict[str, str]) -> list[str]:
+        urls: list[str] = []
+        seen: set[str] = set()
+        for raw_url in (
+            str(item.get("image_url") or "").strip(),
+            str(item.get("raw_image_url") or "").strip(),
+            str(item.get("thumbnail_url") or "").strip(),
+            str(item.get("data_imgurl") or "").strip(),
+        ):
+            url = normalize_storable_image_url(raw_url)
+            if not url or url in seen or self._is_blocked_image_url(url):
+                continue
+            urls.append(url)
+            seen.add(url)
+        return urls
 
     def _extract_expected_cities(
         self, parts: list[str], category_id: int
@@ -569,12 +616,12 @@ class ImageClient:
         return "实物"
 
     def _validate_urls(self, urls: list[str]) -> list[ImageProbe]:
-        valid_images: list[ImageProbe] = []
-        for url in urls:
-            probe = self._probe_url(url)
-            if probe is not None:
-                valid_images.append(probe)
-        return valid_images
+        if len(urls) <= 1 or self.validation_workers <= 1:
+            return [probe for url in urls if (probe := self._probe_url(url)) is not None]
+
+        with ThreadPoolExecutor(max_workers=min(self.validation_workers, len(urls))) as executor:
+            results = list(executor.map(self._probe_url, urls))
+        return [probe for probe in results if probe is not None]
 
     def _rerank_valid_images(
         self,
@@ -612,51 +659,201 @@ class ImageClient:
         return reordered_static + gif_images
 
     def _probe_url(self, url: str) -> ImageProbe | None:
-        if url in self.validation_cache:
-            return self.validation_cache[url]
+        return self._probe_url_internal(url, require_full=False)
 
-        def _request() -> ImageProbe | None:
-            response = self.session.get(
-                url,
-                headers={"User-Agent": USER_AGENT},
-                timeout=self.timeout,
-            )
-            response.raise_for_status()
-            content_type = (response.headers.get("Content-Type") or "").lower()
-            if not content_type.startswith("image/"):
-                return None
-            if self._is_blocked_image_url(url):
-                return None
-            content_length = int(response.headers.get("Content-Length") or 0)
-            content = response.content
-            size = len(content)
-            if max(content_length, size) < self.min_bytes:
-                return None
-            decoded = probe_image_content(content)
-            if decoded is None:
-                return None
-            width, height, image_format = decoded
-            is_gif = (
-                "gif" in content_type
-                or image_format == "gif"
-                or url.lower().endswith(".gif")
-            )
-            return ImageProbe(
-                url=url,
-                content_type=content_type,
-                size=max(content_length, size),
-                is_gif=is_gif,
-                width=width,
-                height=height,
-            )
+    def _probe_url_internal(self, url: str, *, require_full: bool) -> ImageProbe | None:
+        cached_probe, cached_exists = self._get_cached_probe(url)
+        if cached_exists and (cached_probe is None or not require_full or cached_probe.fully_validated):
+            return cached_probe
+
+        def _request() -> tuple[ImageProbe | None, bool]:
+            return self._request_probe(url, require_full=require_full)
 
         try:
-            probe = retry_call(_request, retries=self.retries)
+            probe, cacheable = retry_call(_request, retries=self.retries)
         except Exception:
-            probe = None
+            return None
 
-        self.validation_cache[url] = probe
+        if cacheable:
+            self._set_cached_probe(url, probe)
         return probe
+
+    def _request_probe(self, url: str, *, require_full: bool) -> tuple[ImageProbe | None, bool]:
+        if self._is_blocked_image_url(url):
+            return None, True
+
+        allow_partial = not require_full and self.probe_range_bytes > 0
+        request_headers = self._build_request_headers(url, allow_partial=allow_partial)
+        response = requests.get(
+            url,
+            headers=request_headers,
+            timeout=self.timeout,
+        )
+        if response.status_code in (403, 404, 410):
+            return None, True
+        response.raise_for_status()
+
+        content_type = (response.headers.get("Content-Type") or "").lower()
+        if not content_type.startswith("image/"):
+            return None, True
+
+        content = response.content
+        size = self._resolve_response_size(response, content)
+        if size < self.min_bytes:
+            return None, True
+
+        if allow_partial and response.status_code == 206:
+            header_probe = probe_image_header(content)
+            if header_probe is not None:
+                width, height, image_format = header_probe
+                return (
+                    ImageProbe(
+                        url=url,
+                        content_type=content_type,
+                        size=size,
+                        is_gif=self._is_gif(url, content_type, image_format),
+                        width=width,
+                        height=height,
+                        fully_validated=False,
+                    ),
+                    True,
+                )
+
+        decoded = probe_image_content(content)
+        if decoded is None:
+            if allow_partial and response.status_code == 206:
+                return self._request_probe(url, require_full=True)
+            return None, True
+
+        width, height, image_format = decoded
+        return (
+            ImageProbe(
+                url=url,
+                content_type=content_type,
+                size=size,
+                is_gif=self._is_gif(url, content_type, image_format),
+                width=width,
+                height=height,
+                fully_validated=True,
+            ),
+            True,
+        )
+
+    def _confirm_selected_images(self, valid_images: list[ImageProbe]) -> list[ImageProbe]:
+        if not valid_images:
+            return []
+        target_count = IMAGE_DETAIL_COUNT + 1
+        confirmed: list[ImageProbe] = []
+        for probe in valid_images:
+            full_probe = self._probe_url_internal(probe.url, require_full=True)
+            if full_probe is None:
+                continue
+            confirmed.append(full_probe)
+            if len(confirmed) >= target_count:
+                break
+        return confirmed
+
+    def _build_request_headers(self, url: str, *, allow_partial: bool) -> dict[str, str]:
+        headers = {"User-Agent": USER_AGENT}
+        referer = self._guess_referer(url)
+        if referer:
+            headers["Referer"] = referer
+        if allow_partial:
+            partial_bytes = max(self.probe_range_bytes, self.min_bytes)
+            headers["Range"] = f"bytes=0-{partial_bytes - 1}"
+        return headers
+
+    def _resolve_response_size(self, response: requests.Response, content: bytes) -> int:
+        try:
+            content_length = int(response.headers.get("Content-Length") or 0)
+        except (TypeError, ValueError):
+            content_length = 0
+        content_range = str(response.headers.get("Content-Range") or "").strip()
+        if "/" in content_range:
+            total_text = content_range.rsplit("/", 1)[-1].strip()
+            if total_text.isdigit():
+                return max(int(total_text), len(content), content_length)
+        return max(content_length, len(content))
+
+    def _is_gif(self, url: str, content_type: str, image_format: str) -> bool:
+        return (
+            "gif" in content_type
+            or image_format == "gif"
+            or url.lower().endswith(".gif")
+        )
+
+    def _get_cached_probe(self, url: str) -> tuple[ImageProbe | None, bool]:
+        with self._cache_lock:
+            if url not in self.validation_cache:
+                return None, False
+            return self.validation_cache[url], True
+
+    def _set_cached_probe(self, url: str, probe: ImageProbe | None) -> None:
+        with self._cache_lock:
+            self.validation_cache[url] = probe
+
+    def _load_validation_cache(self) -> dict[str, ImageProbe | None]:
+        raw_cache = load_validation_cache(self.validation_cache_path)
+        parsed: dict[str, ImageProbe | None] = {}
+        for url, payload in raw_cache.items():
+            parsed[url] = self._deserialize_probe(payload)
+        return parsed
+
+    def _persist_validation_cache(self) -> None:
+        payload = {
+            url: self._serialize_probe(probe)
+            for url, probe in self.validation_cache.items()
+        }
+        save_validation_cache(
+            self.validation_cache_path,
+            payload,
+            max_entries=self.validation_cache_max_entries,
+        )
+
+    def _serialize_probe(self, probe: ImageProbe | None) -> dict[str, object] | None:
+        if probe is None:
+            return None
+        return {
+            "url": probe.url,
+            "content_type": probe.content_type,
+            "size": probe.size,
+            "is_gif": probe.is_gif,
+            "width": probe.width,
+            "height": probe.height,
+            "fully_validated": probe.fully_validated,
+        }
+
+    def _deserialize_probe(self, payload: dict[str, object] | None) -> ImageProbe | None:
+        if payload is None or not isinstance(payload, dict):
+            return None
+        url = str(payload.get("url") or "").strip()
+        content_type = str(payload.get("content_type") or "").strip().lower()
+        try:
+            size = int(payload.get("size") or 0)
+            width = int(payload.get("width") or 0)
+            height = int(payload.get("height") or 0)
+        except (TypeError, ValueError):
+            return None
+        if not url or size <= 0 or width <= 0 or height <= 0:
+            return None
+        return ImageProbe(
+            url=url,
+            content_type=content_type,
+            size=size,
+            is_gif=bool(payload.get("is_gif")),
+            width=width,
+            height=height,
+            fully_validated=bool(payload.get("fully_validated", True)),
+        )
+
+    @staticmethod
+    def _guess_referer(url: str) -> str:
+        host = (urlparse(url).netloc or "").lower()
+        if "baidu" in host or "bdstatic" in host or "bcebos" in host or "bdimg" in host:
+            return "https://image.baidu.com/"
+        if "bing" in host or "bing.net" in host:
+            return "https://cn.bing.com/"
+        return ""
 
     def _is_blocked_image_url(self, url: str) -> bool:
         parsed = urlparse(url)

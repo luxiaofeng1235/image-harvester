@@ -82,6 +82,10 @@ class Settings:
     image_timeout: int
     image_retry: int
     image_min_bytes: int
+    image_probe_range_bytes: int
+    image_validation_workers: int
+    image_validation_cache_path: str
+    image_validation_cache_max_entries: int
     image_allow_gif_as_main: bool
     image_enable_bing: bool
     image_enable_clip_rerank: bool
@@ -173,6 +177,17 @@ def load_settings(env_file: Path | None = None) -> Settings:
         image_timeout=_as_int(os.getenv("IMG_TIMEOUT"), 20),
         image_retry=_as_int(os.getenv("IMG_RETRY"), 3),
         image_min_bytes=_as_int(os.getenv("IMG_MIN_BYTES"), 1024),
+        image_probe_range_bytes=_as_int(os.getenv("IMG_PROBE_RANGE_BYTES"), 2048),
+        image_validation_workers=_as_int(os.getenv("IMG_VALIDATION_WORKERS"), 8),
+        image_validation_cache_path=_as_local_path_str(
+            os.getenv("IMG_VALIDATION_CACHE_PATH"),
+            base_dir=PROJECT_DIR,
+            default=PACKAGE_DIR / "runtime" / "image_validation_cache.json",
+        ),
+        image_validation_cache_max_entries=_as_int(
+            os.getenv("IMG_VALIDATION_CACHE_MAX_ENTRIES"),
+            20000,
+        ),
         image_allow_gif_as_main=_as_bool(os.getenv("IMG_ALLOW_GIF_AS_MAIN"), False),
         image_enable_bing=_as_bool(os.getenv("IMG_ENABLE_BING"), False),
         image_enable_clip_rerank=_as_bool(

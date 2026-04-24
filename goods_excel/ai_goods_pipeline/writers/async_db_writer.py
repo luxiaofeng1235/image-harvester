@@ -42,6 +42,54 @@ class AsyncDBWriter:
             await self._pool.wait_closed()
             self._pool = None
 
+    async def fetch_existing_titles(self) -> list[str]:
+        pool = await self._get_pool()
+        sql = f"SELECT goods_name FROM `{self.table}` WHERE goods_name IS NOT NULL AND goods_name <> ''"
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                await cursor.execute(sql)
+                rows = await cursor.fetchall()
+        return [str(row[0]).strip() for row in rows if row and str(row[0]).strip()]
+
+    async def insert_goods(self, goods_records: list[dict[str, Any]]) -> int:
+        if not goods_records:
+            return 0
+
+        pool = await self._get_pool()
+        sql = f"""
+            INSERT INTO `{self.table}`
+            (
+                goods_name, sub_title, shop_id, category_id, image, price, description, en_name,
+                batch_id, last_batch_id, source_type, source_note, create_time, update_time
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        params = [
+            (
+                item["goods_name"],
+                item["sub_title"],
+                int(item.get("shop_id", 0) or 0),
+                item["category_id"],
+                item["image"],
+                item["price"],
+                item["description"],
+                item.get("en_name", ""),
+                item.get("batch_id", ""),
+                item.get("last_batch_id", item.get("batch_id", "")),
+                item.get("source_type", ""),
+                item.get("source_note", ""),
+                item["create_time"],
+                item["update_time"],
+            )
+            for item in goods_records
+        ]
+
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                await cursor.executemany(sql, params)
+            await conn.commit()
+        return len(params)
+
     async def fetch_goods_for_enrichment(
         self,
         *,

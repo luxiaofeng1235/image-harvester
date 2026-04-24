@@ -26,6 +26,11 @@ CONTENT_TYPE_MAP = {
     ".bmp": "image/bmp",
 }
 
+USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36"
+)
+
 OBJECT_ACL_MAP = {
     "": None,
     "inherit": None,
@@ -77,6 +82,7 @@ class OSSImageUploader:
         self.timeout = timeout
         self.max_concurrency = max(1, max_concurrency)
         self.session = requests.Session()
+        self.session.headers.update({"User-Agent": USER_AGENT})
         self.upload_cache: dict[str, str] = {}
         self._cache_lock = threading.Lock()
         self.enabled = self.force_enabled and all(
@@ -109,7 +115,14 @@ class OSSImageUploader:
         if cached:
             return cached
 
-        response = self.session.get(url, timeout=self.timeout)
+        request_headers: dict[str, str] = {}
+        referer = self._guess_referer(url)
+        if referer:
+            request_headers["Referer"] = referer
+
+        response = self.session.get(url, timeout=self.timeout, headers=request_headers)
+        if response.status_code in (403, 404, 410):
+            raise ValueError(f"image_unavailable:{response.status_code}")
         response.raise_for_status()
         content_type = (response.headers.get("Content-Type") or "").lower()
         if not content_type.startswith("image/"):
@@ -155,3 +168,12 @@ class OSSImageUploader:
     def _guess_content_type(self, oss_key: str) -> str:
         ext = Path(oss_key).suffix.lower()
         return CONTENT_TYPE_MAP.get(ext, "image/jpeg")
+
+    @staticmethod
+    def _guess_referer(url: str) -> str:
+        host = (urlparse(url).netloc or "").lower()
+        if "baidu" in host or "bdstatic" in host or "bcebos" in host or "bdimg" in host:
+            return "https://image.baidu.com/"
+        if "bing" in host or "bing.net" in host:
+            return "https://cn.bing.com/"
+        return ""

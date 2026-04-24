@@ -127,8 +127,8 @@ class BaiduImageClient:
                         thumbnail_url:
                           img?.currentSrc ||
                           img?.src ||
-                          img?.getAttribute('data-imgurl') ||
                           '',
+                        data_imgurl: img?.getAttribute('data-imgurl') || '',
                         source_page: fromurl,
                         title:
                           img?.getAttribute('alt') ||
@@ -205,6 +205,7 @@ class BaiduImageClient:
                     "image_url": image_url,
                     "raw_image_url": str(item.get("image_url") or "").strip(),
                     "thumbnail_url": str(item.get("thumbnail_url") or "").strip(),
+                    "data_imgurl": str(item.get("data_imgurl") or "").strip(),
                     "source_page": str(item.get("source_page") or "").strip(),
                     "title": str(item.get("title") or "").strip(),
                     "desc": str(item.get("desc") or "").strip(),
@@ -219,22 +220,39 @@ class BaiduImageClient:
 
     def _resolve_from(self, item: dict[str, str], image_url: str) -> str:
         raw_image_url = str(item.get("image_url") or "").strip()
+        data_imgurl = str(item.get("data_imgurl") or "").strip()
         if image_url and image_url == raw_image_url:
             return "objurl"
+        if image_url and image_url == data_imgurl:
+            return "data-imgurl"
         return "thumbnail"
 
     def _select_candidate_image_url(self, item: dict[str, str]) -> str:
+        return next(iter(self._candidate_image_urls(item)), "")
+
+    def _candidate_image_urls(self, item: dict[str, str]) -> list[str]:
         raw_image_url = str(item.get("image_url") or "").strip()
         thumbnail_url = str(item.get("thumbnail_url") or "").strip()
+        data_imgurl = str(item.get("data_imgurl") or "").strip()
         bdtype = str(item.get("bdtype") or "").strip()
 
+        ordered = [raw_image_url, thumbnail_url, data_imgurl]
         if self._should_prefer_thumbnail_url(
             raw_image_url=raw_image_url,
             thumbnail_url=thumbnail_url,
             bdtype=bdtype,
         ):
-            return thumbnail_url
-        return raw_image_url or thumbnail_url
+            ordered = [thumbnail_url, data_imgurl, raw_image_url]
+
+        deduped: list[str] = []
+        seen: set[str] = set()
+        for url in ordered:
+            value = str(url or "").strip()
+            if not value or value in seen:
+                continue
+            deduped.append(value)
+            seen.add(value)
+        return deduped
 
     def _should_prefer_thumbnail_url(
         self,

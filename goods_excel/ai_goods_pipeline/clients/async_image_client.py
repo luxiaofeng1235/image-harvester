@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from pathlib import Path
 import re
 from urllib.parse import urlparse
 
@@ -32,8 +33,12 @@ from ai_goods_pipeline.enums.image_semantics import (
     IMAGE_MATERIAL_HINTS,
     IMAGE_QUERY_TERM_BLOCKLIST,
 )
-from ai_goods_pipeline.utils.image_decode import probe_image_content
+from ai_goods_pipeline.utils.image_decode import probe_image_content, probe_image_header
 from ai_goods_pipeline.utils.image_url import normalize_storable_image_url
+from ai_goods_pipeline.utils.image_validation_cache import (
+    load_validation_cache,
+    save_validation_cache,
+)
 from ai_goods_pipeline.utils.async_retry import async_retry_call
 
 
@@ -51,6 +56,7 @@ class AsyncImageProbe:
     is_gif: bool
     width: int
     height: int
+    fully_validated: bool = True
 
 
 @dataclass(slots=True)
@@ -61,6 +67,15 @@ class AsyncImageResolutionResult:
     detail_image_sources: list[str]
     source_queries: list[str]
     all_valid_urls: list[str]
+
+
+@dataclass(slots=True)
+class AsyncImageResolutionPool:
+    source_queries: list[str]
+    all_valid_urls: list[str]
+    static_urls: list[str]
+    gif_urls: list[str]
+    candidate_sources: dict[str, str]
 
 
 @dataclass(slots=True)
@@ -78,16 +93,24 @@ class AsyncImageClient:
         retries: int,
         min_bytes: int,
         allow_gif_as_main: bool,
+        enable_bing: bool = False,
         enable_clip_rerank: bool,
         clip_model_name: str,
         clip_min_score: float,
         clip_max_candidates: int,
         clip_category_ids: tuple[int, ...],
+        probe_range_bytes: int,
+        validation_cache_path: str,
+        validation_cache_max_entries: int,
     ) -> None:
         self.timeout = timeout
         self.retries = retries
         self.min_bytes = min_bytes
         self.allow_gif_as_main = allow_gif_as_main
+        self.enable_bing = enable_bing
+        self.probe_range_bytes = max(0, probe_range_bytes)
+        self.validation_cache_path = Path(validation_cache_path).expanduser() if validation_cache_path else None
+        self.validation_cache_max_entries = max(0, validation_cache_max_entries)
         self.http_client = httpx.AsyncClient(
             timeout=self.timeout,
             headers={"User-Agent": USER_AGENT},
@@ -103,11 +126,30 @@ class AsyncImageClient:
             timeout=timeout,
             user_agent=USER_AGENT,
         )
-        self.validation_cache: dict[str, AsyncImageProbe | None] = {}
+        self.validation_cache = self._load_validation_cache()
+        self.resolution_pool_cache: dict[str, AsyncImageResolutionPool] = {}
 
     async def close(self) -> None:
+        try:
+            self._persist_validation_cache()
+        except Exception:
+            pass
         await self.http_client.aclose()
         await self.baidu_image_client.close()
+
+    async def runtime_status(self) -> dict[str, bool | str]:
+        baidu_render_ready = await self.baidu_image_client.can_render()
+        await self.baidu_image_client.close()
+        clip_runtime = self.clip_reranker.runtime_status()
+        return {
+            "bing_enabled": False,
+            "baidu_render_ready": baidu_render_ready,
+            "bing_render_ready": False,
+            "clip_rerank_enabled": clip_runtime["enabled"],
+            "clip_rerank_deps_ready": clip_runtime["deps_ready"],
+            "clip_rerank_model": clip_runtime["model_name"],
+            "clip_rerank_last_error": clip_runtime["last_error"],
+        }
 
     async def resolve_images(
         self,
@@ -116,7 +158,31 @@ class AsyncImageClient:
         image_keywords: list[str],
         category_id: int,
         keywords: list[str],
+        reuse_key: str = "",
+        exclude_urls: set[str] | None = None,
     ) -> AsyncImageResolutionResult:
+        pool = await self._resolve_image_pool(
+            title=title,
+            image_keywords=image_keywords,
+            category_id=category_id,
+            keywords=keywords,
+            reuse_key=reuse_key,
+        )
+        return await self._select_images_from_pool(pool, exclude_urls=exclude_urls)
+
+    async def _resolve_image_pool(
+        self,
+        *,
+        title: str,
+        image_keywords: list[str],
+        category_id: int,
+        keywords: list[str],
+        reuse_key: str = "",
+    ) -> AsyncImageResolutionPool:
+        cache_key = str(reuse_key or "").strip()
+        if cache_key and cache_key in self.resolution_pool_cache:
+            return self.resolution_pool_cache[cache_key]
+
         candidate_urls: list[str] = []
         candidate_preview_urls: dict[str, str] = {}
         candidate_sources: dict[str, str] = {}
@@ -133,48 +199,84 @@ class AsyncImageClient:
             if baidu_items:
                 source_queries.append(f"baidu_images:{query}")
                 for item in baidu_items:
-                    url = normalize_storable_image_url(str(item.get("image_url") or "").strip())
                     preview_url = str(item.get("thumbnail_url") or "").strip()
-                    if not url:
-                        continue
-                    if url not in candidate_urls:
-                        candidate_urls.append(url)
-                    if preview_url:
-                        candidate_preview_urls.setdefault(url, preview_url)
-                    candidate_sources.setdefault(url, "baidu")
+                    for url in self._extract_baidu_candidate_urls(item):
+                        if url not in candidate_urls:
+                            candidate_urls.append(url)
+                        if preview_url:
+                            candidate_preview_urls.setdefault(url, preview_url)
+                        candidate_sources.setdefault(url, "baidu")
             if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
                 break
 
         valid_images = await self._validate_urls(candidate_urls)
+        ordered_valid_urls = [img.url for img in valid_images]
         valid_images = await self._rerank_valid_images(
             title=title,
             category_id=category_id,
             valid_images=valid_images,
             preview_url_map=candidate_preview_urls,
         )
-        static_images = [img.url for img in valid_images if not img.is_gif]
-        gif_images = [img.url for img in valid_images if img.is_gif]
+        pool = AsyncImageResolutionPool(
+            source_queries=source_queries,
+            all_valid_urls=ordered_valid_urls,
+            static_urls=[img.url for img in valid_images if not img.is_gif],
+            gif_urls=[img.url for img in valid_images if img.is_gif],
+            candidate_sources=dict(candidate_sources),
+        )
+        if cache_key:
+            self.resolution_pool_cache[cache_key] = pool
+        return pool
 
-        main_image = static_images[0] if static_images else ""
-        if not main_image and self.allow_gif_as_main and gif_images:
-            main_image = gif_images[0]
+    async def _select_images_from_pool(
+        self,
+        pool: AsyncImageResolutionPool,
+        *,
+        exclude_urls: set[str] | None = None,
+    ) -> AsyncImageResolutionResult:
+        excluded = {
+            normalize_storable_image_url(url)
+            for url in (exclude_urls or set())
+            if normalize_storable_image_url(url)
+        }
 
-        details_pool = [url for url in static_images if url != main_image]
-        if len(details_pool) < IMAGE_DETAIL_COUNT:
-            for url in gif_images:
-                if url == main_image or url in details_pool:
-                    continue
-                details_pool.append(url)
-                if len(details_pool) >= IMAGE_DETAIL_COUNT:
-                    break
-        detail_images = details_pool[:IMAGE_DETAIL_COUNT]
+        selected_urls: set[str] = set(excluded)
+        main_image = await self._pick_first_valid_url(
+            pool.static_urls,
+            excluded_urls=selected_urls,
+        )
+        if main_image:
+            selected_urls.add(main_image)
+        elif self.allow_gif_as_main:
+            main_image = await self._pick_first_valid_url(
+                pool.gif_urls,
+                excluded_urls=selected_urls,
+            )
+            if main_image:
+                selected_urls.add(main_image)
+
+        detail_images = await self._pick_valid_urls(
+            pool.static_urls,
+            excluded_urls=selected_urls,
+            limit=IMAGE_DETAIL_COUNT,
+        )
+        selected_urls.update(detail_images)
+        if len(detail_images) < IMAGE_DETAIL_COUNT:
+            detail_images.extend(
+                await self._pick_valid_urls(
+                    pool.gif_urls,
+                    excluded_urls=selected_urls,
+                    limit=IMAGE_DETAIL_COUNT - len(detail_images),
+                )
+            )
+
         return AsyncImageResolutionResult(
             main_image=main_image,
             detail_images=detail_images,
-            main_image_source=candidate_sources.get(main_image, "") if main_image else "",
-            detail_image_sources=[candidate_sources.get(url, "") for url in detail_images],
-            source_queries=source_queries,
-            all_valid_urls=[img.url for img in valid_images],
+            main_image_source=pool.candidate_sources.get(main_image, "") if main_image else "",
+            detail_image_sources=[pool.candidate_sources.get(url, "") for url in detail_images],
+            source_queries=pool.source_queries,
+            all_valid_urls=pool.all_valid_urls,
         )
 
     async def fetch_baidu_candidates(
@@ -197,14 +299,28 @@ class AsyncImageClient:
                 continue
             if context is not None and not self._is_relevant_search_result(item, context):
                 continue
-            url = normalize_storable_image_url(str(item.get("image_url") or "").strip())
-            if self._is_blocked_image_url(url):
+            candidate = dict(item)
+            candidate["raw_image_url"] = normalize_storable_image_url(
+                str(item.get("raw_image_url") or "").strip()
+            )
+            candidate["thumbnail_url"] = normalize_storable_image_url(
+                str(item.get("thumbnail_url") or "").strip()
+            )
+            candidate["data_imgurl"] = normalize_storable_image_url(
+                str(item.get("data_imgurl") or "").strip()
+            )
+            candidate["image_url"] = normalize_storable_image_url(
+                str(item.get("image_url") or "").strip()
+            )
+            candidate_urls = self._extract_baidu_candidate_urls(candidate)
+            if not candidate_urls:
                 continue
-            if url and url not in seen_urls:
-                candidate = dict(item)
-                candidate["image_url"] = url
-                candidates.append(candidate)
-                seen_urls.add(url)
+            primary_url = candidate_urls[0]
+            if primary_url in seen_urls:
+                continue
+            candidate["image_url"] = primary_url
+            candidates.append(candidate)
+            seen_urls.add(primary_url)
         return candidates
 
     async def fetch_baidu_images(
@@ -407,47 +523,214 @@ class AsyncImageClient:
         return valid_images
 
     async def _probe_url(self, url: str) -> AsyncImageProbe | None:
-        if url in self.validation_cache:
-            return self.validation_cache[url]
+        return await self._probe_url_internal(url, require_full=False)
 
-        async def _request() -> AsyncImageProbe | None:
-            response = await self.http_client.get(url)
-            response.raise_for_status()
-            content_type = (response.headers.get("Content-Type") or "").lower()
-            if not content_type.startswith("image/"):
-                return None
-            if self._is_blocked_image_url(url):
-                return None
-            content_length = int(response.headers.get("Content-Length") or 0)
-            content = response.content
-            size = len(content)
-            if max(content_length, size) < self.min_bytes:
-                return None
-            decoded = probe_image_content(content)
-            if decoded is None:
-                return None
-            width, height, image_format = decoded
-            is_gif = (
-                "gif" in content_type
-                or image_format == "gif"
-                or url.lower().endswith(".gif")
-            )
-            return AsyncImageProbe(
-                url=url,
-                content_type=content_type,
-                size=max(content_length, size),
-                is_gif=is_gif,
-                width=width,
-                height=height,
-            )
+    async def _probe_url_internal(self, url: str, *, require_full: bool) -> AsyncImageProbe | None:
+        if url in self.validation_cache:
+            cached_probe = self.validation_cache[url]
+            if cached_probe is None or not require_full or cached_probe.fully_validated:
+                return cached_probe
+
+        async def _request() -> tuple[AsyncImageProbe | None, bool]:
+            return await self._request_probe(url, require_full=require_full)
 
         try:
-            probe = await async_retry_call(_request, retries=self.retries)
+            probe, cacheable = await async_retry_call(_request, retries=self.retries)
         except Exception:
-            probe = None
+            return None
 
-        self.validation_cache[url] = probe
+        if cacheable:
+            self.validation_cache[url] = probe
         return probe
+
+    async def _request_probe(self, url: str, *, require_full: bool) -> tuple[AsyncImageProbe | None, bool]:
+        if self._is_blocked_image_url(url):
+            return None, True
+
+        allow_partial = not require_full and self.probe_range_bytes > 0
+        response = await self.http_client.get(
+            url,
+            headers=self._build_request_headers(url, allow_partial=allow_partial),
+        )
+        if response.status_code in (403, 404, 410):
+            return None, True
+        response.raise_for_status()
+
+        content_type = (response.headers.get("Content-Type") or "").lower()
+        if not content_type.startswith("image/"):
+            return None, True
+
+        content = response.content
+        size = self._resolve_response_size(response, content)
+        if size < self.min_bytes:
+            return None, True
+
+        if allow_partial and response.status_code == 206:
+            header_probe = probe_image_header(content)
+            if header_probe is not None:
+                width, height, image_format = header_probe
+                return (
+                    AsyncImageProbe(
+                        url=url,
+                        content_type=content_type,
+                        size=size,
+                        is_gif=self._is_gif(url, content_type, image_format),
+                        width=width,
+                        height=height,
+                        fully_validated=False,
+                    ),
+                    True,
+                )
+
+        decoded = probe_image_content(content)
+        if decoded is None:
+            if allow_partial and response.status_code == 206:
+                return await self._request_probe(url, require_full=True)
+            return None, True
+
+        width, height, image_format = decoded
+        return (
+            AsyncImageProbe(
+                url=url,
+                content_type=content_type,
+                size=size,
+                is_gif=self._is_gif(url, content_type, image_format),
+                width=width,
+                height=height,
+                fully_validated=True,
+            ),
+            True,
+        )
+
+    async def _pick_first_valid_url(
+        self,
+        ordered_urls: list[str],
+        *,
+        excluded_urls: set[str],
+    ) -> str:
+        picked = await self._pick_valid_urls(
+            ordered_urls,
+            excluded_urls=excluded_urls,
+            limit=1,
+        )
+        return picked[0] if picked else ""
+
+    async def _pick_valid_urls(
+        self,
+        ordered_urls: list[str],
+        *,
+        excluded_urls: set[str],
+        limit: int,
+    ) -> list[str]:
+        if limit <= 0:
+            return []
+
+        picked: list[str] = []
+        local_excluded = set(excluded_urls)
+        for url in ordered_urls:
+            normalized_url = normalize_storable_image_url(url)
+            if not normalized_url or normalized_url in local_excluded:
+                continue
+            full_probe = await self._probe_url_internal(normalized_url, require_full=True)
+            if full_probe is None:
+                continue
+            picked.append(full_probe.url)
+            local_excluded.add(full_probe.url)
+            if len(picked) >= limit:
+                break
+        return picked
+
+    def _build_request_headers(self, url: str, *, allow_partial: bool) -> dict[str, str]:
+        headers: dict[str, str] = {}
+        referer = self._guess_referer(url)
+        if referer:
+            headers["Referer"] = referer
+        if allow_partial:
+            partial_bytes = max(self.probe_range_bytes, self.min_bytes)
+            headers["Range"] = f"bytes=0-{partial_bytes - 1}"
+        return headers
+
+    def _resolve_response_size(self, response: httpx.Response, content: bytes) -> int:
+        try:
+            content_length = int(response.headers.get("Content-Length") or 0)
+        except (TypeError, ValueError):
+            content_length = 0
+        content_range = str(response.headers.get("Content-Range") or "").strip()
+        if "/" in content_range:
+            total_text = content_range.rsplit("/", 1)[-1].strip()
+            if total_text.isdigit():
+                return max(int(total_text), len(content), content_length)
+        return max(content_length, len(content))
+
+    def _is_gif(self, url: str, content_type: str, image_format: str) -> bool:
+        return (
+            "gif" in content_type
+            or image_format == "gif"
+            or url.lower().endswith(".gif")
+        )
+
+    def _load_validation_cache(self) -> dict[str, AsyncImageProbe | None]:
+        raw_cache = load_validation_cache(self.validation_cache_path)
+        parsed: dict[str, AsyncImageProbe | None] = {}
+        for url, payload in raw_cache.items():
+            parsed[url] = self._deserialize_probe(payload)
+        return parsed
+
+    def _persist_validation_cache(self) -> None:
+        payload = {
+            url: self._serialize_probe(probe)
+            for url, probe in self.validation_cache.items()
+        }
+        save_validation_cache(
+            self.validation_cache_path,
+            payload,
+            max_entries=self.validation_cache_max_entries,
+        )
+
+    def _serialize_probe(self, probe: AsyncImageProbe | None) -> dict[str, object] | None:
+        if probe is None:
+            return None
+        return {
+            "url": probe.url,
+            "content_type": probe.content_type,
+            "size": probe.size,
+            "is_gif": probe.is_gif,
+            "width": probe.width,
+            "height": probe.height,
+            "fully_validated": probe.fully_validated,
+        }
+
+    def _deserialize_probe(self, payload: dict[str, object] | None) -> AsyncImageProbe | None:
+        if payload is None or not isinstance(payload, dict):
+            return None
+        url = str(payload.get("url") or "").strip()
+        content_type = str(payload.get("content_type") or "").strip().lower()
+        try:
+            size = int(payload.get("size") or 0)
+            width = int(payload.get("width") or 0)
+            height = int(payload.get("height") or 0)
+        except (TypeError, ValueError):
+            return None
+        if not url or size <= 0 or width <= 0 or height <= 0:
+            return None
+        return AsyncImageProbe(
+            url=url,
+            content_type=content_type,
+            size=size,
+            is_gif=bool(payload.get("is_gif")),
+            width=width,
+            height=height,
+            fully_validated=bool(payload.get("fully_validated", True)),
+        )
+
+    @staticmethod
+    def _guess_referer(url: str) -> str:
+        host = (urlparse(url).netloc or "").lower()
+        if "baidu" in host or "bdstatic" in host or "bcebos" in host or "bdimg" in host:
+            return "https://image.baidu.com/"
+        if "bing" in host or "bing.net" in host:
+            return "https://cn.bing.com/"
+        return ""
 
     async def _rerank_valid_images(
         self,
@@ -492,8 +775,25 @@ class AsyncImageClient:
             str(item.get("source_page") or "").strip().lower(),
             str(item.get("image_url") or "").strip().lower(),
             str(item.get("thumbnail_url") or "").strip().lower(),
+            str(item.get("data_imgurl") or "").strip().lower(),
         ]
         return " ".join(part for part in parts if part)
+
+    def _extract_baidu_candidate_urls(self, item: dict[str, str]) -> list[str]:
+        urls: list[str] = []
+        seen: set[str] = set()
+        for raw_url in (
+            str(item.get("image_url") or "").strip(),
+            str(item.get("raw_image_url") or "").strip(),
+            str(item.get("thumbnail_url") or "").strip(),
+            str(item.get("data_imgurl") or "").strip(),
+        ):
+            url = normalize_storable_image_url(raw_url)
+            if not url or url in seen or self._is_blocked_image_url(url):
+                continue
+            urls.append(url)
+            seen.add(url)
+        return urls
 
     def _extract_expected_cities(self, parts: list[str], category_id: int) -> list[str]:
         source_text = " ".join(str(part).lower() for part in parts if part)

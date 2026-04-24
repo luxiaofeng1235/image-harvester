@@ -44,6 +44,10 @@ def main() -> int:
         clip_min_score=settings.image_clip_min_score,
         clip_max_candidates=settings.image_clip_max_candidates,
         clip_category_ids=settings.image_clip_category_ids,
+        probe_range_bytes=settings.image_probe_range_bytes,
+        validation_workers=settings.image_validation_workers,
+        validation_cache_path=settings.image_validation_cache_path,
+        validation_cache_max_entries=settings.image_validation_cache_max_entries,
     )
     try:
         query = (args.query or args.title).strip()
