@@ -111,8 +111,8 @@ function renderMoreButton(buttonConfig) {
     return;
   }
 
-  button.href = buttonConfig.href || "#";
-  button.setAttribute("target", buttonConfig.target || "_self");
+  button.href = buttonConfig.href || button.getAttribute("href") || "#";
+  button.setAttribute("target", buttonConfig.target || button.getAttribute("target") || "_self");
   button.setAttribute("rel", buttonConfig.target === "_blank" ? "noopener noreferrer" : "");
 
   var label = button.querySelector(".zr-vr-more-button-label");
