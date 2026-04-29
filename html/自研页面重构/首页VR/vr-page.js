@@ -77,17 +77,8 @@ function createCard(item) {
   loading.className = "zr-vr-card-loading";
   loading.setAttribute("aria-hidden", "true");
 
-  var iframe = document.createElement("iframe");
-  iframe.src = item.iframeUrl || "";
-  iframe.title = item.title || "";
-  iframe.setAttribute("frameborder", "0");
-  iframe.setAttribute("scrolling", "no");
-  iframe.setAttribute("allowtransparency", "true");
-  iframe.width = "650";
-  iframe.height = "460";
-  iframe.addEventListener("load", function () {
-    media.classList.add("is-loaded");
-  });
+  var mediaUrl = item.videoUrl || item.iframeUrl || "";
+  var mediaNode = createMediaNode(mediaUrl, item.title || "", media);
 
   var line = document.createElement("span");
   line.className = "zr-vr-card-line";
@@ -97,12 +88,51 @@ function createCard(item) {
   title.textContent = item.title || "";
 
   media.appendChild(loading);
-  media.appendChild(iframe);
+  media.appendChild(mediaNode);
   card.appendChild(media);
   card.appendChild(line);
   card.appendChild(title);
 
   return card;
+}
+
+function createMediaNode(url, title, media) {
+  if (isVideoUrl(url)) {
+    media.classList.add("is-video");
+
+    var video = document.createElement("video");
+    video.src = url;
+    video.title = title;
+    video.controls = true;
+    video.preload = "metadata";
+    video.playsInline = true;
+    video.setAttribute("playsinline", "true");
+    video.setAttribute("webkit-playsinline", "true");
+    video.addEventListener("loadeddata", function () {
+      media.classList.add("is-loaded");
+    });
+    video.addEventListener("error", function () {
+      media.classList.add("is-loaded");
+    });
+    return video;
+  }
+
+  var iframe = document.createElement("iframe");
+  iframe.src = url;
+  iframe.title = title;
+  iframe.setAttribute("frameborder", "0");
+  iframe.setAttribute("scrolling", "no");
+  iframe.setAttribute("allowtransparency", "true");
+  iframe.width = "650";
+  iframe.height = "460";
+  iframe.addEventListener("load", function () {
+    media.classList.add("is-loaded");
+  });
+  return iframe;
+}
+
+function isVideoUrl(url) {
+  return /\.(mp4|webm|ogg|mov|m4v)(?:[?#].*)?$/i.test(url || "");
 }
 
 function renderMoreButton(buttonConfig) {
