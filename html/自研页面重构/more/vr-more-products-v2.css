@@ -120,6 +120,8 @@ body {
   border-radius: 6px;
   overflow: hidden;
   background: #000;
+  line-height: 0;
+  box-shadow: 0 3px 0 #000;
 }
 
 .vr-player {
@@ -127,6 +129,7 @@ body {
   height: 100%;
   display: block;
   border: 0;
+  object-fit: cover;
 }
 
 .vr-list-section {
