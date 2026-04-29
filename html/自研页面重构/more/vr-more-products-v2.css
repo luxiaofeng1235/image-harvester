@@ -70,7 +70,7 @@ body {
 .vr-top {
   position: relative;
   width: 100%;
-  min-height: 620px;
+  min-height: 598px;
   background: #f0f2f5;
 }
 
@@ -96,7 +96,7 @@ body {
   z-index: 1;
   max-width: var(--vr-max-width);
   margin: 0 auto;
-  height: 620px;
+  height: 598px;
 }
 
 .vr-player-frame {
@@ -135,7 +135,7 @@ body {
 .vr-list-section {
   max-width: var(--vr-container);
   margin: 0 auto;
-  padding: 40px 16px 56px;
+  padding: 0 16px 56px;
 }
 
 .vr-list-header h1 {
