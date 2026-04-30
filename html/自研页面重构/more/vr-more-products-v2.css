@@ -26,6 +26,20 @@ body {
   overflow-x: hidden;
 }
 
+.vr-more-page > p:empty,
+.vr-top p:empty {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+}
+
+.vr-more-page > br,
+.vr-top br {
+  display: none !important;
+}
+
 .wpsidebar-fkf.wpsidebar02 {
   left: 18px !important;
   right: auto !important;
@@ -72,6 +86,8 @@ body {
   width: 100%;
   min-height: 598px;
   background: #f0f2f5;
+  font-size: 0;
+  line-height: 0;
 }
 
 .vr-top-bg {
