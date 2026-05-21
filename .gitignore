@@ -18,3 +18,5 @@ goods_excel/.env.*
 /html/__pycache__/
 /html/out
 /goods_excel/ai_goods_pipeline/logs
+/html/.codex
+/html/copyright
