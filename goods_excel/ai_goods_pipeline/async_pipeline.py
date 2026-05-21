@@ -66,6 +66,7 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             clip_max_candidates=settings.image_clip_max_candidates,
             clip_category_ids=settings.image_clip_category_ids,
             probe_range_bytes=settings.image_probe_range_bytes,
+            validation_workers=settings.image_validation_workers,
             validation_cache_path=settings.image_validation_cache_path,
             validation_cache_max_entries=settings.image_validation_cache_max_entries,
         )
@@ -134,6 +135,18 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
         self.logger.info("Close all done duration=%.3fs", time.perf_counter() - started_at)
 
     async def run(self, task: GenerationTask) -> PipelineResult:
+        """异步主循环：生成 → 校验 → 图片 → 入库。
+
+        核心优化：千问 API double-buffering。
+        在等待千问返回期间，图片处理是异步并行的；
+        在当前批次处理图片时，提前发下一轮千问请求，
+        等图片处理完直接取预取结果，消除千问串行等待。
+
+        流程：
+        1. 拉取历史标题（去重基线）
+        2. 循环：预算下一轮 prompt → 千问生成 → 校验候选 → 预提取图片 → 入库
+        3. 当本批次图片还在处理时，下一轮千问已经在跑了
+        """
         run_started_at = time.perf_counter()
         self._reset_batch_media_registry()
         self._accepted_image_pool_keys = set()
@@ -162,6 +175,11 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
         candidate_durations: list[float] = []
         success_durations: list[float] = []
         model_batch_durations: list[float] = []
+        # 下一轮千问的预取任务（double-buffering）
+        next_gen_task: asyncio.Task[AsyncQwenGenerationResult] | None = None
+        next_gen_system_prompt: str | None = None
+        next_gen_user_prompt: str | None = None
+        next_gen_model: str | None = None
 
         while len(records) < task.count and attempted_candidates < max_attempts:
             remaining = task.count - len(records)
@@ -187,12 +205,19 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             batch_added = 0
             generation_started_at = time.perf_counter()
             try:
-                generation = await self.qwen_client.generate(
-                    system_prompt=system_prompt,
-                    user_prompt=user_prompt,
-                    model=next_model,
-                )
-                model_batch_durations.append(time.perf_counter() - generation_started_at)
+                # 如果有预取任务，直接用预取结果；否则发起新请求
+                if next_gen_task is not None:
+                    generation = await next_gen_task
+                    next_gen_task = None
+                    # 记录预取模型的耗时（使用上一轮预取记录的时间片）
+                    model_batch_durations.append(time.perf_counter() - generation_started_at)
+                else:
+                    generation = await self.qwen_client.generate(
+                        system_prompt=system_prompt,
+                        user_prompt=user_prompt,
+                        model=next_model,
+                    )
+                    model_batch_durations.append(time.perf_counter() - generation_started_at)
             except AsyncQwenParseError as exc:
                 model_batch_durations.append(time.perf_counter() - generation_started_at)
                 failures.append(
@@ -229,6 +254,39 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             )
             attempted_candidates += attempted_in_batch
 
+            # 如果本轮还有剩余候选空间，提前发起下一轮千问请求（double-buffering）
+            if len(records) + len(pending_candidates) < task.count and attempted_candidates < max_attempts:
+                next_remaining = task.count - (len(records) + len(pending_candidates))
+                next_candidate_count = choose_candidate_count(next_remaining, self.settings.qwen_batch_size)
+                next_guard_titles = select_history_guard_titles(
+                    history_titles + [record["goods_name"] for record in records],
+                    task.keywords,
+                    limit=60,
+                )
+                next_sys, next_user = build_prompts(
+                    category_id=task.category_id,
+                    keywords=task.keywords,
+                    target_count=next_candidate_count,
+                    city_strategy=task.city_strategy,
+                    history_titles=next_guard_titles,
+                    system_prompt_base=self.settings.qwen_system_prompt,
+                    style_seed=(
+                        f"{self.run_id}:{normalize_batch_id(task.batch_id, fallback=self.run_id)}:"
+                        f"{attempted_candidates}:{len(records)}"
+                    ),
+                )
+                next_gen_system_prompt = next_sys
+                next_gen_user_prompt = next_user
+                next_gen_model = next_model
+                # 在处理图片的同时，后台跑千问
+                next_gen_task = asyncio.create_task(
+                    self.qwen_client.generate(
+                        system_prompt=next_sys,
+                        user_prompt=next_user,
+                        model=next_model,
+                    )
+                )
+
             materialized = await self._materialize_pending_candidates(
                 task=task,
                 generation=generation,
@@ -241,8 +299,13 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             )
             batch_added += materialized
 
+            # 如果当前批次没有任何成功入库的，切换到 fallback 模型重试
             if batch_added == 0:
                 next_model = task.fallback_model if next_model != task.fallback_model else task.model
+                # 有预取任务的也要取消，因为换模型了
+                if next_gen_task is not None and not next_gen_task.done():
+                    next_gen_task.cancel()
+                next_gen_task = None
             else:
                 next_model = task.model
 
@@ -445,10 +508,15 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
         tasks = [asyncio.create_task(_load(candidate)) for candidate in pending_candidates]
         accepted_count = 0
         try:
-            for future in asyncio.as_completed(tasks):
-                if len(records) >= task.count:
-                    break
-                candidate, pool, pool_error = await future
+            # 用 asyncio.wait(FIRST_COMPLETED) 替代 as_completed，避免提前 break 时
+            # 未完成任务的 coroutine 未被 await 导致 RuntimeWarning
+            pending_tasks = set(tasks)
+            while pending_tasks and len(records) < task.count:
+                done, pending_tasks = await asyncio.wait(pending_tasks, return_when=asyncio.FIRST_COMPLETED)
+                for future in done:
+                    if len(records) >= task.count:
+                        break
+                    candidate, pool, pool_error = future.result()
                 if candidate.image_pool_key in self._accepted_image_pool_keys:
                     candidate_duration = time.perf_counter() - candidate.started_at
                     candidate_durations.append(candidate_duration)

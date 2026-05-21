@@ -18,19 +18,37 @@ USER_AGENT = (
 
 
 class AsyncBaiduImageClient:
-    def __init__(self, timeout: int = 20) -> None:
+    """百度图片搜索客户端，使用 Playwright 渲染首屏后按 DOM 顺序提取图片。
+
+    核心流程：
+        1. 复用全局浏览器实例（_get_browser），避免每次开新浏览器
+        2. 每个搜索关键词开一个新 page → 加载 → 等待首屏渲染 → 滚动展开 → 提取图片 URL
+        3. 通过 _page_semaphore 控制并发 tab 数，避免同时开太多 page 导致百度限流
+    """
+
+    def __init__(self, timeout: int = 20, max_concurrent_pages: int = 3) -> None:
         self.timeout = timeout
+        self.max_concurrent_pages = max(1, max_concurrent_pages)
+        # 并发 page 数限制：百度对同一 IP 大量并发请求会限流，3~4 个 tab 是安全值
+        self._page_semaphore = asyncio.Semaphore(self.max_concurrent_pages)
         self._playwright = None
         self._browser = None
         self._browser_failed = False
         self._browser_lock = asyncio.Lock()
 
     async def fetch_images(self, keyword: str, limit: int = 8) -> list[dict[str, str]]:
+        """搜索关键词，返回百度图片首屏结果。
+
+        通过 _page_semaphore 控制并发 tab 数：
+        - 多个关键词同时搜图时，不会超过 max_concurrent_pages 个并发 page
+        - 超出的请求排队等待已有 page 释放
+        """
         keyword = (keyword or "").strip()
         if not keyword:
             raise ValueError("keyword is required")
         url = self._build_search_url(keyword)
-        return await self._fetch_images_rendered(url, limit)
+        async with self._page_semaphore:
+            return await self._fetch_images_rendered(url, limit)
 
     async def close(self) -> None:
         async with self._browser_lock:
@@ -59,6 +77,14 @@ class AsyncBaiduImageClient:
         )
 
     async def _fetch_images_rendered(self, url: str, limit: int) -> list[dict[str, str]]:
+        """打开一个新 page，加载百度图片搜索页，提取首屏图片信息。
+
+        流程：
+        1. 打开新 tab → 加载搜索页（wait_until=domcontentloaded）
+        2. 等待图片卡片 selector 出现（首屏已渲染完成）
+        3. 滚动展开更多结果（_expand_search_results）
+        4. 按 DOM 顺序提取 objurl / thumbnail_url / data_imgurl
+        """
         browser = await self._get_browser()
         if browser is None:
             return []
@@ -75,7 +101,8 @@ class AsyncBaiduImageClient:
                 'a[href*="/search/detail?"][href*="objurl="][href*="tn=baiduimagedetail"]',
                 timeout=self.timeout * 1000,
             )
-            await page.wait_for_timeout(800)
+            # 首屏渲染完成后额外等待 400ms，让懒加载图片稳定（原 800ms 优化为 400ms）
+            await page.wait_for_timeout(400)
             await self._expand_search_results(page, limit)
             items = await page.evaluate(
                 """
@@ -148,6 +175,10 @@ class AsyncBaiduImageClient:
                 await page.close()
 
     async def _expand_search_results(self, page, limit: int) -> None:
+        """滚动页面加载更多图片，直到达到目标数量或连续两次无新内容。
+
+        优化：固定 700ms 滚动等待改为 500ms（实际网络加载不需要那么久）。
+        """
         selector = 'a[href*="/search/detail?"][href*="objurl="][href*="tn=baiduimagedetail"]'
         target_count = max(limit * 3, limit)
         previous_count = 0
@@ -160,7 +191,8 @@ class AsyncBaiduImageClient:
             if current_count >= target_count:
                 break
             await page.mouse.wheel(0, 2200)
-            await page.wait_for_timeout(700)
+            # 滚动后等待新内容加载，500ms 在百兆网络下足够（原 700ms）
+            await page.wait_for_timeout(500)
             refreshed_count = await page.evaluate(
                 "(selector) => document.querySelectorAll(selector).length",
                 selector,
@@ -174,6 +206,11 @@ class AsyncBaiduImageClient:
             previous_count = max(previous_count, refreshed_count)
 
     async def _get_browser(self):
+        """获取全局浏览器实例（懒加载 + 双重检查锁）。
+
+        只创建一个 Chromium 实例，所有并发 tab 共用这个浏览器进程，
+        避免每次搜图都启动新浏览器的开销。
+        """
         if async_playwright is None or self._browser_failed:
             return None
         if self._browser is not None:

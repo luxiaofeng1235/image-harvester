@@ -231,6 +231,13 @@ class GoodsValidator:
         return canonical
 
     def _match_history(self, normalized_title: str) -> tuple[str, float] | None:
+        """检查标题是否与历史库重复或高度相似。
+
+        优化策略：
+        1. 精确匹配（O(1) 查 dict）— 最快路径
+        2. 近似匹配前先做长度过滤（差异 > 50% 跳过）
+        3. 历史标题 > 500 条时只对前 500 条做近似匹配（最新的标题更可能有重复）
+        """
         for hist_normalized, hist_title in self.history_normalized:
             if not hist_normalized:
                 continue
@@ -239,8 +246,14 @@ class GoodsValidator:
 
         best_title = ""
         best_score = 0.0
-        for hist_normalized, hist_title in self.history_normalized:
+        # 长度过滤：标题长度差异超过 50% 的不可能相似
+        title_len = len(normalized_title)
+        hist_limit = min(len(self.history_normalized), 500) if len(self.history_normalized) > 500 else len(self.history_normalized)
+        for hist_normalized, hist_title in self.history_normalized[:hist_limit]:
             if not hist_normalized:
+                continue
+            # 快速长度过滤
+            if hist_normalized and abs(len(hist_normalized) - title_len) / max(title_len, 1) > 0.5:
                 continue
             score = similarity_ratio(normalized_title, hist_normalized)
             if score > best_score:

@@ -100,6 +100,7 @@ class AsyncImageClient:
         clip_max_candidates: int,
         clip_category_ids: tuple[int, ...],
         probe_range_bytes: int,
+        validation_workers: int = 8,
         validation_cache_path: str,
         validation_cache_max_entries: int,
     ) -> None:
@@ -109,6 +110,8 @@ class AsyncImageClient:
         self.allow_gif_as_main = allow_gif_as_main
         self.enable_bing = enable_bing
         self.probe_range_bytes = max(0, probe_range_bytes)
+        # 并发验证上限：控制同时发出的图片验证请求数，避免目标服务器限流
+        self.validation_workers = max(1, validation_workers)
         self.validation_cache_path = Path(validation_cache_path).expanduser() if validation_cache_path else None
         self.validation_cache_max_entries = max(0, validation_cache_max_entries)
         self.http_client = httpx.AsyncClient(
@@ -259,6 +262,15 @@ class AsyncImageClient:
         category_id: int,
         keywords: list[str],
     ) -> AsyncImageResolutionPool:
+        """构建图片候选池：搜图 → 验证 → 预加载完整解码 → 返回池对象。
+
+        流程：
+        1. _build_queries 构建搜索关键词（title + image_keywords + 衍生词）
+        2. 逐个关键词调百度搜图，收集候选 URL（达到 IMAGE_CANDIDATE_POOL_TARGET 即停止）
+        3. _validate_urls 并发验证所有候选 URL 的有效性（Range 请求 + 文件头校验）
+        4. _prevalidate_full 并发预验证完整图片解码（写入缓存，供后续 pick 时直接命中）
+        5. 可选 CLIP 重排（对 128/129 分类开启，缩小候选范围后排序）
+        """
         candidate_urls: list[str] = []
         candidate_preview_urls: dict[str, str] = {}
         candidate_sources: dict[str, str] = {}
@@ -270,6 +282,7 @@ class AsyncImageClient:
             keywords=keywords,
         )
 
+        # 逐个关键词搜图，达到候选池目标数量后提前退出
         for query in self._build_queries(title, image_keywords, keywords, category_id):
             baidu_items = await self.fetch_baidu_candidates(query, context=search_context)
             if baidu_items:
@@ -285,8 +298,15 @@ class AsyncImageClient:
             if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
                 break
 
+        # 并发验证所有候选 URL 的有效性（Range 请求 + 文件头校验）
         valid_images = await self._validate_urls(candidate_urls)
         ordered_valid_urls = [img.url for img in valid_images]
+
+        # 并发预验证完整图片解码，结果写入 validation_cache，
+        # 后续 _pick_valid_urls 调用 _probe_url_internal(url, require_full=True) 时直接命中缓存
+        await self._prevalidate_full(valid_images)
+
+        # 可选 CLIP 重排（对 128/129 分类开启）
         valid_images = await self._rerank_valid_images(
             title=title,
             category_id=category_id,
@@ -301,6 +321,23 @@ class AsyncImageClient:
             candidate_sources=dict(candidate_sources),
         )
         return pool
+
+    async def _prevalidate_full(self, valid_images: list[AsyncImageProbe]) -> None:
+        """并发预验证所有候选图片的完整字节解码，结果写入 validation_cache。
+
+        作用：后续 _pick_valid_urls 调用 _probe_url_internal(url, require_full=True) 时
+        直接命中缓存，避免逐个串行发网络请求。
+        """
+        urls = [img.url for img in valid_images if img.url]
+        if not urls:
+            return
+        semaphore = asyncio.Semaphore(max(1, self.validation_workers))
+
+        async def _limited_full(url: str):
+            async with semaphore:
+                return await self._probe_url_internal(url, require_full=True)
+
+        await asyncio.gather(*[_limited_full(u) for u in urls], return_exceptions=True)
 
     async def _select_images_from_pool(
         self,
@@ -589,7 +626,21 @@ class AsyncImageClient:
         return any(city in meta_text for city in context.expected_cities)
 
     async def _validate_urls(self, urls: list[str]) -> list[AsyncImageProbe]:
-        results = await asyncio.gather(*[self._probe_url(url) for url in urls], return_exceptions=True)
+        """并发验证所有候选 URL，使用 semaphore 限制并发数。
+
+        原实现用 asyncio.gather 一次性并发所有 URL（无上限），
+        当候选池有 20+ 个 URL 时会导致目标服务器限流或连接池耗尽。
+        现在用 validation_workers 作为并发上限（默认 8）。
+        """
+        if not urls:
+            return []
+        semaphore = asyncio.Semaphore(max(1, self.validation_workers))
+
+        async def _limited(url: str):
+            async with semaphore:
+                return await self._probe_url(url)
+
+        results = await asyncio.gather(*[_limited(u) for u in urls], return_exceptions=True)
         valid_images: list[AsyncImageProbe] = []
         for result in results:
             if isinstance(result, AsyncImageProbe):

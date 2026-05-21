@@ -42,12 +42,22 @@ class AsyncDBWriter:
             await self._pool.wait_closed()
             self._pool = None
 
-    async def fetch_existing_titles(self) -> list[str]:
+    async def fetch_existing_titles(self, max_recent_count: int = 2000) -> list[str]:
+        """拉取最近 N 条商品标题作为去重基线。
+
+        优化：原实现拉全表（SELECT goods_name WHERE ...），随数据增长变慢。
+        改为只拉最近 max_recent_count 条（按 id 降序），足够覆盖近期去重。
+        如果表里确实有大量历史数据，更早期的标题已不太可能被重复生成。
+        """
         pool = await self._get_pool()
-        sql = f"SELECT goods_name FROM `{self.table}` WHERE goods_name IS NOT NULL AND goods_name <> ''"
+        sql = (
+            f"SELECT goods_name FROM `{self.table}` "
+            f"WHERE goods_name IS NOT NULL AND goods_name <> '' "
+            f"ORDER BY id DESC LIMIT %s"
+        )
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
-                await cursor.execute(sql)
+                await cursor.execute(sql, (max_recent_count,))
                 rows = await cursor.fetchall()
         return [str(row[0]).strip() for row in rows if row and str(row[0]).strip()]
 
