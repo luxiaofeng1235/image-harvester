@@ -26,10 +26,10 @@ class AsyncBaiduImageClient:
         3. 通过 _page_semaphore 控制并发 tab 数，避免同时开太多 page 导致百度限流
     """
 
-    def __init__(self, timeout: int = 20, max_concurrent_pages: int = 3) -> None:
+    def __init__(self, timeout: int = 20, max_concurrent_pages: int = 4) -> None:
         self.timeout = timeout
         self.max_concurrent_pages = max(1, max_concurrent_pages)
-        # 并发 page 数限制：百度对同一 IP 大量并发请求会限流，3~4 个 tab 是安全值
+        # 并发 page 数限制：百度对同一 IP 大量并发请求会限流，4 个 tab 是安全值
         self._page_semaphore = asyncio.Semaphore(self.max_concurrent_pages)
         self._playwright = None
         self._browser = None
@@ -101,8 +101,8 @@ class AsyncBaiduImageClient:
                 'a[href*="/search/detail?"][href*="objurl="][href*="tn=baiduimagedetail"]',
                 timeout=self.timeout * 1000,
             )
-            # 首屏渲染完成后额外等待 400ms，让懒加载图片稳定（原 800ms 优化为 400ms）
-            await page.wait_for_timeout(400)
+            # 首屏渲染完成后额外等待，让懒加载图片稳定
+            await page.wait_for_timeout(200)
             await self._expand_search_results(page, limit)
             items = await page.evaluate(
                 """
@@ -183,7 +183,7 @@ class AsyncBaiduImageClient:
         target_count = max(limit * 3, limit)
         previous_count = 0
         stable_rounds = 0
-        for _ in range(3):
+        for _ in range(2):
             current_count = await page.evaluate(
                 "(selector) => document.querySelectorAll(selector).length",
                 selector,
@@ -191,8 +191,8 @@ class AsyncBaiduImageClient:
             if current_count >= target_count:
                 break
             await page.mouse.wheel(0, 2200)
-            # 滚动后等待新内容加载，500ms 在百兆网络下足够（原 700ms）
-            await page.wait_for_timeout(500)
+            # 滚动后等待新内容加载
+            await page.wait_for_timeout(300)
             refreshed_count = await page.evaluate(
                 "(selector) => document.querySelectorAll(selector).length",
                 selector,

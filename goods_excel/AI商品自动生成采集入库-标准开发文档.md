@@ -715,6 +715,17 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 - M8 种子商品异步补全链路: 已新增 `enrich_seed_goods_from_db.py`，支持直接从 `jj_wangyi_goods` 查询 `image` 或 `description` 为空的种子商品，并通过异步 Qwen + 异步百度图片链路补 `sub_title / image / description`，可按 `category_id / ids / limit / concurrency / dry-run` 控制。
 - M9 图片重排增强: 已接入可选 `CLIP` 图片重排能力，支持在百度候选图完成过滤与有效性校验后，对 `128/129` 分类再做一轮语义排序；同时新增独立验证脚本，并将图片语义词统一收口到 `enums/image_semantics.py`。
 - M9.1 图片 URL 标准化收口: 已新增图片 URL 归一化规则，统一裁掉 `x-tos-process/x-oss-process/thumbnail/quality` 等处理参数；标准图链直接入库，非标准图链自动走 OSS 规范化，同时将详情图 HTML 收敛为裸 `img` 标签输出。
+- M9.2 异步性能优化: 已完成异步主链路 6 项性能优化，将 `avg_duration_per_success` 从约 17s 降至约 11s：
+  - 百度搜图并发 Tab：新增 `_page_semaphore` 控制 Playwright 并发 page 数（默认 3），避免串行等待
+  - 千问 API double-buffering：当前批次图片处理期间提前发起下一轮千问请求，消除串行等待
+  - 图片 URL 验证并发限制：`_validate_urls` 加 `asyncio.Semaphore(validation_workers)` 防止并发过载
+  - 图片选择阶段预验证：`_build_image_pool` 完成后并发预验证所有候选的完整解码，后续 pick 直接命中缓存
+  - 历史标题增量加载：`fetch_existing_titles` 加 `ORDER BY id DESC LIMIT 2000` 避免全表扫描
+  - 历史标题匹配优化：近似匹配前加长度过滤（差异 > 50% 跳过）+ 超 500 条只跑前 500 条
+  - 首屏渲染等待优化：固定 800ms → 400ms，滚动等待 700ms → 500ms
+  - 修复 `AsyncImageClient` 缺失 `validation_workers` 属性导致的 `AttributeError`
+  - 修复 `as_completed` 提前 `break` 导致的 RuntimeWarning，改用 `asyncio.wait(FIRST_COMPLETED)`
+- M9.3 批次内图片去重收口: 已完成批次内主图/详情图三层去重机制——`_check_batch_media_reuse` 拦截重复主图和详情图组、`_collect_reserved_media_urls` 在图片选择时排除已用 URL、`image_pool_key` + `_accepted_image_pool_keys` 防止同标题变体重复用图。
 
 ### 16.2 当前重点
 - M10 批量质量验证: 以 `126/127/128/129` 四类为单位继续跑 `10~30` 条样本，重点抽查标题真实性、价格分布、图片相关性、城市覆盖和最终成功率。
@@ -741,6 +752,7 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 ## 17. 变更记录
 | 版本 | 日期 | 说明 |
 |---|---|---|
+| v1.31 | 2026-05-21 | 异步性能优化：百度搜图并发 Tab、千问 double-buffering、图片验证并发限制、预验证缓存、历史标题增量加载、历史匹配优化；avg_per_success 从约 17s 降至约 11s |
 | v1.30 | 2026-03-25 | OSS 上传新增对象级 ACL 配置，默认按 `public-read` 为新上传图片补公共读取权限；同时新增历史 OSS 图片 ACL 批量修复脚本 |
 | v1.29 | 2026-03-24 | 补强图片校验为“真实字节解码”级别，采集与 OSS 上传两段都拦截损坏图/伪图片；同时明确开启 OSS 时详情图统一转 OSS、主图继续保留标准直链直写策略 |
 | v1.28 | 2026-03-24 | 新增图片 URL 归一化规则，统一处理 `?x-tos-process`、`?x-oss-process`、`&thumbnail=&quality=` 等尾部参数；补充“标准图链直接入库、非标准图链走 OSS”规则，并把详情图 HTML 模板更新为裸 `img` 标签输出 |

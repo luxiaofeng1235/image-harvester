@@ -40,6 +40,19 @@ class PendingBatchCandidate:
     started_at: float
 
 
+@dataclass(slots=True)
+class _MaterializeContext:
+    """Phase A（选图+去重）完成后暂存的数据，供 Phase B 并发 OSS 上传使用。"""
+    candidate: PendingBatchCandidate
+    validation: ValidationResult
+    task: GenerationTask
+    generation: AsyncQwenGenerationResult
+    image_result: Any
+    source_main_image: str
+    source_detail_images: list[str]
+    item: dict[str, Any]
+
+
 class AsyncAIGoodsPipeline(AIGoodsPipeline):
     def __init__(self, *, settings: Settings, logger, run_id: str, log_path: Path) -> None:
         self.settings = settings
@@ -487,7 +500,7 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
         if not pending_candidates:
             return 0
 
-        semaphore = asyncio.Semaphore(max(1, min(4, len(pending_candidates))))
+        semaphore = asyncio.Semaphore(max(1, min(6, len(pending_candidates))))
 
         async def _load(candidate: PendingBatchCandidate):
             assert candidate.validation.item is not None
@@ -507,9 +520,11 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
 
         tasks = [asyncio.create_task(_load(candidate)) for candidate in pending_candidates]
         accepted_count = 0
+
+        # Phase A: 并发加载 image pool → 串行选图+去重（内存操作，快）
+        # 通过的进入 to_upload，失败的直接写入 failures
+        to_upload: list[_MaterializeContext] = []
         try:
-            # 用 asyncio.wait(FIRST_COMPLETED) 替代 as_completed，避免提前 break 时
-            # 未完成任务的 coroutine 未被 await 导致 RuntimeWarning
             pending_tasks = set(tasks)
             while pending_tasks and len(records) < task.count:
                 done, pending_tasks = await asyncio.wait(pending_tasks, return_when=asyncio.FIRST_COMPLETED)
@@ -517,54 +532,72 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
                     if len(records) >= task.count:
                         break
                     candidate, pool, pool_error = future.result()
-                if candidate.image_pool_key in self._accepted_image_pool_keys:
+
+                    if candidate.image_pool_key in self._accepted_image_pool_keys:
+                        candidate_duration = time.perf_counter() - candidate.started_at
+                        candidate_durations.append(candidate_duration)
+                        failures.append(
+                            self._failure_entry(
+                                task=task,
+                                candidate_title=self._safe_title(candidate.raw_item),
+                                normalized_title=candidate.validation.normalized_title,
+                                fail_stage="validate",
+                                fail_reason="duplicate_candidate_variant_in_batch",
+                                matched_history_title=self._safe_title(candidate.raw_item),
+                                raw_model_output=json.dumps(candidate.raw_item, ensure_ascii=False),
+                                image_keywords=self._safe_image_keywords(candidate.raw_item),
+                                candidate_duration_seconds=candidate_duration,
+                            )
+                        )
+                        continue
+
+                    if pool_error is not None:
+                        self.logger.warning("Image pool prefetch failed: %s", pool_error)
+
+                    # Phase A: 选图 + 去重（快，不涉及 OSS）
+                    ctx, failure_entry = await self._select_and_check_media(
+                        task=task,
+                        candidate=candidate,
+                        generation=generation,
+                        image_pool_key=candidate.image_pool_key,
+                        preloaded_pool=pool,
+                    )
+                    if ctx is not None:
+                        to_upload.append(ctx)
+                    elif failure_entry is not None:
+                        candidate_duration = time.perf_counter() - candidate.started_at
+                        candidate_durations.append(candidate_duration)
+                        failure_entry["candidate_duration_seconds"] = round(candidate_duration, 3)
+                        failures.append(failure_entry)
+
+            # Phase B: 所有通过 Phase A 的候选项并发 OSS 上传
+            if to_upload:
+                upload_tasks = [
+                    self._upload_and_build_record(ctx) for ctx in to_upload
+                ]
+                results = await asyncio.gather(*upload_tasks, return_exceptions=True)
+
+                for result in results:
+                    if isinstance(result, Exception):
+                        self.logger.warning("Concurrent upload failed: %s", result)
+                        continue
+                    if result is None:
+                        continue
+                    record, candidate, validation = result
                     candidate_duration = time.perf_counter() - candidate.started_at
                     candidate_durations.append(candidate_duration)
-                    failures.append(
-                        self._failure_entry(
-                            task=task,
-                            candidate_title=self._safe_title(candidate.raw_item),
-                            normalized_title=candidate.validation.normalized_title,
-                            fail_stage="validate",
-                            fail_reason="duplicate_candidate_variant_in_batch",
-                            matched_history_title=self._safe_title(candidate.raw_item),
-                            raw_model_output=json.dumps(candidate.raw_item, ensure_ascii=False),
-                            image_keywords=self._safe_image_keywords(candidate.raw_item),
-                            candidate_duration_seconds=candidate_duration,
-                        )
+                    success_durations.append(candidate_duration)
+                    record["processing_duration_seconds"] = round(candidate_duration, 3)
+                    records.append(record)
+                    validator.register_success(validation)
+                    self._accepted_image_pool_keys.add(candidate.image_pool_key)
+                    accepted_count += 1
+                    self.logger.info(
+                        "Accepted item %s/%s: %s",
+                        len(records),
+                        task.count,
+                        record["goods_name"],
                     )
-                    continue
-
-                if pool_error is not None:
-                    self.logger.warning("Image pool prefetch failed: %s", pool_error)
-
-                record, image_failure = await self._materialize_record(
-                    task,
-                    candidate.validation,
-                    generation,
-                    image_pool_key=candidate.image_pool_key,
-                    preloaded_pool=pool,
-                )
-                candidate_duration = time.perf_counter() - candidate.started_at
-                candidate_durations.append(candidate_duration)
-                if image_failure is not None:
-                    image_failure["candidate_duration_seconds"] = round(candidate_duration, 3)
-                    failures.append(image_failure)
-                if record is None:
-                    continue
-
-                record["processing_duration_seconds"] = round(candidate_duration, 3)
-                records.append(record)
-                success_durations.append(candidate_duration)
-                validator.register_success(candidate.validation)
-                self._accepted_image_pool_keys.add(candidate.image_pool_key)
-                accepted_count += 1
-                self.logger.info(
-                    "Accepted item %s/%s: %s",
-                    len(records),
-                    task.count,
-                    record["goods_name"],
-                )
         finally:
             for task_item in tasks:
                 if not task_item.done():
@@ -573,19 +606,21 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
                 await asyncio.gather(*tasks, return_exceptions=True)
         return accepted_count
 
-    async def _materialize_record(
+    async def _select_and_check_media(
         self,
-        task: GenerationTask,
-        validation: ValidationResult,
-        generation: AsyncQwenGenerationResult,
         *,
-        image_pool_key: str = "",
-        preloaded_pool: AsyncImageResolutionPool | None = None,
-    ) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
-        assert validation.item is not None
-        item = validation.item
-        if not image_pool_key:
-            image_pool_key = self._build_image_pool_key(task, item)
+        task: GenerationTask,
+        candidate: PendingBatchCandidate,
+        generation: AsyncQwenGenerationResult,
+        image_pool_key: str,
+        preloaded_pool: AsyncImageResolutionPool | None,
+    ) -> tuple[_MaterializeContext | None, dict[str, Any] | None]:
+        """Phase A: 从 image pool 选图 + 批次内媒体去重（快，无 OSS I/O）。
+
+        返回 (ctx, None) 表示通过，(None, failure_entry) 表示失败。
+        """
+        assert candidate.validation.item is not None
+        item = candidate.validation.item
         if preloaded_pool is not None:
             image_result = await self.image_client.select_images_from_pool(
                 preloaded_pool,
@@ -604,7 +639,7 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             entry = self._failure_entry(
                 task=task,
                 candidate_title=item["title"],
-                normalized_title=validation.normalized_title,
+                normalized_title=candidate.validation.normalized_title,
                 fail_stage="image",
                 fail_reason="no_valid_main_image",
                 image_keywords=item["image_keywords"],
@@ -614,7 +649,6 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             entry["all_valid_urls"] = image_result.all_valid_urls
             return None, entry
 
-        now = int(time.time())
         source_main_image = image_result.main_image
         source_detail_images = list(image_result.detail_images)
         duplicate_reason = self._check_batch_media_reuse(
@@ -625,7 +659,7 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             entry = self._failure_entry(
                 task=task,
                 candidate_title=item["title"],
-                normalized_title=validation.normalized_title,
+                normalized_title=candidate.validation.normalized_title,
                 fail_stage="image",
                 fail_reason=duplicate_reason,
                 image_keywords=item["image_keywords"],
@@ -635,8 +669,34 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             entry["all_valid_urls"] = image_result.all_valid_urls
             return None, entry
 
-        main_image = source_main_image
-        detail_images = list(source_detail_images)
+        # 立即注册源 URL（Phase B 并发 OSS 时不会重复）
+        self._register_batch_media(
+            main_image=source_main_image,
+            detail_images=source_detail_images,
+        )
+        return _MaterializeContext(
+            candidate=candidate,
+            validation=candidate.validation,
+            task=task,
+            generation=generation,
+            image_result=image_result,
+            source_main_image=source_main_image,
+            source_detail_images=source_detail_images,
+            item=item,
+        ), None
+
+    async def _upload_and_build_record(
+        self,
+        ctx: _MaterializeContext,
+    ) -> tuple[dict[str, Any], PendingBatchCandidate, ValidationResult] | None:
+        """Phase B: 并发 OSS 上传 + HTML 构建（纯 I/O，无锁竞争）。"""
+        item = ctx.item
+        image_result = ctx.image_result
+        task = ctx.task
+        generation = ctx.generation
+        main_image = ctx.source_main_image
+        detail_images = list(ctx.source_detail_images)
+        now = int(time.time())
         try:
             main_task = (
                 self.oss_uploader.upload_url(main_image)
@@ -652,23 +712,8 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             main_image = str(uploaded_main or "").strip()
             detail_images = list(uploaded_details or [])
         except Exception as exc:
-            entry = self._failure_entry(
-                task=task,
-                candidate_title=item["title"],
-                normalized_title=validation.normalized_title,
-                fail_stage="oss_upload",
-                fail_reason=str(exc),
-                image_keywords=item["image_keywords"],
-                raw_model_output=json.dumps(item, ensure_ascii=False),
-            )
-            entry["source_queries"] = image_result.source_queries
-            entry["all_valid_urls"] = image_result.all_valid_urls
-            return None, entry
-
-        self._register_batch_media(
-            main_image=source_main_image,
-            detail_images=source_detail_images,
-        )
+            self.logger.warning("OSS upload failed for %s: %s", item.get("title", ""), exc)
+            return None
 
         description = self._build_description_html(
             title=item["title"],
@@ -677,10 +722,10 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             selling_points=item["selling_points"],
             attrs=item["attrs"],
             detail_images=detail_images,
-            variation_seed=f"{self.run_id}:{normalize_batch_id(task.batch_id, fallback=self.run_id)}",
+            variation_seed=f"{self.run_id}:{normalize_batch_id(generation.model, fallback=self.run_id)}",
         )
         batch_id = normalize_batch_id(task.batch_id, fallback=self.run_id)
-        return {
+        record = {
             "goods_name": item["title"],
             "sub_title": item["subtitle"],
             "shop_id": task.shop_id,
@@ -709,7 +754,8 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             "main_image_source": image_result.main_image_source,
             "detail_image_sources": image_result.detail_image_sources,
             "source_queries": image_result.source_queries,
-        }, None
+        }
+        return record, ctx.candidate, ctx.validation
 
     def _build_image_pool_key(self, task: GenerationTask, item: dict[str, Any]) -> str:
         seeds = [

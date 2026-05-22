@@ -105,6 +105,18 @@ AGRI_KEYWORDS = [
     "蔬菜",
     "水果",
     "熟食",
+    # 具体产品名：千问可能生成具体品种而非泛类关键词
+    "蟹",
+    "虾",
+    "鱼",
+    "海鲜",
+    "鸡头米",
+    "枇杷",
+    "杨梅",
+    "鸭",
+    "鸡蛋",
+    "笋",
+    "米",
 ]
 FOOD_KEYWORDS = [
     *AGRI_KEYWORDS,
@@ -241,4 +253,4 @@ IMAGE_TITLE_QUERY_MAX_LEN = 64
 IMAGE_FALLBACK_QUERY_MAX_LEN = 32
 IMAGE_BING_FETCH_LIMIT = 12
 IMAGE_BAIDU_FETCH_LIMIT = 24
-IMAGE_CANDIDATE_POOL_TARGET = 32
+IMAGE_CANDIDATE_POOL_TARGET = 20

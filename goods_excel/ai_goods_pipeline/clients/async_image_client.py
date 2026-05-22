@@ -282,21 +282,42 @@ class AsyncImageClient:
             keywords=keywords,
         )
 
-        # 逐个关键词搜图，达到候选池目标数量后提前退出
-        for query in self._build_queries(title, image_keywords, keywords, category_id):
-            baidu_items = await self.fetch_baidu_candidates(query, context=search_context)
-            if baidu_items:
-                source_queries.append(f"baidu_images:{query}")
-                for item in baidu_items:
-                    preview_url = str(item.get("thumbnail_url") or "").strip()
-                    for url in self._extract_baidu_candidate_urls(item):
-                        if url not in candidate_urls:
-                            candidate_urls.append(url)
-                        if preview_url:
-                            candidate_preview_urls.setdefault(url, preview_url)
-                        candidate_sources.setdefault(url, "baidu")
-            if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
-                break
+        # 并发搜图：前 2 个查询并发发起，后续按需串行补搜
+        queries = list(self._build_queries(title, image_keywords, keywords, category_id))
+
+        def _collect_baidu_results(query: str, baidu_items: list[dict]) -> None:
+            """将百度搜索结果合并到候选池。"""
+            if not baidu_items:
+                return
+            source_queries.append(f"baidu_images:{query}")
+            for item in baidu_items:
+                preview_url = str(item.get("thumbnail_url") or "").strip()
+                for url in self._extract_baidu_candidate_urls(item):
+                    if url not in candidate_urls:
+                        candidate_urls.append(url)
+                    if preview_url:
+                        candidate_preview_urls.setdefault(url, preview_url)
+                    candidate_sources.setdefault(url, "baidu")
+
+        # 前 2 个查询并发发起，充分利用百度并发 tab
+        if len(queries) >= 2:
+            first_two = queries[:2]
+            remaining = queries[2:]
+            results = await asyncio.gather(
+                *[self.fetch_baidu_candidates(q, context=search_context) for q in first_two]
+            )
+            for query, items in zip(first_two, results):
+                _collect_baidu_results(query, items)
+        else:
+            remaining = queries
+
+        # 如果候选池还不够，串行补搜剩余查询
+        if len(candidate_urls) < IMAGE_CANDIDATE_POOL_TARGET:
+            for query in remaining:
+                baidu_items = await self.fetch_baidu_candidates(query, context=search_context)
+                _collect_baidu_results(query, baidu_items)
+                if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
+                    break
 
         # 并发验证所有候选 URL 的有效性（Range 请求 + 文件头校验）
         valid_images = await self._validate_urls(candidate_urls)

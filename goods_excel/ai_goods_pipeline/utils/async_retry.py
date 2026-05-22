@@ -16,7 +16,7 @@ async def async_retry_call(
     if retries < 1:
         raise ValueError("retries must be >= 1")
 
-    delays = delays or [1, 2, 4]
+    delays = delays or [0.5, 1, 2]
     last_error: BaseException | None = None
 
     for attempt in range(1, retries + 1):
