@@ -21,3 +21,4 @@ goods_excel/.env.*
 /html/.codex
 /html/copyright
 /goods_excel/ai_goods_pipeline/runtime
+/goods_excel/ai_goods_pipeline/exports
