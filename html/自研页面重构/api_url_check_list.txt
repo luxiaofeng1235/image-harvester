@@ -1,0 +1,63 @@
+=================================================================
+ 中热官网重构 - 含 https://www.zgzonre.com API URL 的文件清单
+ 扫描时间：当前
+ 待替换域名：https://www.zgzonre.com → (新域名)
+=================================================================
+
+一、HTML 文件（页面级 data-* 属性中带 API URL）
+───────────────────────────────────────────────
+
+ 1. category/category.html               L9   data-api-base="https://www.zgzonre.com/wp-json/wp/v2/posts"
+ 2. category/category.local.html          L8   data-api-base="https://www.zgzonre.com/wp-json/wp/v2/posts"
+ 3. search/search-center.html             L6   data-api-base="https://www.zgzonre.com/wp-json/wp/v2/"
+                                         L7   data-detail-url="https://www.zgzonre.com/detail-base"
+ 4. search/search-center.local.html       L6   data-api-base="https://www.zgzonre.com/wp-json/wp/v2/"
+                                         L7   data-detail-url="https://www.zgzonre.com/detail-base"
+ 5. more/首页-vr-更多产品列表-v2.html      L5   data-api-base="https://www.zgzonre.com/wp-json/wp/v2/posts"
+ 6. more/首页-vr-更多产品列表-v2.local.html L5   data-api-base="https://www.zgzonre.com/wp-json/wp/v2/posts"
+ 7. vr_init/vr_list.html                  L8   data-category-api-base="https://www.zgzonre.com/wp-json/wp/v2/categories"
+                                         L9   data-post-api-base="https://www.zgzonre.com/wp-json/wp/v2/posts"
+                                         L10  data-detail-base="https://www.zgzonre.com/detail-base"
+ 8. vr_init/vr_list.local.html            L8   data-category-api-base="https://www.zgzonre.com/wp-json/wp/v2/categories"
+                                         L9   data-post-api-base="https://www.zgzonre.com/wp-json/wp/v2/posts"
+                                         L10  data-detail-base="https://www.zgzonre.com/detail-base"
+ 9. 首页VR/index.html                     L19  href="https://www.zgzonre.com/index-vr-more?vr_page=1"
+10. 首页VR/index.local.html               L19  href="https://www.zgzonre.com/index-vr-more?vr_page=1"
+
+二、JS 文件（内部硬编码 fallback API URL）
+───────────────────────────────────────────────
+
+11. article/assets/js/article-detail-page.js   L7   DEFAULT_API_BASE = "https://www.zgzonre.com/wp-json/wp/v2/"
+12. category/assets/js/category-api-v2.js      L57  fallback "https://www.zgzonre.com/wp-json/wp/v2/categories"
+                                               L152 buildDetailUrl() 拼装 ".../detail-base?article_id="
+13. category/assets/js/category-page-v2.js     L50  fallback "https://www.zgzonre.com/wp-json/wp/v2/posts"
+14. search/assets/js/search-page.js            L64  fallback "https://www.zgzonre.com/wp-json/wp/v2/"
+                                               L68  fallback "https://www.zgzonre.com/detail-base"
+15. vr_init/assets/js/vr-category-page.js      L47  fallback "https://www.zgzonre.com/wp-json/wp/v2/categories"
+                                               L54  fallback "https://www.zgzonre.com/wp-json/wp/v2/posts"
+                                               L63  fallback "https://www.zgzonre.com/detail-base"
+16. more/vr-more-products-v2.1.js              L7   fallback "https://www.zgzonre.com/wp-json/wp/v2/posts"
+                                               L11  detailPageBase = "https://www.zgzonre.com/detail-base"
+                                               L283 硬编码 "https://www.zgzonre.com/wp-json/wp/v2/categories/{id}"
+
+三、JSON 配置（硬编码了 detail-base 跳转链接）
+───────────────────────────────────────────────
+
+17. 查看更多(首页)/more-page.config.json        多处  "href": "https://www.zgzonre.com/detail-base?article_id=xxx"
+18. 首页VR/config/sections.json                  L18  "href": "https://www.zgzonre.com/index-vr-more?vr_page=1"
+19. index_new/assets/data/home.config.json       多处  "detailUrl": "https://www.zgzonre.com/detail-base?article_id=xxx"
+                                                 多处  "link": "https://www.zgzonre.com/detail-base?article_id=xxx"
+
+=================================================================
+ 汇总
+=================================================================
+ 总文件数  : 19 个（含 .local.html）
+ 独立文件  : 17 个（去重 HTML+local 后）
+
+ URL 类型分布:
+   wp-json API   : 14 处
+   detail-base   : 12 处
+   index-vr-more :  2 处
+
+ 对应 OSS 前缀: https://static.jsss999.com/upload/zrsite/
+=================================================================

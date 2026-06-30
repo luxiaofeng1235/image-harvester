@@ -26,6 +26,15 @@
 - 排查: 当前主流程图片问题优先看百度抓取，必要时再单独用 `verify_bing_order.py` 验证 Bing。
 - 自检: 可通过 `--check-runtime 1` 快速确认当前图片运行环境，输出是否启用 Bing 及对应渲染状态。
 
+## 1.2 两步走流程（当前实现）
+`generate_goods.py` 内部自动分为两个阶段执行：
+
+- **Phase 1 - 文案生成**: 千问生成 → 校验 → 写库（图片和描述字段留空，`skip_images=True`）
+- **Phase 2 - 补图补详情**: 自动调 `enrich_seed_goods_from_db.py` 的 `process_rows()` 逻辑 → 搜图 → OSS 上传 → 生成详情 HTML → 更新回库
+
+可以通过 `--skip-images 1` 关闭 Phase 2，只生成文案不入图。
+`enrich_seed_goods_from_db.py` 仍可作为独立脚本单独使用，用于手动维护的种子商品补全。`generate_goods.py` 内部 Phase 2 复用的是同一套补图逻辑，区别仅在于调用入口。
+
 ## 2. 代码位置
 - 主目录: `goods_excel/ai_goods_pipeline/`
 - 启动脚本: `goods_excel/ai_goods_pipeline/generate_goods.py`
@@ -243,6 +252,7 @@ python3 ai_goods_pipeline/generate_goods.py \
 - `--city-strategy`: 城市分布策略，默认 `balanced`
 - `--batch-id`: 可选，自定义批次号；不传时自动使用系统生成批次号
 - `--check-runtime`: 只做图片运行环境自检，不生成、不入库
+- `--skip-images`: `1` 只生成文案入库，不搜图不上传 OSS，默认 `0`（全流程）
 
 自检示例:
 ```bash
@@ -362,6 +372,7 @@ python3 ai_goods_pipeline/enrich_seed_goods_from_db.py \
 - 已经有人工导入的种子商品，仅需从数据库中补 `sub_title / image / description`
 - 查询条件固定按 `image` 为空或 `description` 为空筛选
 - 适合作为主批量生成链路之外的第二补录方案
+- **注意：`generate_goods.py` 默认内部已自动调用此补图逻辑（Phase 2），一般情况下无需再单独跑此脚本。只有在需要人工干预补录或单独补特定商品时才使用。**
 
 脚本路径:
 - `goods_excel/ai_goods_pipeline/enrich_seed_goods_from_db.py`

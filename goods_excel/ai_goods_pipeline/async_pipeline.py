@@ -148,34 +148,75 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
         self.logger.info("Close all done duration=%.3fs", time.perf_counter() - started_at)
 
     async def run(self, task: GenerationTask) -> PipelineResult:
-        """异步主循环：生成 → 校验 → 图片 → 入库。
+        """异步主循环：先生成文案 → 再补图补详情（两步走）。
 
-        核心优化：千问 API double-buffering。
-        在等待千问返回期间，图片处理是异步并行的；
-        在当前批次处理图片时，提前发下一轮千问请求，
-        等图片处理完直接取预取结果，消除千问串行等待。
-
-        流程：
-        1. 拉取历史标题（去重基线）
-        2. 循环：预算下一轮 prompt → 千问生成 → 校验候选 → 预提取图片 → 入库
-        3. 当本批次图片还在处理时，下一轮千问已经在跑了
+        Phase 1 - 文案生成：千问生成 → 校验 → 入库（空图空描述）
+        Phase 2 - 补图补详情：对已入库的记录搜图+OSS+生成HTML描述
         """
         run_started_at = time.perf_counter()
         self._reset_batch_media_registry()
         self._accepted_image_pool_keys = set()
         profile = get_category_profile(task.category_id)
+
+        # ── Phase 1：只生成文案，不搜图 ──
         self.logger.info(
-            "Start async pipeline: category=%s(%s) count=%s keywords=%s dry_run=%s",
+            "Phase 1 - Text generation: category=%s(%s) count=%s keywords=%s dry_run=%s",
             task.category_id,
             profile["name"],
             task.count,
             ",".join(task.keywords),
             task.dry_run,
         )
+        text_records, failures, attempted_candidates, candidate_durations, success_durations, model_batch_durations = (
+            await self._run_text_phase_only(task, profile, run_started_at)
+        )
+
+        # ── Phase 2：补图 + 补详情 ──
+        if text_records and not task.dry_run:
+            await self._run_image_fill_phase(task, text_records)
+
+        # ── 入库 + 质量报告 ──
+        inserted_count = 0
+        if task.write_db and not task.dry_run and text_records:
+            inserted_count = await self.db_writer.insert_goods(text_records)
+            self.logger.info("Inserted %s rows into %s", inserted_count, self.settings.db_table)
+        else:
+            self.logger.info("Skip DB insert: write_db=%s dry_run=%s", task.write_db, task.dry_run)
+
+        self._write_failures(failures)
+        total_duration_seconds = time.perf_counter() - run_started_at
+        quality_report = self._build_quality_report(
+            task=task, category_name=str(profile["name"]),
+            records=text_records, failures=failures,
+            attempted_candidates=attempted_candidates, inserted_count=inserted_count,
+            total_duration_seconds=total_duration_seconds,
+            candidate_durations=candidate_durations, success_durations=success_durations,
+            model_batch_durations=model_batch_durations,
+        )
+        self._write_quality_report(quality_report)
+        self._log_quality_report_summary(quality_report)
+        self.logger.info(
+            "Async pipeline done: success=%s failures=%s inserted=%s attempted=%s",
+            len(text_records), len(failures), inserted_count, attempted_candidates,
+        )
+        if task.export_excel:
+            self.logger.info("export_excel flag ignored in current DB-first build")
+
+        return PipelineResult(
+            run_id=self.run_id, requested_count=task.count,
+            success_count=len(text_records), inserted_count=inserted_count,
+            failure_count=len(failures), log_path=self.log_path,
+            failure_log_path=self.failure_log_path, report_path=self.report_path,
+            records=text_records, failures=failures, quality_report=quality_report,
+        )
+
+    async def _run_text_phase_only(
+        self, task: GenerationTask, profile, run_started_at: float,
+    ) -> tuple:
+        """仅生成文案，跳过搜图/OSS/描述生成。"""
         history_titles = await self.db_writer.fetch_existing_titles()
         validator = GoodsValidator(
-            category_id=task.category_id,
-            history_titles=history_titles,
+            category_id=task.category_id, history_titles=history_titles,
             target_count=task.count,
             similarity_threshold=self.settings.title_similarity_threshold,
             city_strategy=task.city_strategy,
@@ -184,201 +225,165 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
         records: list[dict[str, Any]] = []
         attempted_candidates = 0
         max_attempts = max(30, task.count * self.settings.task_max_attempts_multiplier)
+        pipeline_timeout = self.settings.pipeline_timeout
         next_model = task.model
         candidate_durations: list[float] = []
         success_durations: list[float] = []
         model_batch_durations: list[float] = []
-        # 下一轮千问的预取任务（double-buffering）
         next_gen_task: asyncio.Task[AsyncQwenGenerationResult] | None = None
-        next_gen_system_prompt: str | None = None
-        next_gen_user_prompt: str | None = None
-        next_gen_model: str | None = None
-        pipeline_timeout = self.settings.pipeline_timeout
+        batch_id = normalize_batch_id(task.batch_id, fallback=self.run_id)
+        now = int(time.time())
 
         while len(records) < task.count and attempted_candidates < max_attempts:
-            # 整体超时检查：超过 pipeline_timeout 秒则停止
             if pipeline_timeout > 0 and (time.perf_counter() - run_started_at) > pipeline_timeout:
-                self.logger.warning(
-                    "Pipeline timeout after %.1fs (limit=%ss) records=%s/%s",
-                    time.perf_counter() - run_started_at,
-                    pipeline_timeout,
-                    len(records),
-                    task.count,
-                )
+                self.logger.warning("Phase 1 timeout after %.1fs records=%s/%s",
+                    time.perf_counter() - run_started_at, len(records), task.count)
                 break
+
             remaining = task.count - len(records)
             candidate_count = choose_candidate_count(remaining, self.settings.qwen_batch_size)
             history_guard_titles = select_history_guard_titles(
-                history_titles + [record["goods_name"] for record in records],
-                task.keywords,
-                limit=60,
-            )
+                history_titles + [r["goods_name"] for r in records], task.keywords, limit=60)
             system_prompt, user_prompt = build_prompts(
-                category_id=task.category_id,
-                keywords=task.keywords,
-                target_count=candidate_count,
-                city_strategy=task.city_strategy,
+                category_id=task.category_id, keywords=task.keywords,
+                target_count=candidate_count, city_strategy=task.city_strategy,
                 history_titles=history_guard_titles,
                 system_prompt_base=self.settings.qwen_system_prompt,
-                style_seed=(
-                    f"{self.run_id}:{normalize_batch_id(task.batch_id, fallback=self.run_id)}:"
-                    f"{attempted_candidates}:{len(records)}"
-                ),
+                style_seed=f"{self.run_id}:{batch_id}:{attempted_candidates}:{len(records)}",
             )
 
-            batch_added = 0
             generation_started_at = time.perf_counter()
             try:
-                # 如果有预取任务，直接用预取结果；否则发起新请求
                 if next_gen_task is not None:
                     generation = await next_gen_task
                     next_gen_task = None
-                    # 记录预取模型的耗时（使用上一轮预取记录的时间片）
-                    model_batch_durations.append(time.perf_counter() - generation_started_at)
                 else:
                     generation = await self.qwen_client.generate(
-                        system_prompt=system_prompt,
-                        user_prompt=user_prompt,
-                        model=next_model,
-                    )
-                    model_batch_durations.append(time.perf_counter() - generation_started_at)
-            except AsyncQwenParseError as exc:
+                        system_prompt=system_prompt, user_prompt=user_prompt, model=next_model)
                 model_batch_durations.append(time.perf_counter() - generation_started_at)
-                failures.append(
-                    self._failure_entry(
-                        task=task,
-                        fail_stage="qwen_parse",
-                        fail_reason=str(exc),
-                        raw_model_output=exc.raw_content,
-                    )
-                )
-                self.logger.warning("Model parse failure with %s: %s", next_model, exc)
-                next_model = task.fallback_model if next_model != task.fallback_model else task.model
-                continue
-            except AsyncQwenClientError as exc:
+            except (AsyncQwenParseError, AsyncQwenClientError) as exc:
                 model_batch_durations.append(time.perf_counter() - generation_started_at)
-                failures.append(
-                    self._failure_entry(
-                        task=task,
-                        fail_stage="qwen_request",
-                        fail_reason=str(exc),
-                    )
-                )
-                self.logger.warning("Model request failure with %s: %s", next_model, exc)
+                fail_stage = "qwen_parse" if isinstance(exc, AsyncQwenParseError) else "qwen_request"
+                raw_output = exc.raw_content if isinstance(exc, AsyncQwenParseError) else ""
+                failures.append(self._failure_entry(task=task, fail_stage=fail_stage, fail_reason=str(exc), raw_model_output=raw_output))
+                self.logger.warning("Model failure with %s: %s", next_model, exc)
                 next_model = task.fallback_model if next_model != task.fallback_model else task.model
                 continue
 
-            raw_items = generation.items[: max(0, max_attempts - attempted_candidates)]
-            pending_candidates, attempted_in_batch = self._collect_pending_candidates(
-                task=task,
-                validator=validator,
-                raw_items=raw_items,
-                failures=failures,
-                candidate_durations=candidate_durations,
-            )
-            attempted_candidates += attempted_in_batch
+            batch_added = 0
+            raw_items = generation.items[:max(0, max_attempts - attempted_candidates)]
+            for raw_item in raw_items:
+                if len(records) >= task.count or attempted_candidates >= max_attempts:
+                    break
+                candidate_started_at = time.perf_counter()
+                attempted_candidates += 1
+                validation = validator.validate(raw_item)
+                if not validation.ok:
+                    cd = time.perf_counter() - candidate_started_at
+                    candidate_durations.append(cd)
+                    failures.append(self._failure_entry(
+                        task=task, candidate_title=self._safe_title(raw_item),
+                        normalized_title=validation.normalized_title,
+                        fail_stage="validate", fail_reason=validation.reason,
+                        similarity_score=validation.similarity_score,
+                        matched_history_title=validation.matched_history_title,
+                        image_keywords=self._safe_image_keywords(raw_item),
+                        raw_model_output=json.dumps(raw_item, ensure_ascii=False),
+                        candidate_duration_seconds=cd))
+                    continue
 
-            # 如果本轮还有剩余候选空间，提前发起下一轮千问请求（double-buffering）
-            if len(records) + len(pending_candidates) < task.count and attempted_candidates < max_attempts:
-                next_remaining = task.count - (len(records) + len(pending_candidates))
-                next_candidate_count = choose_candidate_count(next_remaining, self.settings.qwen_batch_size)
-                next_guard_titles = select_history_guard_titles(
-                    history_titles + [record["goods_name"] for record in records],
-                    task.keywords,
-                    limit=60,
-                )
-                next_sys, next_user = build_prompts(
-                    category_id=task.category_id,
-                    keywords=task.keywords,
-                    target_count=next_candidate_count,
-                    city_strategy=task.city_strategy,
-                    history_titles=next_guard_titles,
-                    system_prompt_base=self.settings.qwen_system_prompt,
-                    style_seed=(
-                        f"{self.run_id}:{normalize_batch_id(task.batch_id, fallback=self.run_id)}:"
-                        f"{attempted_candidates}:{len(records)}"
-                    ),
-                )
-                next_gen_system_prompt = next_sys
-                next_gen_user_prompt = next_user
-                next_gen_model = next_model
-                # 在处理图片的同时，后台跑千问
+                assert validation.item is not None
+                item = validation.item
+                cd = time.perf_counter() - candidate_started_at
+                candidate_durations.append(cd)
+                success_durations.append(cd)
+
+                record = {
+                    "goods_name": item["title"], "sub_title": item["subtitle"],
+                    "shop_id": task.shop_id, "category_id": task.category_id,
+                    "image": "", "price": item["price"], "description": "",
+                    "en_name": "", "batch_id": batch_id, "last_batch_id": batch_id,
+                    "source_type": SOURCE_AI_GENERATE,
+                    "source_note": build_source_note(
+                        [f"batch_id={batch_id}", f"keywords={','.join(task.keywords)}", f"model={generation.model}"]),
+                    "create_time": now, "update_time": now,
+                    "selling_points": item["selling_points"], "attrs": item["attrs"],
+                    "image_keywords": item["image_keywords"], "detail_images": [],
+                    "model_used": generation.model, "main_image_source": "",
+                    "detail_image_sources": [], "source_queries": [],
+                    "processing_duration_seconds": round(cd, 3),
+                }
+                records.append(record)
+                validator.register_success(validation)
+                batch_added += 1
+                self.logger.info("Phase 1 text %s/%s: %s", len(records), task.count, record["goods_name"])
+
+            # double-buffering
+            if len(records) < task.count and attempted_candidates < max_attempts:
+                nr = task.count - len(records)
+                nc = choose_candidate_count(nr, self.settings.qwen_batch_size)
+                ngt = select_history_guard_titles(
+                    history_titles + [r["goods_name"] for r in records], task.keywords, limit=60)
+                ns, nu = build_prompts(
+                    category_id=task.category_id, keywords=task.keywords,
+                    target_count=nc, city_strategy=task.city_strategy,
+                    history_titles=ngt, system_prompt_base=self.settings.qwen_system_prompt,
+                    style_seed=f"{self.run_id}:{batch_id}:{attempted_candidates}:{len(records)}")
                 next_gen_task = asyncio.create_task(
-                    self.qwen_client.generate(
-                        system_prompt=next_sys,
-                        user_prompt=next_user,
-                        model=next_model,
-                    )
-                )
+                    self.qwen_client.generate(system_prompt=ns, user_prompt=nu, model=next_model))
 
-            materialized = await self._materialize_pending_candidates(
-                task=task,
-                generation=generation,
-                validator=validator,
-                pending_candidates=pending_candidates,
-                records=records,
-                failures=failures,
-                candidate_durations=candidate_durations,
-                success_durations=success_durations,
-            )
-            batch_added += materialized
-
-            # 如果当前批次没有任何成功入库的，切换到 fallback 模型重试
             if batch_added == 0:
                 next_model = task.fallback_model if next_model != task.fallback_model else task.model
-                # 有预取任务的也要取消，因为换模型了
                 if next_gen_task is not None and not next_gen_task.done():
                     next_gen_task.cancel()
                 next_gen_task = None
             else:
                 next_model = task.model
 
-        inserted_count = 0
-        if task.write_db and not task.dry_run and records:
-            inserted_count = await self.db_writer.insert_goods(records)
-            self.logger.info("Inserted %s rows into %s", inserted_count, self.settings.db_table)
-        else:
-            self.logger.info("Skip DB insert: write_db=%s dry_run=%s", task.write_db, task.dry_run)
+        self.logger.info("Phase 1 done: accepted=%s/%s", len(records), task.count)
+        return records, failures, attempted_candidates, candidate_durations, success_durations, model_batch_durations
 
-        self._write_failures(failures)
-        total_duration_seconds = time.perf_counter() - run_started_at
-        quality_report = self._build_quality_report(
-            task=task,
-            category_name=str(profile["name"]),
-            records=records,
-            failures=failures,
-            attempted_candidates=attempted_candidates,
-            inserted_count=inserted_count,
-            total_duration_seconds=total_duration_seconds,
-            candidate_durations=candidate_durations,
-            success_durations=success_durations,
-            model_batch_durations=model_batch_durations,
-        )
-        self._write_quality_report(quality_report)
-        self._log_quality_report_summary(quality_report)
-        self.logger.info(
-            "Async pipeline done: success=%s failures=%s inserted=%s attempted=%s",
-            len(records),
-            len(failures),
-            inserted_count,
-            attempted_candidates,
-        )
-        if task.export_excel:
-            self.logger.info("export_excel flag ignored in current DB-first build")
+    async def _run_image_fill_phase(self, task: GenerationTask, records: list[dict[str, Any]]) -> None:
+        """Phase 2：对已生成的记录补图片 + 补详情HTML。"""
+        if not records:
+            return
+        self.logger.info("Phase 2 - Image fill: processing %s records", len(records))
+        self._reset_batch_media_registry()
 
-        return PipelineResult(
-            run_id=self.run_id,
-            requested_count=task.count,
-            success_count=len(records),
-            inserted_count=inserted_count,
-            failure_count=len(failures),
-            log_path=self.log_path,
-            failure_log_path=self.failure_log_path,
-            report_path=self.report_path,
-            records=records,
-            failures=failures,
-            quality_report=quality_report,
+        # 构造虚拟的 GenerationTask（skip_images=False 才能走完整搜图流程）
+        img_task = GenerationTask(
+            category_id=task.category_id, keywords=task.keywords, count=len(records),
+            shop_id=task.shop_id, model=task.model, fallback_model=task.fallback_model,
+            write_db=False, dry_run=False, export_excel=False,
+            city_strategy=task.city_strategy, batch_id=task.batch_id, skip_images=False,
         )
+        dummy_validator = GoodsValidator(
+            category_id=task.category_id, history_titles=[],
+            target_count=len(records),
+            similarity_threshold=self.settings.title_similarity_threshold,
+            city_strategy=task.city_strategy,
+        )
+        dummy_gen = AsyncQwenGenerationResult(
+            model=str(records[0].get("model_used", "")), raw_content="", items=[], response_payload={},
+        ) if records else AsyncQwenGenerationResult(model="", raw_content="", items=[], response_payload={})
+
+        pending: list[PendingBatchCandidate] = []
+        for rec in records:
+            item = {
+                "title": rec["goods_name"], "subtitle": rec["sub_title"],
+                "price": rec["price"], "selling_points": rec["selling_points"],
+                "attrs": rec["attrs"], "image_keywords": rec.get("image_keywords", []),
+            }
+            val = ValidationResult(ok=True, item=item, normalized_title="", city="")
+            key = self._build_image_pool_key(task, item)
+            pending.append(PendingBatchCandidate(raw_item=item, validation=val, image_pool_key=key, started_at=time.perf_counter()))
+
+        accepted = await self._materialize_pending_candidates(
+            task=img_task, generation=dummy_gen, validator=dummy_validator,
+            pending_candidates=pending, records=records, failures=[],
+            candidate_durations=[], success_durations=[],
+        )
+        self.logger.info("Phase 2 done: %s/%s images filled", accepted, len(records))
 
     def _collect_pending_candidates(
         self,
@@ -510,6 +515,62 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
     ) -> int:
         if not pending_candidates:
             return 0
+
+        # skip_images 模式：跳过搜图/OSS/HTML，直接生成空图片空描述的记录入库
+        if task.skip_images:
+            accepted_count = 0
+            batch_id = normalize_batch_id(task.batch_id, fallback=self.run_id)
+            now = int(time.time())
+            for candidate in pending_candidates:
+                if len(records) >= task.count:
+                    break
+                assert candidate.validation.item is not None
+                item = candidate.validation.item
+                candidate_duration = time.perf_counter() - candidate.started_at
+                candidate_durations.append(candidate_duration)
+                success_durations.append(candidate_duration)
+                record = {
+                    "goods_name": item["title"],
+                    "sub_title": item["subtitle"],
+                    "shop_id": task.shop_id,
+                    "category_id": task.category_id,
+                    "image": "",
+                    "price": item["price"],
+                    "description": "",
+                    "en_name": "",
+                    "batch_id": batch_id,
+                    "last_batch_id": batch_id,
+                    "source_type": SOURCE_AI_GENERATE,
+                    "source_note": build_source_note(
+                        [
+                            f"batch_id={batch_id}",
+                            f"keywords={','.join(task.keywords)}",
+                            f"model={generation.model}",
+                            "skip_images=1",
+                        ]
+                    ),
+                    "create_time": now,
+                    "update_time": now,
+                    "selling_points": item["selling_points"],
+                    "attrs": item["attrs"],
+                    "image_keywords": item["image_keywords"],
+                    "detail_images": [],
+                    "model_used": generation.model,
+                    "main_image_source": "",
+                    "detail_image_sources": [],
+                    "source_queries": [],
+                    "processing_duration_seconds": round(candidate_duration, 3),
+                }
+                records.append(record)
+                validator.register_success(candidate.validation)
+                accepted_count += 1
+                self.logger.info(
+                    "Accepted item %s/%s (skip_images): %s",
+                    len(records),
+                    task.count,
+                    record["goods_name"],
+                )
+            return accepted_count
 
         semaphore = asyncio.Semaphore(max(1, min(6, len(pending_candidates))))
 

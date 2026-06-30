@@ -33,6 +33,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--city-strategy", type=str, default="balanced")
     parser.add_argument("--batch-id", type=str, default="")
     parser.add_argument("--check-runtime", type=int, default=0)
+    parser.add_argument("--skip-images", type=int, default=0, help="1=只生成文案入库，不搜图不上传OSS")
     return parser.parse_args()
 
 
@@ -81,6 +82,7 @@ async def amain() -> int:
             export_excel=bool(args.export_excel),
             city_strategy=args.city_strategy,
             batch_id=batch_id,
+            skip_images=True,  # Phase 1：先生成文案，不搜图
         )
         result = await pipeline.run(task)
         print(
@@ -93,6 +95,15 @@ async def amain() -> int:
             )
         )
         print("quality_report=" + json.dumps(result.quality_report, ensure_ascii=False))
+
+        # Phase 2：如果没开 skip-images，自动补图补详情
+        if not args.skip_images and result.inserted_count > 0 and not args.dry_run:
+            await _fill_images_for_batch(
+                settings=settings, logger=logger, run_id=run_id,
+                batch_id=batch_id, category_id=args.category_id,
+                model=args.model or str(profile["default_model"]),
+                concurrency=3,
+            )
     finally:
         close_started_at = time.perf_counter()
         logger.info("amain finally: pipeline.close start")
@@ -119,6 +130,43 @@ async def amain() -> int:
                 time.perf_counter() - cleanup_started_at,
             )
     return 0
+
+
+async def _fill_images_for_batch(
+    *, settings, logger, run_id: str, batch_id: str,
+    category_id: int, model: str, concurrency: int = 3,
+) -> None:
+    """Phase 2：从 enrich_seed_goods_from_db 调补图补详情逻辑。"""
+    from ai_goods_pipeline.enrich_seed_goods_from_db import process_rows
+    from ai_goods_pipeline.writers.async_db_writer import AsyncDBWriter
+
+    db_writer = AsyncDBWriter(
+        host=settings.db_host, port=settings.db_port,
+        user=settings.db_user, password=settings.db_password,
+        database=settings.db_name, charset=settings.db_charset,
+        table=settings.db_table, pool_maxsize=max(2, concurrency + 1),
+    )
+    try:
+        rows = await db_writer.fetch_goods_for_enrichment(
+            category_id=category_id, limit=9999, missing_mode="both",
+        )
+        # 只处理当前 batch_id 的记录
+        rows = [r for r in rows if str(r.get("batch_id") or "") == batch_id]
+        if not rows:
+            logger.info("Phase 2: no records found for batch_id=%s", batch_id)
+            return
+
+        logger.info("Phase 2 - Image fill: processing %s records for batch=%s", len(rows), batch_id)
+        results = await process_rows(
+            rows, settings=settings, model=model,
+            concurrency=concurrency, dry_run=False,
+            force_image_refresh=False, logger=logger,
+            batch_id=batch_id, run_id=run_id,
+        )
+        ok = sum(1 for r in results if r.get("ok"))
+        logger.info("Phase 2 done: %s/%s images filled", ok, len(rows))
+    finally:
+        await db_writer.close()
 
 
 def main() -> int:

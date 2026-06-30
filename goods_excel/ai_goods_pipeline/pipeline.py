@@ -43,6 +43,7 @@ class GenerationTask:
     export_excel: bool
     city_strategy: str
     batch_id: str = ""
+    skip_images: bool = False
 
 
 @dataclass(slots=True)
