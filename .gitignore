@@ -20,3 +20,4 @@ goods_excel/.env.*
 /goods_excel/ai_goods_pipeline/logs
 /html/.codex
 /html/copyright
+/goods_excel/ai_goods_pipeline/runtime
