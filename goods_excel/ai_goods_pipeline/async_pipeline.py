@@ -193,8 +193,19 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
         next_gen_system_prompt: str | None = None
         next_gen_user_prompt: str | None = None
         next_gen_model: str | None = None
+        pipeline_timeout = self.settings.pipeline_timeout
 
         while len(records) < task.count and attempted_candidates < max_attempts:
+            # 整体超时检查：超过 pipeline_timeout 秒则停止
+            if pipeline_timeout > 0 and (time.perf_counter() - run_started_at) > pipeline_timeout:
+                self.logger.warning(
+                    "Pipeline timeout after %.1fs (limit=%ss) records=%s/%s",
+                    time.perf_counter() - run_started_at,
+                    pipeline_timeout,
+                    len(records),
+                    task.count,
+                )
+                break
             remaining = task.count - len(records)
             candidate_count = choose_candidate_count(remaining, self.settings.qwen_batch_size)
             history_guard_titles = select_history_guard_titles(

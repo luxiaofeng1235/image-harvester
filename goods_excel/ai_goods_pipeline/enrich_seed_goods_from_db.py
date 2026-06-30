@@ -307,6 +307,7 @@ async def process_rows(
     logger,
     batch_id: str,
     run_id: str,
+    db_writer: AsyncDBWriter | None = None,
 ) -> list[dict[str, Any]]:
     semaphore = asyncio.Semaphore(max(1, concurrency))
     qwen_client = AsyncQwenClient(
@@ -329,16 +330,20 @@ async def process_rows(
         validation_cache_path=settings.image_validation_cache_path,
         validation_cache_max_entries=settings.image_validation_cache_max_entries,
     )
-    db_writer = AsyncDBWriter(
-        host=settings.db_host,
-        port=settings.db_port,
-        user=settings.db_user,
-        password=settings.db_password,
-        database=settings.db_name,
-        charset=settings.db_charset,
-        table=settings.db_table,
-        pool_maxsize=max(2, concurrency + 1),
-    )
+    if db_writer is None:
+        db_writer = AsyncDBWriter(
+            host=settings.db_host,
+            port=settings.db_port,
+            user=settings.db_user,
+            password=settings.db_password,
+            database=settings.db_name,
+            charset=settings.db_charset,
+            table=settings.db_table,
+            pool_maxsize=max(2, concurrency + 1),
+        )
+        _db_writer_owned = True
+    else:
+        _db_writer_owned = False
     oss_uploader = (
         AsyncOSSImageUploader(
             enabled=settings.oss_enabled,
@@ -424,7 +429,8 @@ async def process_rows(
     finally:
         await qwen_client.close()
         await image_client.close()
-        await db_writer.close()
+        if _db_writer_owned:
+            await db_writer.close()
         if oss_uploader is not None:
             await oss_uploader.close()
 
@@ -484,10 +490,12 @@ async def amain() -> int:
             missing_mode=args.missing_mode,
             ids=ids or None,
         )
-    finally:
+    except Exception:
         await db_writer.close()
+        raise
 
     if not rows:
+        await db_writer.close()
         print("selected=0 processed=0 updated=0 failed=0")
         return 0
 
@@ -502,17 +510,21 @@ async def amain() -> int:
         model,
     )
     started_at = time.perf_counter()
-    results = await process_rows(
-        rows,
-        settings=settings,
-        model=model,
-        concurrency=args.concurrency,
-        dry_run=bool(args.dry_run),
-        force_image_refresh=bool(args.force_image_refresh),
-        logger=logger,
-        batch_id=batch_id,
-        run_id=run_id,
-    )
+    try:
+        results = await process_rows(
+            rows,
+            settings=settings,
+            model=model,
+            concurrency=args.concurrency,
+            dry_run=bool(args.dry_run),
+            force_image_refresh=bool(args.force_image_refresh),
+            logger=logger,
+            batch_id=batch_id,
+            run_id=run_id,
+            db_writer=db_writer,
+        )
+    finally:
+        await db_writer.close()
     summary = build_summary(
         category_id=args.category_id,
         model=model,

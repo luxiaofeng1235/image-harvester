@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+from collections import OrderedDict
 from dataclasses import dataclass
+import logging
 from pathlib import Path
 import re
 from urllib.parse import urlparse
@@ -46,6 +48,8 @@ USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36"
 )
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -130,9 +134,14 @@ class AsyncImageClient:
             user_agent=USER_AGENT,
         )
         self.validation_cache = self._load_validation_cache()
-        self.resolution_pool_cache: dict[str, AsyncImageResolutionPool] = {}
+        # 图片池缓存：上限 500 条目，超限淘汰最旧
+        self.resolution_pool_cache: OrderedDict[str, AsyncImageResolutionPool] = OrderedDict()
+        self._resolution_pool_cache_max = 500
         self._resolution_pool_lock = asyncio.Lock()
-        self._resolution_pool_inflight: dict[str, asyncio.Task[AsyncImageResolutionPool]] = {}
+        self._resolution_pool_inflight: dict[str, asyncio.Task[AsyncImagePool]] = {}
+        # 验证缓存定期持久化计数器
+        self._validation_cache_dirty_count = 0
+        self._validation_cache_save_interval = 200
 
     async def close(self) -> None:
         async with self._resolution_pool_lock:
@@ -221,11 +230,13 @@ class AsyncImageClient:
     ) -> AsyncImageResolutionPool:
         cache_key = str(reuse_key or "").strip()
         if cache_key and cache_key in self.resolution_pool_cache:
+            self.resolution_pool_cache.move_to_end(cache_key)
             return self.resolution_pool_cache[cache_key]
         if cache_key:
             async with self._resolution_pool_lock:
                 cached_pool = self.resolution_pool_cache.get(cache_key)
                 if cached_pool is not None:
+                    self.resolution_pool_cache.move_to_end(cache_key)
                     return cached_pool
                 inflight_task = self._resolution_pool_inflight.get(cache_key)
                 if inflight_task is None:
@@ -245,6 +256,8 @@ class AsyncImageClient:
                     if self._resolution_pool_inflight.get(cache_key) is inflight_task:
                         self._resolution_pool_inflight.pop(cache_key, None)
             self.resolution_pool_cache[cache_key] = pool
+            self.resolution_pool_cache.move_to_end(cache_key)
+            self._evict_resolution_pool_cache()
             return pool
 
         return await self._build_image_pool(
@@ -253,6 +266,11 @@ class AsyncImageClient:
             category_id=category_id,
             keywords=keywords,
         )
+
+    def _evict_resolution_pool_cache(self) -> None:
+        """当缓存超过上限时淘汰最旧的条目。"""
+        while len(self.resolution_pool_cache) > self._resolution_pool_cache_max:
+            self.resolution_pool_cache.popitem(last=False)
 
     async def _build_image_pool(
         self,
@@ -422,7 +440,8 @@ class AsyncImageClient:
             return []
         try:
             items = await self.baidu_image_client.fetch_images(query, limit=IMAGE_BAIDU_FETCH_LIMIT)
-        except Exception:
+        except Exception as exc:
+            logger.warning("Baidu image search failed for query=%r error=%s", query, exc)
             return []
         candidates: list[dict[str, str]] = []
         seen_urls: set[str] = set()
@@ -687,6 +706,13 @@ class AsyncImageClient:
 
         if cacheable:
             self.validation_cache[url] = probe
+            self._validation_cache_dirty_count += 1
+            if self._validation_cache_dirty_count >= self._validation_cache_save_interval:
+                self._validation_cache_dirty_count = 0
+                try:
+                    self._persist_validation_cache()
+                except Exception:
+                    logger.exception("Periodic validation cache persist failed")
         return probe
 
     async def _request_probe(self, url: str, *, require_full: bool) -> tuple[AsyncImageProbe | None, bool]:

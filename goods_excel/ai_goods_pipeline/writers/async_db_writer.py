@@ -6,7 +6,7 @@ from typing import Any
 
 try:
     import aiomysql
-except Exception:  # pragma: no cover - optional runtime dependency
+except ImportError:  # pragma: no cover - optional runtime dependency
     aiomysql = None
 
 

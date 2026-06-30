@@ -145,12 +145,23 @@ class AIGoodsPipeline:
         records: list[dict[str, Any]] = []
         attempted_candidates = 0
         max_attempts = max(30, task.count * self.settings.task_max_attempts_multiplier)
+        pipeline_timeout = self.settings.pipeline_timeout
         next_model = task.model
         candidate_durations: list[float] = []
         success_durations: list[float] = []
         model_batch_durations: list[float] = []
 
         while len(records) < task.count and attempted_candidates < max_attempts:
+            # 整体超时检查：超过 pipeline_timeout 秒则停止
+            if pipeline_timeout > 0 and (time.perf_counter() - run_started_at) > pipeline_timeout:
+                self.logger.warning(
+                    "Pipeline timeout after %.1fs (limit=%ss) records=%s/%s",
+                    time.perf_counter() - run_started_at,
+                    pipeline_timeout,
+                    len(records),
+                    task.count,
+                )
+                break
             remaining = task.count - len(records)
             candidate_count = choose_candidate_count(remaining, self.settings.qwen_batch_size)
             history_guard_titles = select_history_guard_titles(

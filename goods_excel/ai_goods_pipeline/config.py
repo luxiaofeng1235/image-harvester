@@ -95,6 +95,7 @@ class Settings:
     image_clip_category_ids: tuple[int, ...]
     title_similarity_threshold: float
     task_max_attempts_multiplier: int
+    pipeline_timeout: int
     oss_enabled: bool
     oss_access_key_id: str
     oss_access_key_secret: str
@@ -213,6 +214,9 @@ def load_settings(env_file: Path | None = None) -> Settings:
         ),
         task_max_attempts_multiplier=_as_int(
             os.getenv("TASK_MAX_ATTEMPTS_MULTIPLIER"), 3
+        ),
+        pipeline_timeout=_as_int(
+            os.getenv("PIPELINE_TIMEOUT"), 0
         ),
         oss_enabled=_as_bool(os.getenv("OSS_ENABLED"), True),
         oss_access_key_id=os.getenv("OSS_ACCESS_KEY_ID", ""),
