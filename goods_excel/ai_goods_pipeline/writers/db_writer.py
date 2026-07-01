@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import time
 from typing import Any
 
@@ -50,16 +51,19 @@ class DBWriter:
         if not goods_records:
             return 0
 
-        sql = f"""
-            INSERT INTO `{self.table}`
-            (
-                goods_name, sub_title, shop_id, category_id, image, price, description, en_name,
-                batch_id, last_batch_id, source_type, source_note, create_time, update_time
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        params = [
-            (
+        columns = (
+            "goods_name, sub_title, shop_id, category_id, image, price, description, en_name, "
+            "batch_id, last_batch_id, source_type, source_note, create_time, update_time, "
+            "selling_points, attrs, image_keywords, detail_images, "
+            "model_used, main_image_source, detail_image_sources, source_queries, "
+            "processing_duration_seconds"
+        )
+        value_rows: list[str] = []
+        flat_params: list[Any] = []
+        for item in goods_records:
+            placeholders = ",".join(["%s"] * 23)
+            value_rows.append(f"({placeholders})")
+            flat_params.extend([
                 item["goods_name"],
                 item["sub_title"],
                 int(item.get("shop_id", 0) or 0),
@@ -74,15 +78,23 @@ class DBWriter:
                 item.get("source_note", ""),
                 item["create_time"],
                 item["update_time"],
-            )
-            for item in goods_records
-        ]
+                json.dumps(item.get("selling_points", []), ensure_ascii=False),
+                json.dumps(item.get("attrs", {}), ensure_ascii=False),
+                json.dumps(item.get("image_keywords", []), ensure_ascii=False),
+                json.dumps(item.get("detail_images", []), ensure_ascii=False),
+                item.get("model_used", ""),
+                item.get("main_image_source", ""),
+                json.dumps(item.get("detail_image_sources", []), ensure_ascii=False),
+                json.dumps(item.get("source_queries", []), ensure_ascii=False),
+                item.get("processing_duration_seconds", 0),
+            ])
 
+        sql = f"INSERT INTO `{self.table}` ({columns}) VALUES {', '.join(value_rows)}"
         with self._connect() as conn:
             with conn.cursor() as cursor:
-                cursor.executemany(sql, params)
+                cursor.execute(sql, flat_params)
             conn.commit()
-        return len(params)
+        return len(goods_records)
 
     def fetch_goods_for_enrichment(
         self,
@@ -111,7 +123,10 @@ class DBWriter:
         sql = f"""
             SELECT
                 id, goods_name, sub_title, shop_id, category_id, image, price, description,
-                en_name, batch_id, last_batch_id, source_type, source_note, create_time, update_time
+                en_name, batch_id, last_batch_id, source_type, source_note, create_time, update_time,
+                selling_points, attrs, image_keywords, detail_images,
+                model_used, main_image_source, detail_image_sources, source_queries,
+                processing_duration_seconds
             FROM `{self.table}`
             WHERE {' AND '.join(where_clauses)}
             ORDER BY id ASC
@@ -173,4 +188,3 @@ class DBWriter:
         if mode == "both":
             return f"{image_empty} AND {description_empty}"
         return f"({image_empty} OR {description_empty})"
-

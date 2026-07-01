@@ -232,6 +232,20 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
         batch_id = normalize_batch_id(task.batch_id, fallback=self.run_id)
         now = int(time.time())
 
+        def _build_prompt(candidate_count: int, current_records: list) -> tuple[str, str]:
+            """构建本轮千问 prompt（提取为共用方法，主循环和双缓冲共用同一份逻辑）。"""
+            hgt = select_history_guard_titles(
+                history_titles + [r["goods_name"] for r in current_records],
+                task.keywords, limit=60,
+            )
+            return build_prompts(
+                category_id=task.category_id, keywords=task.keywords,
+                target_count=candidate_count, city_strategy=task.city_strategy,
+                history_titles=hgt,
+                system_prompt_base=self.settings.qwen_system_prompt,
+                style_seed=f"{self.run_id}:{batch_id}:{attempted_candidates}:{len(current_records)}",
+            )
+
         while len(records) < task.count and attempted_candidates < max_attempts:
             if pipeline_timeout > 0 and (time.perf_counter() - run_started_at) > pipeline_timeout:
                 self.logger.warning("Phase 1 timeout after %.1fs records=%s/%s",
@@ -240,15 +254,7 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
 
             remaining = task.count - len(records)
             candidate_count = choose_candidate_count(remaining, self.settings.qwen_batch_size)
-            history_guard_titles = select_history_guard_titles(
-                history_titles + [r["goods_name"] for r in records], task.keywords, limit=60)
-            system_prompt, user_prompt = build_prompts(
-                category_id=task.category_id, keywords=task.keywords,
-                target_count=candidate_count, city_strategy=task.city_strategy,
-                history_titles=history_guard_titles,
-                system_prompt_base=self.settings.qwen_system_prompt,
-                style_seed=f"{self.run_id}:{batch_id}:{attempted_candidates}:{len(records)}",
-            )
+            system_prompt, user_prompt = _build_prompt(candidate_count, records)
 
             generation_started_at = time.perf_counter()
             try:
@@ -316,17 +322,11 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
                 batch_added += 1
                 self.logger.info("Phase 1 text %s/%s: %s", len(records), task.count, record["goods_name"])
 
-            # double-buffering
+            # double-buffering：预取下一轮 prompt（与主循环共用 _build_prompt）
             if len(records) < task.count and attempted_candidates < max_attempts:
                 nr = task.count - len(records)
                 nc = choose_candidate_count(nr, self.settings.qwen_batch_size)
-                ngt = select_history_guard_titles(
-                    history_titles + [r["goods_name"] for r in records], task.keywords, limit=60)
-                ns, nu = build_prompts(
-                    category_id=task.category_id, keywords=task.keywords,
-                    target_count=nc, city_strategy=task.city_strategy,
-                    history_titles=ngt, system_prompt_base=self.settings.qwen_system_prompt,
-                    style_seed=f"{self.run_id}:{batch_id}:{attempted_candidates}:{len(records)}")
+                ns, nu = _build_prompt(nc, records)
                 next_gen_task = asyncio.create_task(
                     self.qwen_client.generate(system_prompt=ns, user_prompt=nu, model=next_model))
 

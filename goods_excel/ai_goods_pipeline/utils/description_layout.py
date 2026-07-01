@@ -48,6 +48,10 @@ ATTR_DISPLAY_ORDER = {
     129: ["工艺类别", "核心材质", "规格尺寸", "适用场景"],
 }
 
+# CSS class 名称（集中定义，方便前端调整时统一修改）
+CSS_DESCRIPTION_CONTAINER = "product-description"
+CSS_DETAIL_CONTAINER = "product-detail"
+
 
 def build_description_html(
     *,
@@ -74,7 +78,7 @@ def build_description_html(
         variation_seed=variation_seed,
     )
 
-    sections = ['<div class="product-description">']
+    sections = [f'<div class="{CSS_DESCRIPTION_CONTAINER}">']
     if intro:
         if variant["intro_style"] == "block":
             sections.append(f"  <p><strong>{html_escape(variant['intro_label'])}</strong></p>")
@@ -102,7 +106,7 @@ def build_description_html(
     sections.append("</div>")
 
     if clean_images:
-        sections.append('<div class="product-detail">')
+        sections.append(f'<div class="{CSS_DETAIL_CONTAINER}">')
         sections.append(f"  <p><strong>{html_escape(str(variant['detail_label']))}</strong></p>")
         for url in clean_images:
             sections.append(f'  <img src="{html_escape(url)}" />')
