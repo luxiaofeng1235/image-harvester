@@ -171,9 +171,7 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             await self._run_text_phase_only(task, profile, run_started_at)
         )
 
-        # ── Phase 2：补图 + 补详情 ──
-        if text_records and not task.dry_run:
-            await self._run_image_fill_phase(task, text_records)
+        # ── Phase 2 由调用方（generate_goods.py）在外部通过 enrich 流程处理 ──
 
         # ── 入库 + 质量报告 ──
         inserted_count = 0

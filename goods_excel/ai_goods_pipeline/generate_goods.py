@@ -82,7 +82,7 @@ async def amain() -> int:
             export_excel=bool(args.export_excel),
             city_strategy=args.city_strategy,
             batch_id=batch_id,
-            skip_images=True,  # Phase 1：先生成文案，不搜图
+            skip_images=bool(args.skip_images),  # Phase 1：先生成文案，不搜图
         )
         result = await pipeline.run(task)
         print(

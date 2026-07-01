@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 from typing import Any
 
@@ -70,9 +71,12 @@ class AsyncDBWriter:
             INSERT INTO `{self.table}`
             (
                 goods_name, sub_title, shop_id, category_id, image, price, description, en_name,
-                batch_id, last_batch_id, source_type, source_note, create_time, update_time
+                batch_id, last_batch_id, source_type, source_note, create_time, update_time,
+                selling_points, attrs, image_keywords, detail_images,
+                model_used, main_image_source, detail_image_sources, source_queries,
+                processing_duration_seconds
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         params = [
             (
@@ -90,6 +94,15 @@ class AsyncDBWriter:
                 item.get("source_note", ""),
                 item["create_time"],
                 item["update_time"],
+                json.dumps(item.get("selling_points", []), ensure_ascii=False),
+                json.dumps(item.get("attrs", {}), ensure_ascii=False),
+                json.dumps(item.get("image_keywords", []), ensure_ascii=False),
+                json.dumps(item.get("detail_images", []), ensure_ascii=False),
+                item.get("model_used", ""),
+                item.get("main_image_source", ""),
+                json.dumps(item.get("detail_image_sources", []), ensure_ascii=False),
+                json.dumps(item.get("source_queries", []), ensure_ascii=False),
+                item.get("processing_duration_seconds", 0),
             )
             for item in goods_records
         ]
@@ -127,7 +140,10 @@ class AsyncDBWriter:
         sql = f"""
             SELECT
                 id, goods_name, sub_title, category_id, image, price, description,
-                en_name, batch_id, last_batch_id, source_type, source_note, create_time, update_time
+                en_name, batch_id, last_batch_id, source_type, source_note, create_time, update_time,
+                selling_points, attrs, image_keywords, detail_images,
+                model_used, main_image_source, detail_image_sources, source_queries,
+                processing_duration_seconds
             FROM `{self.table}`
             WHERE {' AND '.join(where_clauses)}
             ORDER BY id ASC
