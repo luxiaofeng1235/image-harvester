@@ -308,15 +308,20 @@ async def process_rows(
     batch_id: str,
     run_id: str,
     db_writer: AsyncDBWriter | None = None,
+    qwen_client: AsyncQwenClient | None = None,
+    image_client: AsyncImageClient | None = None,
+    oss_uploader: AsyncOSSImageUploader | None = None,
 ) -> list[dict[str, Any]]:
     semaphore = asyncio.Semaphore(max(1, concurrency))
-    qwen_client = AsyncQwenClient(
+
+    # 复用传入的客户端，避免每次新建连接池
+    use_qwen = qwen_client if qwen_client is not None else AsyncQwenClient(
         open_url=settings.qwen_open_url,
         api_key=settings.qwen_key,
         temperature=settings.qwen_temperature,
         max_tokens=settings.qwen_max_tokens,
     )
-    image_client = AsyncImageClient(
+    use_image = image_client if image_client is not None else AsyncImageClient(
         timeout=settings.image_timeout,
         retries=settings.image_retry,
         min_bytes=settings.image_min_bytes,
@@ -330,6 +335,8 @@ async def process_rows(
         validation_cache_path=settings.image_validation_cache_path,
         validation_cache_max_entries=settings.image_validation_cache_max_entries,
     )
+    _qwen_owned = qwen_client is None
+    _image_owned = image_client is None
     if db_writer is None:
         db_writer = AsyncDBWriter(
             host=settings.db_host,
@@ -344,7 +351,7 @@ async def process_rows(
         _db_writer_owned = True
     else:
         _db_writer_owned = False
-    oss_uploader = (
+    use_oss = oss_uploader if oss_uploader is not None else (
         AsyncOSSImageUploader(
             enabled=settings.oss_enabled,
             access_key_id=settings.oss_access_key_id,
@@ -371,10 +378,10 @@ async def process_rows(
                     model=model,
                     dry_run=dry_run,
                     force_image_refresh=force_image_refresh,
-                    qwen_client=qwen_client,
-                    image_client=image_client,
+                    qwen_client=use_qwen,
+                    image_client=use_image,
                     db_writer=db_writer,
-                    oss_uploader=oss_uploader,
+                    oss_uploader=use_oss,
                     batch_id=batch_id,
                     run_id=run_id,
                 )
@@ -427,12 +434,19 @@ async def process_rows(
     try:
         return await asyncio.gather(*[_runner(row) for row in rows])
     finally:
-        await qwen_client.close()
-        await image_client.close()
+        if _qwen_owned:
+            await use_qwen.close()
+        if _image_owned:
+            await use_image.close()
         if _db_writer_owned:
             await db_writer.close()
-        if oss_uploader is not None:
-            await oss_uploader.close()
+        if _qwen_owned or _image_owned:
+            # 只有自有客户端才需要关 oss_uploader（因为没用预建的）
+            if oss_uploader is not None:
+                await oss_uploader.close()
+        _oss_owned = oss_uploader is None and settings.oss_enabled
+        if _oss_owned and use_oss is not None:
+            await use_oss.close()
 
 
 def build_summary(

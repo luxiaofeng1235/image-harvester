@@ -300,7 +300,8 @@ class AsyncImageClient:
             keywords=keywords,
         )
 
-        # 并发搜图：前 2 个查询并发发起，后续按需串行补搜
+        # 并发搜图：前 2 个查询并发发起，后续也并发补搜（AsyncBaiduImageClient
+        # 内部有 _page_semaphore 限制并发 tab 数，不会打满百度）
         queries = list(self._build_queries(title, image_keywords, keywords, category_id))
 
         def _collect_baidu_results(query: str, baidu_items: list[dict]) -> None:
@@ -317,33 +318,26 @@ class AsyncImageClient:
                         candidate_preview_urls.setdefault(url, preview_url)
                     candidate_sources.setdefault(url, "baidu")
 
-        # 前 2 个查询并发发起，充分利用百度并发 tab
-        if len(queries) >= 2:
-            first_two = queries[:2]
-            remaining = queries[2:]
-            results = await asyncio.gather(
-                *[self.fetch_baidu_candidates(q, context=search_context) for q in first_two]
-            )
-            for query, items in zip(first_two, results):
-                _collect_baidu_results(query, items)
-        else:
-            remaining = queries
-
-        # 如果候选池还不够，串行补搜剩余查询
-        if len(candidate_urls) < IMAGE_CANDIDATE_POOL_TARGET:
-            for query in remaining:
-                baidu_items = await self.fetch_baidu_candidates(query, context=search_context)
+        # 全部查询并发发起，内部由 _page_semaphore 限流，达到目标数即可停止
+        all_tasks = [self.fetch_baidu_candidates(q, context=search_context) for q in queries]
+        for coro in asyncio.as_completed(all_tasks):
+            if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
+                break
+            try:
+                query_idx = all_tasks.index(coro)
+                query = queries[query_idx]
+                baidu_items = await coro
                 _collect_baidu_results(query, baidu_items)
-                if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
-                    break
+            except Exception:
+                continue
 
         # 并发验证所有候选 URL 的有效性（Range 请求 + 文件头校验）
         valid_images = await self._validate_urls(candidate_urls)
         ordered_valid_urls = [img.url for img in valid_images]
 
-        # 并发预验证完整图片解码，结果写入 validation_cache，
+        # 并发预验证全部候选图片（后台任务，不阻塞主流程），
         # 后续 _pick_valid_urls 调用 _probe_url_internal(url, require_full=True) 时直接命中缓存
-        await self._prevalidate_full(valid_images)
+        asyncio.ensure_future(self._prevalidate_full(valid_images))
 
         # 可选 CLIP 重排（对 128/129 分类开启）
         valid_images = await self._rerank_valid_images(

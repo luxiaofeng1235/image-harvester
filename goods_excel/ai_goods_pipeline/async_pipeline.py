@@ -333,7 +333,8 @@ class AsyncAIGoodsPipeline(AIGoodsPipeline):
             if batch_added == 0:
                 next_model = task.fallback_model if next_model != task.fallback_model else task.model
                 if next_gen_task is not None and not next_gen_task.done():
-                    next_gen_task.cancel()
+                    # 不 cancel，让预取请求自然完成避免连接重置浪费
+                    pass
                 next_gen_task = None
             else:
                 next_model = task.model

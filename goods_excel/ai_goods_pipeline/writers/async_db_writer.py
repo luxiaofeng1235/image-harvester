@@ -67,19 +67,19 @@ class AsyncDBWriter:
             return 0
 
         pool = await self._get_pool()
-        sql = f"""
-            INSERT INTO `{self.table}`
-            (
-                goods_name, sub_title, shop_id, category_id, image, price, description, en_name,
-                batch_id, last_batch_id, source_type, source_note, create_time, update_time,
-                selling_points, attrs, image_keywords, detail_images,
-                model_used, main_image_source, detail_image_sources, source_queries,
-                processing_duration_seconds
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        params = [
-            (
+        columns = (
+            "goods_name, sub_title, shop_id, category_id, image, price, description, en_name, "
+            "batch_id, last_batch_id, source_type, source_note, create_time, update_time, "
+            "selling_points, attrs, image_keywords, detail_images, "
+            "model_used, main_image_source, detail_image_sources, source_queries, "
+            "processing_duration_seconds"
+        )
+        value_rows: list[str] = []
+        flat_params: list[Any] = []
+        for item in goods_records:
+            placeholders = ",".join(["%s"] * 23)
+            value_rows.append(f"({placeholders})")
+            flat_params.extend([
                 item["goods_name"],
                 item["sub_title"],
                 int(item.get("shop_id", 0) or 0),
@@ -103,15 +103,14 @@ class AsyncDBWriter:
                 json.dumps(item.get("detail_image_sources", []), ensure_ascii=False),
                 json.dumps(item.get("source_queries", []), ensure_ascii=False),
                 item.get("processing_duration_seconds", 0),
-            )
-            for item in goods_records
-        ]
+            ])
 
+        sql = f"INSERT INTO `{self.table}` ({columns}) VALUES {', '.join(value_rows)}"
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
-                await cursor.executemany(sql, params)
+                await cursor.execute(sql, flat_params)
             await conn.commit()
-        return len(params)
+        return len(goods_records)
 
     async def fetch_goods_for_enrichment(
         self,

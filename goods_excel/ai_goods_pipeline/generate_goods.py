@@ -96,13 +96,17 @@ async def amain() -> int:
         )
         print("quality_report=" + json.dumps(result.quality_report, ensure_ascii=False))
 
-        # Phase 2：如果没开 skip-images，自动补图补详情
+        # Phase 2：如果没开 skip-images，自动补图补详情（复用 pipeline 客户端）
         if not args.skip_images and result.inserted_count > 0 and not args.dry_run:
             await _fill_images_for_batch(
                 settings=settings, logger=logger, run_id=run_id,
                 batch_id=batch_id, category_id=args.category_id,
                 model=args.model or str(profile["default_model"]),
                 concurrency=3,
+                db_writer=pipeline.db_writer,
+                qwen_client=pipeline.qwen_client,
+                image_client=pipeline.image_client,
+                oss_uploader=pipeline.oss_uploader,
             )
     finally:
         close_started_at = time.perf_counter()
@@ -135,17 +139,23 @@ async def amain() -> int:
 async def _fill_images_for_batch(
     *, settings, logger, run_id: str, batch_id: str,
     category_id: int, model: str, concurrency: int = 3,
+    db_writer=None, qwen_client=None, image_client=None, oss_uploader=None,
 ) -> None:
-    """Phase 2：从 enrich_seed_goods_from_db 调补图补详情逻辑。"""
+    """Phase 2：从 enrich_seed_goods_from_db 调补图补详情逻辑。
+    
+    可复用外部传入的客户端实例（如 pipeline 已建好的），避免重复连接。
+    """
     from ai_goods_pipeline.enrich_seed_goods_from_db import process_rows
     from ai_goods_pipeline.writers.async_db_writer import AsyncDBWriter
 
-    db_writer = AsyncDBWriter(
-        host=settings.db_host, port=settings.db_port,
-        user=settings.db_user, password=settings.db_password,
-        database=settings.db_name, charset=settings.db_charset,
-        table=settings.db_table, pool_maxsize=max(2, concurrency + 1),
-    )
+    own_db = db_writer is None
+    if db_writer is None:
+        db_writer = AsyncDBWriter(
+            host=settings.db_host, port=settings.db_port,
+            user=settings.db_user, password=settings.db_password,
+            database=settings.db_name, charset=settings.db_charset,
+            table=settings.db_table, pool_maxsize=max(2, concurrency + 1),
+        )
     try:
         rows = await db_writer.fetch_goods_for_enrichment(
             category_id=category_id, limit=9999, missing_mode="both",
@@ -162,11 +172,16 @@ async def _fill_images_for_batch(
             concurrency=concurrency, dry_run=False,
             force_image_refresh=False, logger=logger,
             batch_id=batch_id, run_id=run_id,
+            db_writer=db_writer,
+            qwen_client=qwen_client,
+            image_client=image_client,
+            oss_uploader=oss_uploader,
         )
         ok = sum(1 for r in results if r.get("ok"))
         logger.info("Phase 2 done: %s/%s images filled", ok, len(rows))
     finally:
-        await db_writer.close()
+        if own_db:
+            await db_writer.close()
 
 
 def main() -> int:
