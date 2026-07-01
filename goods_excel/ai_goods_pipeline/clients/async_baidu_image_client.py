@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from urllib.parse import quote, urlparse
 
 from ai_goods_pipeline.constants import IMAGE_URL_EMBED_UNSTABLE_HOSTS
@@ -10,6 +11,9 @@ try:
 except Exception:  # pragma: no cover - optional runtime dependency
     async_playwright = None
 
+
+# 模块级 logger
+logger = logging.getLogger(__name__)
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -168,22 +172,24 @@ class AsyncBaiduImageClient:
                 limit,
             )
             return self._dedupe_results(items, limit)
-        except Exception:
+        except Exception as exc:
+            logger.warning("Baidu page fetch failed url=%s error=%s", url[:80], exc)
             return []
         finally:
             if page is not None:
                 await page.close()
 
     async def _expand_search_results(self, page, limit: int) -> None:
-        """滚动页面加载更多图片，直到达到目标数量或连续两次无新内容。
+        """滚动页面加载更多图片，直到达到目标数量或连续多次无新内容。
 
-        优化：固定 700ms 滚动等待改为 500ms（实际网络加载不需要那么久）。
+        最多滚动 8 次，每次等待 400ms，连续 3 次没新图就提前停。
         """
         selector = 'a[href*="/search/detail?"][href*="objurl="][href*="tn=baiduimagedetail"]'
         target_count = max(limit * 3, limit)
         previous_count = 0
         stable_rounds = 0
-        for _ in range(2):
+        max_scrolls = 8
+        for i in range(max_scrolls):
             current_count = await page.evaluate(
                 "(selector) => document.querySelectorAll(selector).length",
                 selector,
@@ -191,15 +197,14 @@ class AsyncBaiduImageClient:
             if current_count >= target_count:
                 break
             await page.mouse.wheel(0, 2200)
-            # 滚动后等待新内容加载
-            await page.wait_for_timeout(300)
+            await page.wait_for_timeout(400)
             refreshed_count = await page.evaluate(
                 "(selector) => document.querySelectorAll(selector).length",
                 selector,
             )
             if refreshed_count <= previous_count:
                 stable_rounds += 1
-                if stable_rounds >= 2:
+                if stable_rounds >= 3:
                     break
             else:
                 stable_rounds = 0
