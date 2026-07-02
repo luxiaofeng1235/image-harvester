@@ -1,8 +1,8 @@
 """
 网易严选商品采集工具（协程并发版）
-用法: python3 fetch_details.py <关键词> [--size 40] [--concurrency 5]
+用法: python3 fetch_details.py <关键词> [--size 20] [--concurrency 5]
 示例: python3 fetch_details.py 非遗
-      python3 fetch_details.py 茶具 --size 20 --concurrency 8
+      python3 fetch_details.py 茶具 --size 40 --concurrency 8
 """
 import asyncio
 import json
@@ -26,7 +26,7 @@ MAX_RETRIES = 3
 
 # ── 1. 搜索接口（只调一次，保留同步即可） ──
 
-def search_goods(keyword: str, size: int = 40) -> list:
+def search_goods(keyword: str, size: int = 20) -> list:
     """调用网易严选搜索接口，返回商品ID+名称列表"""
     url = "https://you.163.com/xhr/search/search.json"
     params = {
@@ -224,12 +224,15 @@ def export_excel(items: list, keyword: str):
 async def amain():
     parser = argparse.ArgumentParser(description="网易严选商品采集 → Excel（协程并发）")
     parser.add_argument("keyword", help="搜索关键词")
-    parser.add_argument("--size", type=int, default=40, help="搜索数量 (默认40)")
+    parser.add_argument("--size", type=int, default=20, help="搜索数量 (默认20)")
     parser.add_argument("--concurrency", type=int, default=5, help="并发数 (默认5)")
     args = parser.parse_args()
 
     keyword = args.keyword
     concurrency = max(1, args.concurrency)
+    started_at = time.perf_counter()
+    start_time_str = time.strftime("%Y-%m-%d %H:%M:%S")
+    print(f"开始时间: {start_time_str}")
     print(f"搜索关键词: {keyword}, 数量: {args.size}, 并发: {concurrency}")
 
     # Step 1: 搜索
@@ -270,7 +273,10 @@ async def amain():
     # Step 3: 导出
     print(f"\n[3/3] 导出 Excel...")
     export_excel(results, keyword)
-    print(f"\n完成: {len(results)}/{len(goods)} 条")
+    elapsed = time.perf_counter() - started_at
+    end_time_str = time.strftime("%Y-%m-%d %H:%M:%S")
+    print(f"结束时间: {end_time_str}")
+    print(f"完成: {len(results)}/{len(goods)} 条，总耗时 {elapsed:.1f} 秒")
 
 
 def main():
