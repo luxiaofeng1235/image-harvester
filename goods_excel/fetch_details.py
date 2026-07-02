@@ -247,7 +247,6 @@ async def amain():
     print(f"\n[2/3] 并发抓取商品详情（最多 {concurrency} 个同时）...")
     semaphore = asyncio.Semaphore(concurrency)
     results: list[dict] = []
-    lock = asyncio.Lock()
 
     async def _fetch_one(g: dict, idx: int, total: int):
         async with semaphore:
@@ -255,8 +254,7 @@ async def amain():
             try:
                 item = await fetch_one(client, g["id"])
                 if item:
-                    async with lock:
-                        results.append(item)
+                    results.append(item)
                     print(f"OK ¥{item['minPrice']}")
                 else:
                     print("跳过(无数据)")
