@@ -222,7 +222,7 @@ def export_excel(items: list, keyword: str):
 # ── 主流程（异步） ──
 
 async def amain():
-    parser = argparse.ArgumentParser(description="网易严选商品采集 → Excel（协程并发）")
+    parser = argparse.ArgumentParser(description="网易严选商品采集 （协程并发）")
     parser.add_argument("keyword", help="搜索关键词")
     parser.add_argument("--size", type=int, default=20, help="搜索数量 (默认20)")
     parser.add_argument("--concurrency", type=int, default=5, help="并发数 (默认5)")
