@@ -234,9 +234,14 @@ async def process_one_row(
             raise ValueError("missing_qwen_payload_for_image_or_description")
         resolved_main_image = ""
         try:
+            search_keywords = list(qwen_payload["image_keywords"] or [])
+            logger.info(
+                "Enrich search image title=%s image_keywords=%s",
+                title, search_keywords,
+            )
             image_result = await image_client.resolve_images(
                 title=title,
-                image_keywords=qwen_payload["image_keywords"],
+                image_keywords=search_keywords,
                 category_id=category_id,
                 keywords=[title],
                 reuse_key=build_image_reuse_key(

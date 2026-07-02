@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import time
 from typing import Any
 
@@ -9,6 +10,8 @@ try:
     import aiomysql
 except ImportError:  # pragma: no cover - optional runtime dependency
     aiomysql = None
+
+logger = logging.getLogger(__name__)
 
 
 class AsyncDBWriter:
@@ -202,18 +205,23 @@ class AsyncDBWriter:
         async with self._pool_lock:
             if self._pool is not None:
                 return self._pool
-            self._pool = await aiomysql.create_pool(
-                host=self.host,
-                port=self.port,
-                user=self.user,
-                password=self.password,
-                db=self.database,
-                charset=self.charset,
-                autocommit=False,
-                minsize=self.pool_minsize,
-                maxsize=self.pool_maxsize,
-            )
-            return self._pool
+            try:
+                self._pool = await aiomysql.create_pool(
+                    host=self.host,
+                    port=self.port,
+                    user=self.user,
+                    password=self.password,
+                    db=self.database,
+                    charset=self.charset,
+                    autocommit=False,
+                    minsize=self.pool_minsize,
+                    maxsize=self.pool_maxsize,
+                )
+                logger.info("DB pool created host=%s db=%s pool_max=%s", self.host, self.database, self.pool_maxsize)
+                return self._pool
+            except Exception as exc:
+                logger.error("DB pool create failed host=%s db=%s error=%s", self.host, self.database, exc)
+                raise
 
     def _build_missing_condition(self, missing_mode: str) -> str:
         image_empty = "(image IS NULL OR image = '')"

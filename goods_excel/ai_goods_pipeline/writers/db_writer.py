@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import json
+import logging
 import time
 from typing import Any
 
 import pymysql
 from pymysql.cursors import DictCursor
+
+logger = logging.getLogger(__name__)
 
 
 class DBWriter:
@@ -29,15 +32,19 @@ class DBWriter:
         self.table = table
 
     def _connect(self):
-        return pymysql.connect(
-            host=self.host,
-            port=self.port,
-            user=self.user,
-            password=self.password,
-            database=self.database,
-            charset=self.charset,
-            autocommit=False,
-        )
+        try:
+            return pymysql.connect(
+                host=self.host,
+                port=self.port,
+                user=self.user,
+                password=self.password,
+                database=self.database,
+                charset=self.charset,
+                autocommit=False,
+            )
+        except Exception as exc:
+            logger.error("DB connect failed host=%s db=%s error=%s", self.host, self.database, exc)
+            raise
 
     def fetch_existing_titles(self) -> list[str]:
         sql = f"SELECT goods_name FROM `{self.table}` WHERE goods_name IS NOT NULL AND goods_name <> ''"
