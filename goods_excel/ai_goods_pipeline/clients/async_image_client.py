@@ -153,8 +153,8 @@ class AsyncImageClient:
             await asyncio.gather(*inflight, return_exceptions=True)
         try:
             self._persist_validation_cache()
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning("Validation cache persist failed on close: %s", exc)
         await asyncio.gather(
             asyncio.wait_for(self.http_client.aclose(), timeout=3.0),
             asyncio.wait_for(self.baidu_image_client.close(), timeout=5.0),

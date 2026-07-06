@@ -168,6 +168,34 @@ async def maybe_upload_images(
     return final_main, final_details, warnings
 
 
+def _parse_stored_row_data(row: dict[str, Any]) -> dict[str, Any] | None:
+    """从数据库行里解析 Phase 1 已存的 selling_points/attrs/image_keywords。
+
+    如果字段存在且能正常解析，返回 dict 直接复用，跳过千问重新生成。
+    如果是老数据（字段为空或解析失败），返回 None 走千问逻辑。
+    """
+    raw_image_keywords = row.get("image_keywords")
+    raw_selling_points = row.get("selling_points")
+    raw_attrs = row.get("attrs")
+    subtitle = str(row.get("sub_title") or "").strip()
+    if not raw_image_keywords or not raw_selling_points or not raw_attrs:
+        return None
+    try:
+        image_keywords = json.loads(raw_image_keywords) if isinstance(raw_image_keywords, str) else list(raw_image_keywords or [])
+        selling_points = json.loads(raw_selling_points) if isinstance(raw_selling_points, str) else list(raw_selling_points or [])
+        attrs = json.loads(raw_attrs) if isinstance(raw_attrs, str) else dict(raw_attrs or {})
+        if not image_keywords:
+            return None
+        return {
+            "subtitle": subtitle,
+            "selling_points": selling_points,
+            "attrs": attrs,
+            "image_keywords": image_keywords,
+        }
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return None
+
+
 async def process_one_row(
     *,
     row: dict[str, Any],
@@ -203,9 +231,16 @@ async def process_one_row(
     source_queries: list[str] = []
     warnings: list[str] = []
 
+    # 从DB读取 Phase 1 已存的数据（空图空描述但有卖点/属性/搜图关键词）
+    stored_data = _parse_stored_row_data(row)
+
     if need_image or need_description or need_subtitle:
-        if force_image_refresh and need_image and not need_description and not need_subtitle:
-            qwen_payload = {"image_keywords": [title]}
+        # 如果DB已有完整数据（selling_points/attrs/image_keywords），直接复用
+        # 避免重复调千问重新生成，省 token 省时间
+        if stored_data is not None and not force_image_refresh:
+            qwen_payload = stored_data
+            if need_subtitle:
+                final_sub_title = qwen_payload["subtitle"]
         else:
             system_prompt, user_prompt = build_seed_enrichment_prompts(
                 category_id=category_id,
@@ -437,7 +472,10 @@ async def process_rows(
                 }
 
     try:
-        return await asyncio.gather(*[_runner(row) for row in rows])
+        results = await asyncio.gather(*[_runner(row) for row in rows])
+        ok = sum(1 for r in results if r.get("ok"))
+        logger.info("Phase 2 enrich done: %s/%s ok, %s failed", ok, len(rows), len(rows) - ok)
+        return results
     finally:
         if _qwen_owned:
             await use_qwen.close()

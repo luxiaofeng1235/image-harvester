@@ -3,6 +3,8 @@
 用法: python3 fetch_details.py <关键词> [--size 20] [--concurrency 5]
 示例: python3 fetch_details.py 非遗
       python3 fetch_details.py 茶具 --size 40 --concurrency 8
+
+流程：搜索商品 → 并发抓详情 → 导出Excel
 """
 import asyncio
 import json
@@ -14,6 +16,7 @@ import httpx
 from openpyxl import Workbook
 from html import escape as html_escape
 
+# 请求头，模拟浏览器访问，防止被反爬
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 HEADERS = {
     "User-Agent": UA,
@@ -21,13 +24,15 @@ HEADERS = {
     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
     "Cache-Control": "no-cache",
 }
-MAX_RETRIES = 3
+MAX_RETRIES = 3  # 网络请求失败最多重试3次
 
 
-# ── 1. 搜索接口（只调一次，保留同步即可） ──
+# ══════════════════════════════════════════
+# 1. 搜索接口（异步）
+# ══════════════════════════════════════════
 
-def search_goods(keyword: str, size: int = 20) -> list:
-    """调用网易严选搜索接口，返回商品ID+名称列表"""
+async def search_goods(client: httpx.AsyncClient, keyword: str, size: int = 20) -> list:
+    """调网易严选搜索API，返回商品ID+名称列表"""
     url = "https://you.163.com/xhr/search/search.json"
     params = {
         "csrf_token": "",
@@ -41,19 +46,21 @@ def search_goods(keyword: str, size: int = 20) -> list:
         "upperPrice": -1,
         "stillSearch": "false",
         "searchWordSource": 1,
-        "size": size,
-        "keyword": keyword,
+        "size": size,          # 每页多少条
+        "keyword": keyword,    # 搜索关键词
         "needPopWindow": "true",
     }
-    resp = httpx.get(url, params=params, headers={"User-Agent": UA},
-                     timeout=15, verify=False)
+    resp = await client.get(url, params=params, headers={"User-Agent": UA},
+                            timeout=15)
     resp.raise_for_status()
     data = resp.json()
 
+    # 接口返回 code=200 才算成功
     if data.get("code") != "200":
         print(f"搜索接口返回异常: {data.get('code')}")
         return []
 
+    # 从嵌套的 JSON 里取出商品列表
     items = (data.get("data", {})
              .get("directly", {})
              .get("searcherResult", {})
@@ -62,9 +69,12 @@ def search_goods(keyword: str, size: int = 20) -> list:
     return [{"id": item["id"], "name": item.get("name", "")} for item in items]
 
 
-# ── 2. 异步网络请求（重试 + 指数退避） ──
+# ══════════════════════════════════════════
+# 2. 异步网络请求（带重试）
+# ══════════════════════════════════════════
 
 async def fetch_html(client: httpx.AsyncClient, url: str) -> str:
+    """下载页面HTML，失败自动重试（指数退避）"""
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             resp = await client.get(url, headers=HEADERS, timeout=30)
@@ -74,15 +84,21 @@ async def fetch_html(client: httpx.AsyncClient, url: str) -> str:
             return resp.text
         except Exception as e:
             if attempt == MAX_RETRIES:
-                raise
-            delay = 2 ** (attempt - 1)
+                raise  # 最后一次还失败就把异常抛出去
+            delay = 2 ** (attempt - 1)  # 第1次等1s, 第2次等2s, 第3次等4s
             print(f"  重试 {attempt}/{MAX_RETRIES}: {e}, {delay}s后重试")
             await asyncio.sleep(delay)
 
 
-# ── 3. JSON 提取（引号感知括号匹配） ──
+# ══════════════════════════════════════════
+# 3. 从HTML里提取 JSON_DATA_FROMFTL 变量
+# ══════════════════════════════════════════
 
 def extract_json_string(html: str) -> str | None:
+    """
+    找到页面里的 JSON_DATA_FROMFTL = {...}
+    用括号匹配拿到完整的 JSON 字符串
+    """
     marker = "JSON_DATA_FROMFTL = "
     start_pos = html.find(marker)
     if start_pos == -1:
@@ -95,6 +111,7 @@ def extract_json_string(html: str) -> str | None:
     escape_next = False
     end_pos = json_start
 
+    # 逐字符解析，遇到 { 加1，遇到 } 减1，归零就结束
     for i in range(json_start, len(html)):
         ch = html[i]
         if escape_next:
@@ -121,23 +138,30 @@ def extract_json_string(html: str) -> str | None:
     return html[json_start:end_pos]
 
 
-# ── 4. JSON 修复（单引号→双引号） ──
+# ══════════════════════════════════════════
+# 4. JSON 修复（网易返回的是单引号，Python要双引号）
+# ══════════════════════════════════════════
 
 def parse_json(json_str: str) -> dict | None:
+    """把单引号替换成双引号后解析"""
     if not json_str:
         return None
-    json_str = re.sub(r":\s*'([^']*)'", r': "\1"', json_str)
-    json_str = re.sub(r"'([^']+)':", r'"\1":', json_str)
+    json_str = re.sub(r":\s*'([^']*)'", r': "\1"', json_str)   # 值上的单引号
+    json_str = re.sub(r"'([^']+)':", r'"\1":', json_str)       # key上的单引号
     return json.loads(json_str)
 
 
-# ── 5. 数据清洗 ──
+# ══════════════════════════════════════════
+# 5. 数据清洗（取价格、拼描述HTML）
+# ══════════════════════════════════════════
 
 def clean_product(data: dict) -> dict | None:
+    """从原始数据里取出需要的字段，拼成结构化数据"""
     item = data.get("item")
     if not item:
         return None
 
+    # 从 sku 列表里取价格（有多个规格就取最小和最大）
     prices = []
     if isinstance(item.get("skuList"), list):
         for sku in item["skuList"]:
@@ -153,6 +177,7 @@ def clean_product(data: dict) -> dict | None:
     max_price = max(prices) if prices else 0
     min_price = min(prices) if prices else 0
 
+    # 把 attrList 拼成 description HTML
     desc_html = ""
     if isinstance(item.get("attrList"), list):
         desc_html = '<div class="product-description">'
@@ -163,6 +188,7 @@ def clean_product(data: dict) -> dict | None:
                 desc_html += f"<p><strong>{html_escape(name)}</strong>：{html_escape(value)}</p>"
         desc_html += "</div>"
 
+    # 如果纯文本太短（<200字），补上详情页的大段HTML描述
     plain_len = len(re.sub(r"<[^>]+>", "", desc_html))
     detail_html = (item.get("itemDetail") or {}).get("detailHtml", "")
     if plain_len < 200 and detail_html:
@@ -178,9 +204,12 @@ def clean_product(data: dict) -> dict | None:
     }
 
 
-# ── 6. 单个商品抓取（异步） ──
+# ══════════════════════════════════════════
+# 6. 抓取单个商品详情（异步）
+# ══════════════════════════════════════════
 
 async def fetch_one(client: httpx.AsyncClient, goods_id: int) -> dict | None:
+    """下载详情页 → 提取JSON → 清洗 → 返回结构化数据"""
     url = f"https://you.163.com/item/detail?id={goods_id}"
     html = await fetch_html(client, url)
     json_str = extract_json_string(html)
@@ -190,9 +219,12 @@ async def fetch_one(client: httpx.AsyncClient, goods_id: int) -> dict | None:
     return clean_product(data)
 
 
-# ── 7. 导出 Excel ──
+# ══════════════════════════════════════════
+# 7. 导出 Excel
+# ══════════════════════════════════════════
 
 def export_excel(items: list, keyword: str):
+    """把数据写到 goods_{关键词}.xlsx1"""
     filename = f"goods_{keyword}.xlsx"
     wb = Workbook()
     ws = wb.active
@@ -201,10 +233,12 @@ def export_excel(items: list, keyword: str):
     headers = ["id", "title", "image", "price_min", "subtitle", "description"]
     ws.append(headers)
 
+    # 设置列宽
     col_widths = [12, 40, 50, 12, 50, 80]
     for i, w in enumerate(col_widths, 1):
         ws.column_dimensions[ws.cell(1, i).column_letter].width = w
 
+    # 逐行写入数据
     for item in items:
         ws.append([
             item["id"],
@@ -219,36 +253,43 @@ def export_excel(items: list, keyword: str):
     print(f"Excel 已保存: {filename}")
 
 
-# ── 主流程（异步） ──
+# ══════════════════════════════════════════
+# 主流程
+# ══════════════════════════════════════════
 
 async def amain():
+    """入口：解析参数 → 搜索 → 并发抓 → 导出"""
     parser = argparse.ArgumentParser(description="网易严选商品采集 （协程并发）")
     parser.add_argument("keyword", help="搜索关键词")
-    parser.add_argument("--size", type=int, default=20, help="搜索数量 (默认20)")
+    parser.add_argument("--size", type=int, default=20, help="采集数量 (默认20)")
     parser.add_argument("--concurrency", type=int, default=5, help="并发数 (默认5)")
     args = parser.parse_args()
 
     keyword = args.keyword
     concurrency = max(1, args.concurrency)
+
+    # 记录开始时间
     started_at = time.perf_counter()
     start_time_str = time.strftime("%Y-%m-%d %H:%M:%S")
     print(f"开始时间: {start_time_str}")
     print(f"搜索关键词: {keyword}, 数量: {args.size}, 并发: {concurrency}")
 
-    # Step 1: 搜索
+    # ── Step 1: 搜索（复用主流程的 httpx 客户端） ──
     print("\n[1/3] 搜索商品列表...")
-    goods = search_goods(keyword, args.size)
+    async with httpx.AsyncClient(verify=False) as client:
+        goods = await search_goods(client, keyword, args.size)
     if not goods:
         print("未搜索到商品，退出")
         sys.exit(1)
     print(f"  找到 {len(goods)} 个商品")
 
-    # Step 2: 并发抓取详情
+    # ── Step 2: 并发抓取详情数据 ──
     print(f"\n[2/3] 并发抓取商品详情（最多 {concurrency} 个同时）...")
-    semaphore = asyncio.Semaphore(concurrency)
+    semaphore = asyncio.Semaphore(concurrency)  # 控制同时请求数
     results: list[dict] = []
 
     async def _fetch_one(g: dict, idx: int, total: int):
+        """抓取单个商品，由 gather 并发调度，semaphore 限流"""
         async with semaphore:
             print(f"  [{idx}/{total}] {g['name'][:30]} ... ", end="", flush=True)
             try:
@@ -261,16 +302,20 @@ async def amain():
             except Exception as e:
                 print(f"失败: {e}")
 
+    # 创建共享的 httpx 客户端，所有请求复用同一个连接池
     async with httpx.AsyncClient(verify=False) as client:
+        # 搜索也用同一个客户端
         tasks = [
             _fetch_one(g, i + 1, len(goods))
             for i, g in enumerate(goods)
         ]
         await asyncio.gather(*tasks)
 
-    # Step 3: 导出
+    # ── Step 3: 导出 ──
     print(f"\n[3/3] 导出 Excel...")
     export_excel(results, keyword)
+
+    # 输出耗时
     elapsed = time.perf_counter() - started_at
     end_time_str = time.strftime("%Y-%m-%d %H:%M:%S")
     print(f"结束时间: {end_time_str}")
