@@ -12,6 +12,10 @@ import requests
 from ai_goods_pipeline.clients.baidu_image_client import BaiduImageClient
 from ai_goods_pipeline.clients.bing_image_client import BingImageClient
 from ai_goods_pipeline.clients.clip_image_reranker import ClipImageReranker
+from ai_goods_pipeline.clients.base_image_client import (
+    BaseImageClient,
+    SearchRelevanceContext,
+)
 from ai_goods_pipeline.constants import (
     CITY_POOL,
     CRAFT_KEYWORDS,
@@ -80,7 +84,8 @@ class SearchRelevanceContext:
     expected_cities: tuple[str, ...]
 
 
-class ImageClient:
+class ImageClient(BaseImageClient):
+    """同步图片客户端，使用 requests 库。"""
     def __init__(
         self,
         *,
@@ -99,15 +104,22 @@ class ImageClient:
         validation_cache_path: str,
         validation_cache_max_entries: int,
     ) -> None:
-        self.timeout = timeout
-        self.retries = retries
-        self.min_bytes = min_bytes
-        self.allow_gif_as_main = allow_gif_as_main
-        self.enable_bing = enable_bing
-        self.probe_range_bytes = max(0, probe_range_bytes)
-        self.validation_workers = max(1, validation_workers)
-        self.validation_cache_path = Path(validation_cache_path).expanduser() if validation_cache_path else None
-        self.validation_cache_max_entries = max(0, validation_cache_max_entries)
+        super().__init__(
+            timeout=timeout,
+            retries=retries,
+            min_bytes=min_bytes,
+            allow_gif_as_main=allow_gif_as_main,
+            enable_bing=enable_bing,
+            enable_clip_rerank=enable_clip_rerank,
+            clip_model_name=clip_model_name,
+            clip_min_score=clip_min_score,
+            clip_max_candidates=clip_max_candidates,
+            clip_category_ids=clip_category_ids,
+            probe_range_bytes=probe_range_bytes,
+            validation_workers=validation_workers,
+            validation_cache_path=validation_cache_path,
+            validation_cache_max_entries=validation_cache_max_entries,
+        )
         self.baidu_image_client = BaiduImageClient(timeout=timeout)
         self.bing_image_client = BingImageClient(timeout=timeout)
         self.clip_reranker = ClipImageReranker(
@@ -120,7 +132,6 @@ class ImageClient:
             user_agent=USER_AGENT,
         )
         self._cache_lock = threading.Lock()
-        self.validation_cache = self._load_validation_cache()
 
     def resolve_images(
         self,
