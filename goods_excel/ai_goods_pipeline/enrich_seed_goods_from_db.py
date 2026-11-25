@@ -209,6 +209,7 @@ async def process_one_row(
     oss_uploader: AsyncOSSImageUploader | None,
     batch_id: str,
     run_id: str,
+    logger,
 ) -> dict[str, Any]:
     row_id = int(row["id"])
     title = str(row["goods_name"] or "").strip()
@@ -424,6 +425,7 @@ async def process_rows(
                     oss_uploader=use_oss,
                     batch_id=batch_id,
                     run_id=run_id,
+                    logger=logger,
                 )
                 logger.info(
                     "Processed seed goods id=%s ok=%s updated=%s duration=%.2fs title=%s",

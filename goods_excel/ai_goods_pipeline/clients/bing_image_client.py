@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from pathlib import Path
 from urllib.parse import quote
 
 import requests
@@ -17,6 +18,31 @@ USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36"
 )
+
+
+def _find_chrome_path() -> str | None:
+    """自动查找可用的 Chrome/Chromium 路径"""
+    cache_dirs = [
+        Path.home() / ".cache" / "ms-playwright",
+        Path("/ms-playwright"),
+    ]
+    for cache_dir in cache_dirs:
+        if not cache_dir.exists():
+            continue
+        chromium_dirs = sorted(
+            cache_dir.glob("chromium-*"),
+            key=lambda p: p.name,
+            reverse=True,
+        )
+        for chromium_dir in chromium_dirs:
+            candidates = [
+                chromium_dir / "chrome-linux64" / "chrome",
+                chromium_dir / "chrome-linux" / "chrome",
+            ]
+            for chrome_path in candidates:
+                if chrome_path.exists():
+                    return str(chrome_path)
+    return None
 
 
 @dataclass(slots=True)
@@ -200,7 +226,12 @@ class BingImageClient:
             return self._browser
         try:
             self._playwright = sync_playwright().start()
-            self._browser = self._playwright.chromium.launch(headless=True)
+            # 自动查找可用的 Chrome 路径
+            chrome_path = _find_chrome_path()
+            launch_args = {"headless": True, "args": ["--no-sandbox", "--disable-setuid-sandbox"]}
+            if chrome_path:
+                launch_args["executable_path"] = chrome_path
+            self._browser = self._playwright.chromium.launch(**launch_args)
             return self._browser
         except Exception:
             self._browser_failed = True

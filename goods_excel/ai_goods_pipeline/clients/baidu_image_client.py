@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from urllib.parse import quote, urlparse
 
 from ai_goods_pipeline.constants import IMAGE_URL_EMBED_UNSTABLE_HOSTS
@@ -14,6 +15,37 @@ USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Safari/537.36"
 )
+
+
+def _find_chrome_path() -> str | None:
+    """自动查找可用的 Chrome/Chromium 路径"""
+    # 常见 playwright 浏览器目录
+    cache_dirs = [
+        Path.home() / ".cache" / "ms-playwright",
+        Path("/ms-playwright"),  # Linux 全局
+    ]
+    
+    for cache_dir in cache_dirs:
+        if not cache_dir.exists():
+            continue
+        # 查找 chromium-* 目录（按版本号降序）
+        chromium_dirs = sorted(
+            cache_dir.glob("chromium-*"),
+            key=lambda p: p.name,
+            reverse=True,
+        )
+        for chromium_dir in chromium_dirs:
+            # 检查常见的 chrome 可执行文件路径
+            candidates = [
+                chromium_dir / "chrome-linux64" / "chrome",
+                chromium_dir / "chrome-linux" / "chrome",
+                chromium_dir / "chrome" / "chrome",
+            ]
+            for chrome_path in candidates:
+                if chrome_path.exists():
+                    return str(chrome_path)
+    
+    return None
 
 
 class BaiduImageClient:
@@ -62,6 +94,10 @@ class BaiduImageClient:
         )
 
     def _fetch_images_rendered(self, url: str, limit: int) -> list[dict[str, str]]:
+        """
+        使用与 fetch_images.py 一致的选择器逻辑：
+        直接从 img.main_img.img-hover 的 data-objurl 属性获取原图 URL。
+        """
         browser = self._get_browser()
         if browser is None:
             return []
@@ -73,72 +109,55 @@ class BaiduImageClient:
                 viewport={"width": 1600, "height": 1200},
                 locale="zh-CN",
             )
-            page.goto(url, wait_until="domcontentloaded", timeout=self.timeout * 1000)
-            page.wait_for_selector(
-                'a[href*="/search/detail?"][href*="objurl="][href*="tn=baiduimagedetail"]',
-                timeout=self.timeout * 1000,
-            )
-            page.wait_for_timeout(800)
+            page.goto(url, wait_until="networkidle", timeout=self.timeout * 1000)
+            page.wait_for_timeout(2000)
             self._expand_search_results(page, limit)
             items = page.evaluate(
                 """
                 (maxCount) => {
-                  const maxScanCount = Math.max(maxCount * 4, maxCount);
-                  const links = Array.from(
-                    document.querySelectorAll(
-                      'a[href*="/search/detail?"][href*="objurl="][href*="tn=baiduimagedetail"]'
-                    )
-                  );
-
-                  return links
-                    .filter((link) => {
-                      const img = link.querySelector('img');
-                      if (!img) {
-                        return false;
-                      }
-                      try {
-                        const parsed = new URL(link.href);
-                        return Boolean(parsed.searchParams.get('objurl'));
-                      } catch (error) {
-                        return false;
-                      }
-                    })
-                    .slice(0, maxScanCount)
-                    .map((link) => {
-                      const img = link.querySelector('img');
-                      let objurl = '';
-                      let fromurl = '';
-                      let word = '';
-                      let bdtype = '';
-                      let pn = '';
-                      try {
-                        const parsed = new URL(link.href);
-                        objurl = decodeURIComponent(parsed.searchParams.get('objurl') || '');
-                        fromurl = decodeURIComponent(parsed.searchParams.get('fromurl') || '');
-                        word = decodeURIComponent(parsed.searchParams.get('word') || '');
-                        bdtype = parsed.searchParams.get('bdtype') || '';
-                        pn = parsed.searchParams.get('pn') || '';
-                      } catch (error) {
-                        objurl = '';
-                      }
-
-                      return {
-                        image_url: objurl,
-                        thumbnail_url:
-                          img?.currentSrc ||
-                          img?.src ||
-                          '',
-                        data_imgurl: img?.getAttribute('data-imgurl') || '',
-                        source_page: fromurl,
-                        title:
-                          img?.getAttribute('alt') ||
-                          link.getAttribute('title') ||
-                          '',
-                        desc: word,
-                        bdtype,
-                        pn,
-                      };
+                  // 优先使用 img.main_img.img-hover 的 data-objurl（原图直链）
+                  const imgs = document.querySelectorAll('img.main_img.img-hover');
+                  const results = [];
+                  
+                  imgs.forEach((img, index) => {
+                    if (results.length >= maxCount) return;
+                    
+                    const objUrl = img.getAttribute('data-objurl');
+                    if (!objUrl) return;
+                    
+                    results.push({
+                      image_url: objUrl,
+                      thumbnail_url: img.currentSrc || img.src || '',
+                      data_imgurl: img.getAttribute('data-imgurl') || '',
+                      source_page: '',
+                      title: img.getAttribute('alt') || '',
+                      desc: '',
+                      bdtype: '',
+                      pn: String(index),
                     });
+                  });
+                  
+                  // 如果没找到 hover 的，取所有带 data-objurl 的 img
+                  if (results.length === 0) {
+                    document.querySelectorAll('img[data-objurl]').forEach((img, index) => {
+                      if (results.length >= maxCount) return;
+                      const objUrl = img.getAttribute('data-objurl');
+                      if (!objUrl) return;
+                      
+                      results.push({
+                        image_url: objUrl,
+                        thumbnail_url: img.currentSrc || img.src || '',
+                        data_imgurl: img.getAttribute('data-imgurl') || '',
+                        source_page: '',
+                        title: img.getAttribute('alt') || '',
+                        desc: '',
+                        bdtype: '',
+                        pn: String(index),
+                      });
+                    });
+                  }
+                  
+                  return results;
                 }
                 """,
                 limit,
@@ -151,7 +170,9 @@ class BaiduImageClient:
                 page.close()
 
     def _expand_search_results(self, page, limit: int) -> None:
-        selector = 'a[href*="/search/detail?"][href*="objurl="][href*="tn=baiduimagedetail"]'
+        """滚动页面加载更多图片结果，使用与 _fetch_images_rendered 一致的选择器。"""
+        selector = 'img.main_img.img-hover[data-objurl]'
+        fallback_selector = 'img[data-objurl]'
         target_count = max(limit * 3, limit)
         previous_count = 0
         stable_rounds = 0
@@ -160,6 +181,12 @@ class BaiduImageClient:
                 "(selector) => document.querySelectorAll(selector).length",
                 selector,
             )
+            if current_count == 0:
+                # 如果没找到 hover 的，用 fallback
+                current_count = page.evaluate(
+                    "(selector) => document.querySelectorAll(selector).length",
+                    fallback_selector,
+                )
             if current_count >= target_count:
                 break
             page.mouse.wheel(0, 2200)
@@ -168,6 +195,11 @@ class BaiduImageClient:
                 "(selector) => document.querySelectorAll(selector).length",
                 selector,
             )
+            if refreshed_count == 0:
+                refreshed_count = page.evaluate(
+                    "(selector) => document.querySelectorAll(selector).length",
+                    fallback_selector,
+                )
             if refreshed_count <= previous_count:
                 stable_rounds += 1
                 if stable_rounds >= 2:
@@ -183,7 +215,12 @@ class BaiduImageClient:
             return self._browser
         try:
             self._playwright = sync_playwright().start()
-            self._browser = self._playwright.chromium.launch(headless=True)
+            # 自动查找可用的 Chrome 路径
+            chrome_path = _find_chrome_path()
+            launch_args = {"headless": True, "args": ["--no-sandbox", "--disable-setuid-sandbox"]}
+            if chrome_path:
+                launch_args["executable_path"] = chrome_path
+            self._browser = self._playwright.chromium.launch(**launch_args)
             return self._browser
         except Exception:
             self._browser_failed = True
