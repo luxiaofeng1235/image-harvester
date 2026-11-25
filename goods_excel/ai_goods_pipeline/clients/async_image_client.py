@@ -278,11 +278,6 @@ class AsyncImageClient(BaseImageClient):
             keywords=keywords,
         )
 
-    def _evict_resolution_pool_cache(self) -> None:
-        """当缓存超过上限时淘汰最旧的条目。"""
-        while len(self.resolution_pool_cache) > self._resolution_pool_cache_max:
-            self.resolution_pool_cache.popitem(last=False)
-
     async def _build_image_pool(
         self,
         *,
@@ -609,74 +604,6 @@ class AsyncImageClient(BaseImageClient):
             seen.add(value)
         return scoped[:3]
 
-    def _is_blocked_search_result(self, item: dict[str, str]) -> bool:
-        meta_text = " ".join(
-            str(item.get(field) or "").strip().lower()
-            for field in ("title", "desc", "source_page")
-        )
-        if not meta_text:
-            return False
-        return any(token in meta_text for token in IMAGE_BING_META_BLOCKLIST)
-
-    def _is_relevant_search_result(
-        self, item: dict[str, str], context: SearchRelevanceContext
-    ) -> bool:
-        meta_text = self._build_meta_text(item)
-        if not meta_text:
-            return True
-
-        city_hits = {city for city in JIANGSU_HINTS if city.lower() in meta_text}
-        query_hits = self._count_keyword_hits(meta_text, context.query_terms)
-        if (
-            context.expected_cities
-            and city_hits
-            and not any(city in city_hits for city in context.expected_cities)
-        ):
-            return False
-
-        # If the search result already strongly matches the query terms, keep it.
-        # This avoids treating food results that contain words like "手工" as craft-only noise.
-        if query_hits > 0:
-            return True
-
-        football_hits = self._count_keyword_hits(meta_text, FOOTBALL_KEYWORDS)
-        craft_hits = self._count_keyword_hits(meta_text, CRAFT_KEYWORDS)
-        food_hits = self._count_keyword_hits(meta_text, FOOD_KEYWORDS)
-
-        if context.category_id == 128 and football_hits == 0 and (food_hits > 0 or craft_hits > 0):
-            return False
-        if context.category_id == 129 and craft_hits == 0 and (food_hits > 0 or football_hits > 0):
-            return False
-        if context.category_id in {126, 127} and food_hits == 0 and (craft_hits > 0 or football_hits > 0):
-            return False
-
-        if query_hits > 0:
-            return True
-        if context.category_id == 128 and football_hits > 0 and self._matches_expected_city(meta_text, context):
-            return True
-        if context.category_id == 129 and craft_hits > 0:
-            return True
-        if (
-            context.category_id in {126, 127}
-            and food_hits > 0
-            and self._matches_expected_city(meta_text, context)
-        ):
-            return True
-        # 当没有足够的元数据做判断时（如 title/desc 为空），保留结果而不是过滤
-        # 这种情况发生在新选择器只返回 URL 没有标题描述时
-        if not city_hits and query_hits == 0 and football_hits == 0 and craft_hits == 0 and food_hits == 0:
-            return True
-        return False
-
-    def _matches_expected_city(
-        self,
-        meta_text: str,
-        context: SearchRelevanceContext,
-    ) -> bool:
-        if not context.expected_cities:
-            return True
-        return any(city in meta_text for city in context.expected_cities)
-
     async def _validate_urls(self, urls: list[str]) -> list[AsyncImageProbe]:
         """并发验证所有候选 URL，使用 semaphore 限制并发数。
 
@@ -951,42 +878,6 @@ class AsyncImageClient(BaseImageClient):
         if len(reordered_static) != len(static_images):
             return valid_images
         return reordered_static + gif_images
-
-    def _build_meta_text(self, item: dict[str, str]) -> str:
-        parts = [
-            str(item.get("title") or "").strip().lower(),
-            str(item.get("desc") or "").strip().lower(),
-            str(item.get("source_page") or "").strip().lower(),
-            str(item.get("image_url") or "").strip().lower(),
-            str(item.get("thumbnail_url") or "").strip().lower(),
-            str(item.get("data_imgurl") or "").strip().lower(),
-        ]
-        return " ".join(part for part in parts if part)
-
-    def _extract_baidu_candidate_urls(self, item: dict[str, str]) -> list[str]:
-        urls: list[str] = []
-        seen: set[str] = set()
-        for raw_url in (
-            str(item.get("image_url") or "").strip(),
-            str(item.get("raw_image_url") or "").strip(),
-            str(item.get("thumbnail_url") or "").strip(),
-            str(item.get("data_imgurl") or "").strip(),
-        ):
-            url = normalize_storable_image_url(raw_url)
-            if not url or url in seen or self._is_blocked_image_url(url):
-                continue
-            urls.append(url)
-            seen.add(url)
-        return urls
-
-    def _extract_expected_cities(self, parts: list[str], category_id: int) -> list[str]:
-        source_text = " ".join(str(part).lower() for part in parts if part)
-        matches: list[str] = []
-        for city in CITY_POOL + SUZHOU_HINTS:
-            city_lower = city.lower()
-            if city_lower in source_text and city_lower not in matches:
-                matches.append(city_lower)
-        return matches
 
     def _extract_query_terms(self, parts: list[str]) -> list[str]:
         terms: list[str] = []

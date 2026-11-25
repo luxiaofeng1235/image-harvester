@@ -85,6 +85,7 @@ class BaseImageClient:
         self.validation_cache_max_entries = max(0, validation_cache_max_entries)
         self.validation_cache: dict[str, Any] = self._load_validation_cache()
         self.resolution_pool_cache: OrderedDict[str, Any] = OrderedDict()
+        self._resolution_pool_cache_max = 500
 
     # ─── URL 过滤 ───
 
