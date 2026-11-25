@@ -11,6 +11,10 @@ from urllib.parse import urlparse
 import httpx
 
 from ai_goods_pipeline.clients.async_baidu_image_client import AsyncBaiduImageClient
+from ai_goods_pipeline.clients.base_image_client import (
+    BaseImageClient,
+    SearchRelevanceContext,
+)
 from ai_goods_pipeline.clients.clip_image_reranker import ClipImageReranker
 from ai_goods_pipeline.constants import (
     CITY_POOL,
@@ -89,7 +93,8 @@ class SearchRelevanceContext:
     expected_cities: tuple[str, ...]
 
 
-class AsyncImageClient:
+class AsyncImageClient(BaseImageClient):
+    """异步图片客户端，使用 httpx 库。"""
     def __init__(
         self,
         *,
@@ -108,16 +113,22 @@ class AsyncImageClient:
         validation_cache_path: str,
         validation_cache_max_entries: int,
     ) -> None:
-        self.timeout = timeout
-        self.retries = retries
-        self.min_bytes = min_bytes
-        self.allow_gif_as_main = allow_gif_as_main
-        self.enable_bing = enable_bing
-        self.probe_range_bytes = max(0, probe_range_bytes)
-        # 并发验证上限：控制同时发出的图片验证请求数，避免目标服务器限流
-        self.validation_workers = max(1, validation_workers)
-        self.validation_cache_path = Path(validation_cache_path).expanduser() if validation_cache_path else None
-        self.validation_cache_max_entries = max(0, validation_cache_max_entries)
+        super().__init__(
+            timeout=timeout,
+            retries=retries,
+            min_bytes=min_bytes,
+            allow_gif_as_main=allow_gif_as_main,
+            enable_bing=enable_bing,
+            enable_clip_rerank=enable_clip_rerank,
+            clip_model_name=clip_model_name,
+            clip_min_score=clip_min_score,
+            clip_max_candidates=clip_max_candidates,
+            clip_category_ids=clip_category_ids,
+            probe_range_bytes=probe_range_bytes,
+            validation_workers=validation_workers,
+            validation_cache_path=validation_cache_path,
+            validation_cache_max_entries=validation_cache_max_entries,
+        )
         self.http_client = httpx.AsyncClient(
             timeout=self.timeout,
             headers={"User-Agent": USER_AGENT},
@@ -1030,25 +1041,9 @@ class AsyncImageClient:
             seen.add(item)
         return deduped
 
-    def _count_keyword_hits(self, text: str, terms: list[str] | tuple[str, ...]) -> int:
-        return sum(1 for term in terms if term and term.lower() in text)
-
     def _get_display_hint(self, carrier: str) -> str:
         if carrier in IMAGE_FLAT_DISPLAY_CARRIERS:
             return "平铺"
         if carrier in IMAGE_FINISHED_DISPLAY_CARRIERS:
             return "成品"
         return "实物"
-
-    def _is_blocked_image_url(self, url: str) -> bool:
-        # 拒绝含 @ 的 URL（不规范的外链）
-        if "@" in url:
-            return True
-        parsed = urlparse(url)
-        host = (parsed.netloc or "").lower()
-        path = (parsed.path or "").lower()
-        if any(token in host for token in IMAGE_URL_HOST_BLOCKLIST):
-            return True
-        if any(token in path for token in IMAGE_URL_PATH_BLOCKLIST):
-            return True
-        return False
