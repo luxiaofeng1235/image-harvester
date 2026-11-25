@@ -30,13 +30,14 @@ class AsyncOSSImageUploader:
             prefix=prefix,
             object_acl=object_acl,
             timeout=timeout,
+            max_concurrency=max_concurrency,
         )
         self.semaphore = asyncio.Semaphore(max(1, max_concurrency))
         self._lock = asyncio.Lock()
         self._inflight: dict[str, asyncio.Task[str]] = {}
 
     async def close(self) -> None:
-        await asyncio.to_thread(self.uploader.close)
+        await self.uploader.close()
 
     async def upload_url(self, url: str) -> str:
         return await self.upload_url_with_options(url)
@@ -71,8 +72,4 @@ class AsyncOSSImageUploader:
 
     async def _upload_one(self, url: str, *, force_upload: bool = False) -> str:
         async with self.semaphore:
-            return await asyncio.to_thread(
-                self.uploader.upload_url,
-                url,
-                force_upload=force_upload,
-            )
+            return await self.uploader.upload_url(url, force_upload=force_upload)

@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
+import asyncio
 import hashlib
 import os
 from pathlib import Path
+import tempfile
 import threading
 from urllib.parse import urlparse
 
+import httpx
 import oss2
-import requests
 
 from ai_goods_pipeline.utils.image_url import (
     is_standard_storable_image_url,
@@ -81,8 +82,6 @@ class OSSImageUploader:
         self.object_acl_permission = resolve_object_acl(self.object_acl)
         self.timeout = timeout
         self.max_concurrency = max(1, max_concurrency)
-        self.session = requests.Session()
-        self.session.headers.update({"User-Agent": USER_AGENT})
         self.upload_cache: dict[str, str] = {}
         self._cache_lock = threading.Lock()
         self.enabled = self.force_enabled and all(
@@ -93,13 +92,11 @@ class OSSImageUploader:
             auth = oss2.Auth(self.access_key_id, self.access_key_secret)
             self.bucket = oss2.Bucket(auth, self.endpoint, self.bucket_name)
 
-    def close(self) -> None:
-        try:
-            self.session.close()
-        except Exception:
-            pass
+    async def close(self) -> None:
+        pass
 
-    def upload_url(self, url: str, *, force_upload: bool = False) -> str:
+    async def upload_url(self, url: str, *, force_upload: bool = False) -> str:
+        """Download a remote image to a temporary file and upload it to OSS."""
         url = normalize_storable_image_url(url)
         if not url:
             return ""
@@ -115,47 +112,64 @@ class OSSImageUploader:
         if cached:
             return cached
 
-        request_headers: dict[str, str] = {}
-        referer = self._guess_referer(url)
-        if referer:
-            request_headers["Referer"] = referer
+        # 流式下载到临时文件（与 fastapi-server 一致）
+        with tempfile.TemporaryDirectory(prefix="oss-upload-") as directory:
+            path = Path(directory) / "resource"
+            try:
+                async with httpx.AsyncClient(timeout=self.timeout, trust_env=False, follow_redirects=True) as client:
+                    headers = {}
+                    referer = self._guess_referer(url)
+                    if referer:
+                        headers["Referer"] = referer
+                    async with client.stream("GET", url, headers=headers) as response:
+                        if response.status_code in (403, 404, 410):
+                            raise ValueError(f"image_unavailable:{response.status_code}")
+                        response.raise_for_status()
+                        content_type = (response.headers.get("Content-Type") or "").split(";", 1)[0] or ""
+                        if not content_type.startswith("image/"):
+                            raise ValueError("non_image_content_type")
+                        size = 0
+                        with path.open("wb") as output:
+                            async for chunk in response.aiter_bytes(chunk_size=64 * 1024):
+                                size += len(chunk)
+                                await asyncio.to_thread(output.write, chunk)
+            except httpx.HTTPError:
+                raise ValueError("remote_download_failed") from None
 
-        response = self.session.get(url, timeout=self.timeout, headers=request_headers)
-        if response.status_code in (403, 404, 410):
-            raise ValueError(f"image_unavailable:{response.status_code}")
-        response.raise_for_status()
-        content_type = (response.headers.get("Content-Type") or "").lower()
-        if not content_type.startswith("image/"):
-            raise ValueError("non_image_content_type")
-        content = response.content
-        if not content:
-            raise ValueError("empty_image_content")
-        if probe_image_content(content) is None:
-            raise ValueError("invalid_image_content")
+            # 验证图片内容
+            content = path.read_bytes()
+            if not content:
+                raise ValueError("empty_image_content")
+            if probe_image_content(content) is None:
+                raise ValueError("invalid_image_content")
 
-        oss_key = self._url_to_oss_key(url)
-        content_type = self._guess_content_type(oss_key)
-        assert self.bucket is not None
-        self.bucket.put_object(oss_key, content, headers={"Content-Type": content_type})
-        if self.object_acl_permission is not None:
-            self.bucket.put_object_acl(oss_key, self.object_acl_permission)
+            # 上传到 OSS
+            oss_key = self._url_to_oss_key(url)
+            content_type = self._guess_content_type(oss_key)
+            assert self.bucket is not None
+            await asyncio.to_thread(self.bucket.put_object, oss_key, content, headers={"Content-Type": content_type})
+            if self.object_acl_permission is not None:
+                await asyncio.to_thread(self.bucket.put_object_acl, oss_key, self.object_acl_permission)
+
         new_url = f"{self.view_domain}{oss_key}"
         with self._cache_lock:
             self.upload_cache[cache_key] = new_url
         return new_url
 
-    def upload_urls(self, urls: list[str], *, force_upload: bool = False) -> list[str]:
+    async def upload_urls(self, urls: list[str], *, force_upload: bool = False) -> list[str]:
         valid_urls = [str(url or "").strip() for url in urls if str(url or "").strip()]
         if not valid_urls:
             return []
         if len(valid_urls) == 1:
-            return [self.upload_url(valid_urls[0], force_upload=force_upload)]
-        with ThreadPoolExecutor(max_workers=min(self.max_concurrency, len(valid_urls))) as executor:
-            futures = [
-                executor.submit(self.upload_url, url, force_upload=force_upload)
-                for url in valid_urls
-            ]
-            return [future.result() for future in futures]
+            return [await self.upload_url(valid_urls[0], force_upload=force_upload)]
+        # 并发上传
+        semaphore = asyncio.Semaphore(self.max_concurrency)
+
+        async def _limited_upload(url: str) -> str:
+            async with semaphore:
+                return await self.upload_url(url, force_upload=force_upload)
+
+        return await asyncio.gather(*[_limited_upload(url) for url in valid_urls])
 
     def _url_to_oss_key(self, url: str) -> str:
         md5 = hashlib.md5(url.encode("utf-8")).hexdigest()
