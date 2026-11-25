@@ -1041,6 +1041,9 @@ class AsyncImageClient:
         return "实物"
 
     def _is_blocked_image_url(self, url: str) -> bool:
+        # 拒绝含 @ 的 URL（不规范的外链）
+        if "@" in url:
+            return True
         parsed = urlparse(url)
         host = (parsed.netloc or "").lower()
         path = (parsed.path or "").lower()
