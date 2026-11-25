@@ -319,17 +319,16 @@ class AsyncImageClient:
                     candidate_sources.setdefault(url, "baidu")
 
         # 全部查询并发发起，内部由 _page_semaphore 限流，达到目标数即可停止
-        all_coros = [self.fetch_baidu_candidates(q, context=search_context) for q in queries]
-        tasks = [asyncio.create_task(c) for c in all_coros]
-        query_of_task = {id(t): q for t, q in zip(tasks, queries)}
-        for done in asyncio.as_completed(tasks):
+        async def _fetch_with_query(query: str) -> tuple[str, list[dict]]:
+            items = await self.fetch_baidu_candidates(query, context=search_context)
+            return query, items
+
+        all_coros = [_fetch_with_query(q) for q in queries]
+        for coro in asyncio.as_completed(all_coros):
             if len(candidate_urls) >= IMAGE_CANDIDATE_POOL_TARGET:
                 break
             try:
-                baidu_items = await done
-                # 找出这个 task 对应的 query
-                task_id = id(done)
-                query = query_of_task.get(task_id, "")
+                query, baidu_items = await coro
                 if query and baidu_items:
                     _collect_baidu_results(query, baidu_items)
             except Exception:
@@ -651,6 +650,10 @@ class AsyncImageClient:
             and food_hits > 0
             and self._matches_expected_city(meta_text, context)
         ):
+            return True
+        # 当没有足够的元数据做判断时（如 title/desc 为空），保留结果而不是过滤
+        # 这种情况发生在新选择器只返回 URL 没有标题描述时
+        if not city_hits and query_hits == 0 and football_hits == 0 and craft_hits == 0 and food_hits == 0:
             return True
         return False
 
